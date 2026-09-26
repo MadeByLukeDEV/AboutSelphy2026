@@ -1,0 +1,14 @@
+// Single physical schema for the whole app, organized into commented
+// sections per module (see src/modules/README.md). Lives in its own
+// Postgres schema (DATABASE_SCHEMA, default "main") on the shared
+// AboutSelphy instance -- the central auth service's tables sit next to it
+// in "auth" and are never touched from here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

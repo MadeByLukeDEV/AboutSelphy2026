@@ -87,19 +87,37 @@ Read `node_modules/next/dist/docs/` before writing framework code if unsure.
   Social uses (currently `7.10.0`). Check `npm view prisma dist-tags` before
   installing or bumping, because `latest` has pointed at an 8.x RC before.
   Always run `pnpm exec prisma …`, never `pnpm dlx prisma …`.
-- Config lives in **`prisma7.config.ts`** and loads `dotenv/config`, the same
-  as Social. The generator is `provider = "prisma-client"` with output
-  `src/generated/prisma` (gitignored).
-- `datasource db { provider = "postgresql" }`. The client is built with a
-  driver adapter (`PrismaPg`) in `src/lib/prisma.ts`. Set the app's schema on
-  the adapter or connection string, and verify it against the Prisma docs and
-  skills before relying on it.
-- **Migrations**: try `pnpm exec prisma migrate dev` first. If it fails with
-  `P3014` (the DB user can't create a shadow database), use Social's
-  file-based workflow (`migrate diff --from-schema <prev> --to-schema
-  prisma/schema.prisma --script` → `migrate deploy` → `generate`), which is
-  documented in `../SocialMedia Tree/CLAUDE.md`. Record which workflow applies
-  here once you know.
+- Config lives in **`prisma7.config.ts`**. It loads `.env.local`, then
+  `.env` (dotenv 18 `path` array), which is the same precedence as Next.js,
+  so the CLI and the app see the same `DATABASE_URL`. The generator is
+  `provider = "prisma-client"` with output `src/generated/prisma`
+  (gitignored).
+- **Database facts** (checked 2026-09-26): PostgreSQL 18.6, database
+  `aboutselphy` on the shared instance (Tailscale IP in dev). The DB user
+  `aboutselphy` can create schemas but has **no `CREATEDB`**.
+- **App schema `main`**:
+  - `DATABASE_URL` stays a plain connection string with no `?schema=`.
+  - At runtime, `src/lib/prisma.ts` passes `DATABASE_SCHEMA` (default
+    `main`) to `new PrismaPg(..., { schema })`.
+  - For the CLI, `prisma7.config.ts` appends `?schema=` to the URL.
+  - `prisma migrate status` confirms that the CLI targets schema `main`.
+- **Migrations: `migrate dev` does not work here** (no `CREATEDB`, so it
+  can't create a shadow database; error `P3014`). For every schema change:
+  1. Get the previous schema: `git show main:prisma/schema.prisma >
+     "$TEMP/schema_prev.prisma"`. For the very first migration, use
+     `--from-empty` in step 2 instead.
+  2. `pnpm exec prisma migrate diff --from-schema "$TEMP/schema_prev.prisma"
+     --to-schema prisma/schema.prisma --script >
+     prisma/migrations/<YYYYMMDDHHMMSS>_<name>/migration.sql`
+  3. Review the SQL, then run `pnpm exec prisma migrate deploy`.
+  4. Run `pnpm exec prisma generate`.
+
+  `prisma/migrations/migration_lock.toml` (`provider = "postgresql"`) was
+  created by hand and is committed. No migrations exist yet; the first model
+  brings the first one.
+- **Scripts that import `src/lib/prisma.ts`** (which has
+  `import "server-only"`) must run with
+  `NODE_OPTIONS=--conditions=react-server pnpm exec tsx <file>.mts`.
 - `dotenv` and `tsx` go in `dependencies`, not `devDependencies`, because
   `migrate deploy` and scripts run in production.
 - **Local dev and production may share the database.** Delete any test data
@@ -337,7 +355,10 @@ cron routes, env handling or headers.
   Cron routes need a `CRON_SECRET` bearer token (compared in constant time).
   Use plain-hex secrets.
 - **Least privilege**: the auth-DB user has only `SELECT` on `auth.session`
-  and `auth."user"`. The app DB user owns only this app's schema. API keys
+  and `auth."user"`. **Current state (open):** there is only one DB user,
+  `aboutselphy`, which owns both `public` and `auth` (the auth service's
+  tables). Before production, create a dedicated role for this app that owns
+  only `main`, plus a read-only role for `AUTH_DATABASE_URL`. The app DB user owns only this app's schema. API keys
   are restricted (the YouTube key is limited to the Data API).
 - **Dependencies**: pin exact versions for framework and auth packages, run
   `pnpm audit` before each release, and add no new packages without a reason.
@@ -420,8 +441,9 @@ pnpm exec prisma studio
 ## Environment variables
 
 Keep `.env.example` complete and commented, as in Social.
-- `DATABASE_URL`: Postgres, this app's schema. URL-encode special characters
-  in the password.
+- `DATABASE_URL`: Postgres, a plain connection string. URL-encode special
+  characters in the password. `DATABASE_SCHEMA` is the app's schema
+  (`main`). Locally these live in `.env.local`.
 - `AUTH_URL`, `AUTH_DATABASE_URL`, `AUTH_DATABASE_SCHEMA` (`auth`),
   `BETTER_AUTH_SECRET` (same as the auth service), `AUTH_COOKIE_PREFIX`
 - `NEXT_PUBLIC_SITE_URL` (`https://aboutselphy.com`), `NEXT_PUBLIC_ROOT_DOMAIN`

@@ -50,3 +50,8 @@ next-env.d.ts
 !.vscode/extensions.json
 
 /src/generated/prisma
+
+# Secrets
+.env.*
+.env
+!.env.example
