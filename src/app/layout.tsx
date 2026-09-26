@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { AnimatedBackground } from "@/components/effects/animated-background";
 import { CustomCursor } from "@/components/effects/custom-cursor";
+import { ThemeProvider } from "@/modules/theme";
 import "./globals.css";
 
 // Named "--font-sans" directly so it plugs into globals.css's
@@ -19,12 +20,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${fontSans.variable} h-full antialiased`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${fontSans.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col">
-        <AnimatedBackground />
-        <CustomCursor />
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          <AnimatedBackground />
+          <CustomCursor />
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

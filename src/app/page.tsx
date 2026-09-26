@@ -1,3 +1,5 @@
+import { ThemeToggle } from "@/modules/theme";
+
 // Placeholder until the Home / About phase replaces it.
 export default function HomePage() {
   return (
@@ -8,6 +10,7 @@ export default function HomePage() {
       <p className="max-w-prose text-fluid-lg text-muted-foreground">
         Something new is being built here.
       </p>
+      <ThemeToggle />
     </main>
   );
 }
