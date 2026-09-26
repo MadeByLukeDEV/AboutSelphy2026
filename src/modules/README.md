@@ -27,4 +27,5 @@ Modules are added here as they are built.
 
 | Module | Owns | Depends on |
 |--------|------|------------|
-| —      | —    | —          |
+| `theme` | next-themes provider + light/dark/system toggle | `i18n` (labels) |
+| `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |

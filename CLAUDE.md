@@ -212,13 +212,40 @@ brand.
 - Motion: respect `prefers-reduced-motion` (`useReducedMotion`). Don't put a
   continuously active transform prop (`whileHover={{ scale }}`) on elements
   that dnd-kit also transforms.
-- i18n: every UI string needs a key in both `messages/en.json` and
-  `messages/de.json`, because nothing enforces that they stay in sync.
-  Long-form prose (About text, media kit copy) belongs in the DB as
-  per-locale fields, not in the JSON catalogs.
+- **i18n** (`src/modules/i18n`, next-intl 4):
+  - Routing is `localePrefix: "always"`, locales `de` and `en`, default `en`.
+    Public pages live under `src/app/[locale]/`, which is also their root
+    layout (`<html lang>`). `dynamicParams = false` plus
+    `generateStaticParams`, so `/de` and `/en` are prerendered.
+  - Every `[locale]` page and layout calls `setRequestLocale(locale)` before
+    using translations, or it silently turns dynamic.
+  - `src/proxy.ts` runs next-intl's middleware. `/` redirects by the
+    `NEXT_LOCALE` cookie, then `Accept-Language`, then `en`. It also sends
+    hreflang `Link` headers.
+  - Every public page's `generateMetadata` returns
+    `alternates: localeAlternates(locale, "/path")` (canonical + `de`/`en` +
+    `x-default` → the unprefixed URL).
+  - Internal links use `Link`/`useRouter` from `@/modules/i18n`, not
+    `next/*`.
+  - Routes outside `[locale]` (the future `/admin`) have no locale segment.
+    `request.ts` falls back to the cookie, then `Accept-Language`.
+  - `timeZone` is fixed to `Europe/Vienna` in `request.ts`. Without it,
+    next-intl uses the server's zone, which is UTC in Docker.
+  - 404s: `[locale]/[...rest]` catches unknown paths so they get the
+    localized `[locale]/not-found.tsx`. URLs that match no route at all get
+    the bilingual `app/global-not-found.tsx`
+    (`experimental.globalNotFound`), because there is no single root layout.
+  - Message keys are typed (`src/global.d.ts`, with `en.json` as the
+    reference), so a wrong key is a type error. `de.json` must still be kept
+    in sync by hand.
+  - Long-form prose (About text, media kit copy) belongs in the DB as
+    per-locale fields, not in the JSON catalogs.
+  - `NextIntlClientProvider` currently sends all messages to the client.
+    Once the catalogs grow, pass only the namespaces client components need.
 - Accessibility: semantic landmarks, visible focus rings, alt text,
   AA contrast (bright `#00FFA8` on white fails, so use it for accents and
-  surfaces, not body text on light backgrounds).
+  surfaces, not body text on light backgrounds; use the `text-brand-text`
+  token for green text instead).
 
 ## Media kit data (YouTube + Twitch APIs)
 

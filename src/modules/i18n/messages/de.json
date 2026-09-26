@@ -1,0 +1,25 @@
+{
+  "Metadata": {
+    "title": "AboutSelphy — Streamer & Creator",
+    "description": "AboutSelphy ist Streamer und Content Creator. Erfahre, wer ich bin, was ich streame, wann ich live bin und wie Marken mit mir zusammenarbeiten können."
+  },
+  "Home": {
+    "tagline": "Hier entsteht gerade etwas Neues."
+  },
+  "NotFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Diese Seite gibt es nicht (mehr).",
+    "back": "Zur Startseite"
+  },
+  "LocaleSwitcher": {
+    "label": "Sprache",
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "ThemeToggle": {
+    "label": "Farbschema",
+    "light": "Helles Design",
+    "dark": "Dunkles Design",
+    "system": "Systemeinstellung"
+  }
+}

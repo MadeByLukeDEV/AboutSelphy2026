@@ -1,0 +1,25 @@
+{
+  "Metadata": {
+    "title": "AboutSelphy — streamer & creator",
+    "description": "AboutSelphy is a streamer and content creator. Find out who I am, what I stream, when I'm live, and how brands can work with me."
+  },
+  "Home": {
+    "tagline": "Something new is being built here."
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "This page doesn't exist (anymore).",
+    "back": "Back to the homepage"
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "ThemeToggle": {
+    "label": "Color theme",
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "system": "System theme"
+  }
+}
