@@ -358,7 +358,11 @@ cron routes, env handling or headers.
   and `auth."user"`. **Current state (open):** there is only one DB user,
   `aboutselphy`, which owns both `public` and `auth` (the auth service's
   tables). Before production, create a dedicated role for this app that owns
-  only `main`, plus a read-only role for `AUTH_DATABASE_URL`. The app DB user owns only this app's schema. API keys
+  only `main`, plus a read-only role for `AUTH_DATABASE_URL`. The script
+  `pnpm db:setup-roles` (`scripts/setup-db-roles.ts`) does this. It runs as
+  the postgres superuser via `ADMIN_DATABASE_URL`, supports `--dry-run`,
+  `--rotate`, `--write-env` and `--skip-revoke`, and verifies the result by
+  logging in as each role. The app DB user owns only this app's schema. API keys
   are restricted (the YouTube key is limited to the Data API).
 - **Dependencies**: pin exact versions for framework and auth packages, run
   `pnpm audit` before each release, and add no new packages without a reason.
