@@ -93,8 +93,9 @@ Read `node_modules/next/dist/docs/` before writing framework code if unsure.
   `provider = "prisma-client"` with output `src/generated/prisma`
   (gitignored).
 - **Database facts** (checked 2026-09-26): PostgreSQL 18.6, database
-  `aboutselphy` on the shared instance (Tailscale IP in dev). The DB user
-  `aboutselphy` can create schemas but has **no `CREATEDB`**.
+  `aboutselphy` on the shared instance (Tailscale IP in dev). This app
+  connects as **`aboutselphy_main`**, which owns schema `main` (with
+  search_path `main`) and has **no `CREATEDB`** and no access to `auth`.
 - **App schema `main`**:
   - `DATABASE_URL` stays a plain connection string with no `?schema=`.
   - At runtime, `src/lib/prisma.ts` passes `DATABASE_SCHEMA` (default
@@ -354,16 +355,19 @@ cron routes, env handling or headers.
   with `timingSafeEqual`, and reject stale timestamps and replayed message IDs.
   Cron routes need a `CRON_SECRET` bearer token (compared in constant time).
   Use plain-hex secrets.
-- **Least privilege**: the auth-DB user has only `SELECT` on `auth.session`
-  and `auth."user"`. **Current state (open):** there is only one DB user,
-  `aboutselphy`, which owns both `public` and `auth` (the auth service's
-  tables). Before production, create a dedicated role for this app that owns
-  only `main`, plus a read-only role for `AUTH_DATABASE_URL`. The script
-  `pnpm db:setup-roles` (`scripts/setup-db-roles.ts`) does this. It runs as
-  the postgres superuser via `ADMIN_DATABASE_URL`, supports `--dry-run`,
-  `--rotate`, `--write-env` and `--skip-revoke`, and verifies the result by
-  logging in as each role. The app DB user owns only this app's schema. API keys
-  are restricted (the YouTube key is limited to the Data API).
+- **Least privilege** (set up 2026-09-26 with `pnpm db:setup-roles`,
+  `scripts/setup-db-roles.ts`):
+
+  | Role | Rights | Used as |
+  | --- | --- | --- |
+  | `aboutselphy_main` | owns schema `main` only | `DATABASE_URL` |
+  | `aboutselphy_auth_reader` | read-only `SELECT` on `auth.session` and `auth."user"` (not `account`), 5 s statement timeout | `AUTH_DATABASE_URL` here and in Social |
+  | `aboutselphy` | owns `public` and `auth` | auth service only, never this app |
+
+  `PUBLIC` has no `CONNECT` on the database any more. To rotate passwords,
+  run `pnpm db:setup-roles --rotate` as the postgres superuser
+  (`ADMIN_DATABASE_URL`). API keys are restricted (the YouTube key is
+  limited to the Data API).
 - **Dependencies**: pin exact versions for framework and auth packages, run
   `pnpm audit` before each release, and add no new packages without a reason.
 - **Uploads** (if any, e.g. partner logos): check type by magic bytes, cap
