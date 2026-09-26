@@ -215,8 +215,9 @@ brand.
 - **i18n** (`src/modules/i18n`, next-intl 4):
   - Routing is `localePrefix: "always"`, locales `de` and `en`, default `en`.
     Public pages live under `src/app/[locale]/`, which is also their root
-    layout (`<html lang>`). `dynamicParams = false` plus
-    `generateStaticParams`, so `/de` and `/en` are prerendered.
+    layout (`<html lang>`). There is no `generateStaticParams`, because
+    pages render per request for the CSP nonce (see Security). Unknown
+    locales 404 through the `hasLocale` check.
   - Every `[locale]` page and layout calls `setRequestLocale(locale)` before
     using translations, or it silently turns dynamic.
   - `src/proxy.ts` runs next-intl's middleware. `/` redirects by the
@@ -289,9 +290,14 @@ For now, every media kit number comes directly from the platform APIs. The
 SEO is a core requirement, not polish. Every public page must pass these
 checks before it's considered done.
 
-- **Rendering**: public pages are Server Components, statically rendered or
-  ISR (`revalidate`) where possible, with no client-only content that
-  crawlers can't see. The stats snapshots make the media kit ISR-friendly.
+- **Rendering**: public pages are Server Components with no client-only
+  content that crawlers can't see. **Every page renders per request.** The
+  user chose the strict nonce CSP over static pages on 2026-09-26 (see
+  Security). Speed therefore comes from **caching the data, not the HTML**:
+  - DB reads and API results are cached (Next's data cache / `use cache`
+    with tags, invalidated by admin edits and the stats sync).
+  - A page render must never wait on Twitch or YouTube.
+  - Keep server render time low and check TTFB in Lighthouse.
 - **i18n routing differs from Social**: public pages use **locale-prefixed
   URLs** (`/de/…`, `/en/…`, next-intl routing with `localePrefix`). With
   Social's cookie/Accept-Language approach, Google only ever indexes one
@@ -340,22 +346,54 @@ Treat every change as security-relevant. Run the `security-review` skill
 before merging anything that touches auth, the admin area, forms, webhooks,
 cron routes, env handling or headers.
 
-- **Security headers** (set in `proxy.ts` / `next.config.ts` `headers()`):
-  - A strict **CSP with a per-request nonce** (`script-src 'self'
-    'nonce-…' 'strict-dynamic'`, no `unsafe-eval`). Allow only the
-    Twitch/YouTube embed hosts in `frame-src` and the image CDNs in
-    `img-src`. Set `frame-ancestors 'none'`.
-  - `Strict-Transport-Security` (with preload), `X-Content-Type-Options:
-    nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` and a
-    restrictive `Permissions-Policy`.
-  - Check them with securityheaders.com after deploy.
+- **Security headers** (done, `feature_security-headers`):
+  - **CSP with a per-request nonce, on every page** (decided 2026-09-26),
+    built in `src/lib/security/csp.ts`:
+    - `script-src 'self' 'nonce-…' 'strict-dynamic'`, plus
+      `'unsafe-eval'` in dev only.
+    - `style-src 'self' 'unsafe-inline'`, because React/Motion `style`
+      attributes and sonner's injected `<style>` need it. Never add a nonce
+      to `style-src`: browsers then ignore `'unsafe-inline'`.
+    - `frame-src 'none'`, `frame-ancestors 'none'`, `object-src 'none'`,
+      and `upgrade-insecure-requests` in production.
+    - **Add origins only together with the feature that needs them**, with
+      a comment: Twitch/YouTube players → `frame-src`, their CDNs →
+      `img-src`, Turnstile → `script-src`/`frame-src`.
+  - **How the nonce flows**:
+    - `src/proxy.ts` sets the `Content-Security-Policy` **request** header
+      (Next reads the nonce from it and applies it to its own scripts), the
+      `x-nonce` request header, and the CSP response header.
+    - next-intl's middleware gets a `new NextRequest(request, { headers })`
+      and copies those headers into its rewrite/next response.
+    - Layouts read `x-nonce` and pass it to `ThemeProvider`, because
+      next-themes has an inline pre-paint script. **Any new inline script**
+      (JSON-LD, analytics) needs `nonce={nonce}` too, or it's blocked.
+    - Because the layout reads `headers()`, every page is dynamic. Don't add
+      `generateStaticParams`, because static HTML can't carry a nonce and
+      its scripts would be blocked.
+  - **Static headers** are set in `next.config.ts` `headers()`: HSTS
+    (production only, 2 years, `includeSubDomains; preload`; don't submit to
+    hstspreload.org until every subdomain is HTTPS-only),
+    `X-Content-Type-Options: nosniff`,
+    `Referrer-Policy: strict-origin-when-cross-origin`,
+    `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy: same-origin`, and
+    a deny-all `Permissions-Policy`. `poweredByHeader: false`.
+  - **Verification** (repeat after header changes): the curl header list;
+    every `<script>` carrying the header's nonce; a Playwright run that
+    listens for `securitypolicyviolation` events and console errors on
+    `/en`, `/de` and both 404s, in prod **and** dev. Check
+    securityheaders.com after deploy.
 - **Authorization everywhere**: every Server Action and route handler
   re-checks the session and role itself (`requireAdmin()`/`requireStaff()`).
   `proxy.ts` is only the first gate. Server Actions are public POST endpoints,
   so treat them that way.
 - **Validate all input with zod** on the server, including action arguments,
-  query params, webhook payloads and env vars. Validate env vars once in
-  `src/lib/env.ts` (lazily, so the Docker build still works).
+  query params, webhook payloads and env vars. Env vars are validated once in
+  `src/lib/env.ts`: `env()` is lazy (so the Docker build still works) and
+  server-only, and its errors name the variables without echoing their
+  values. Every new server env var goes into its zod schema. Read it with
+  `env()`, never `process.env` directly (except `prisma7.config.ts` and
+  scripts).
 - **Secrets**: never in `NEXT_PUBLIC_*`. Server-only modules
   `import "server-only"`. Never commit `.env`. Error responses and toasts
   never leak stack traces, SQL or env values (log details server-side,

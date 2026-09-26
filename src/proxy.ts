@@ -1,19 +1,54 @@
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "@/modules/i18n/routing";
+import { buildCsp, createNonce } from "@/lib/security/csp";
 
 const handleI18n = createIntlMiddleware(routing);
 
-// Runs before every matched request (Node runtime in Next 16). For now:
-// locale detection/redirects for public pages ("/" → "/de" or "/en") and
-// hreflang Link headers. Security headers and the /admin auth gate come
-// next.
+const CSP_HEADER = "Content-Security-Policy";
+
+// Paths that are not locale-prefixed public pages. They still get the CSP.
+// /admin gets its auth gate here once central auth is integrated.
+function isOutsideI18n(pathname: string) {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
+// Runs before every matched request (Node runtime in Next 16):
+// 1. A fresh nonce + CSP per request. Next reads the nonce from the
+//    *request* CSP header while rendering and applies it to its own
+//    scripts; the layout passes it on via `x-nonce` (next-themes).
+// 2. Locale detection/redirects for public pages ("/" → "/de" or "/en")
+//    and hreflang Link headers (next-intl). next-intl copies the request
+//    headers into the response it forwards, so the nonce survives.
+// Static security headers (HSTS, nosniff, ...) live in next.config.ts.
 export function proxy(request: NextRequest) {
-  return handleI18n(request);
+  const nonce = createNonce();
+  const csp = buildCsp(nonce);
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set(CSP_HEADER, csp);
+
+  const response = isOutsideI18n(request.nextUrl.pathname)
+    ? NextResponse.next({ request: { headers: requestHeaders } })
+    : handleI18n(new NextRequest(request, { headers: requestHeaders }));
+
+  response.headers.set(CSP_HEADER, csp);
+  return response;
 }
 
 export const config = {
-  // Everything except API routes, the (future) admin area, Next internals
-  // and files with an extension (favicon.ico, robots.txt, images...).
-  matcher: ["/((?!api|admin|_next|_vercel|.*\\..*).*)"],
+  matcher: [
+    {
+      // Everything except API routes, Next internals and files with an
+      // extension (favicon.ico, robots.txt, images...).
+      source: "/((?!api|_next|_vercel|.*\\..*).*)",
+      // Skip next/link prefetches: they don't render HTML, so they don't
+      // need a CSP (recommended by the Next.js CSP guide).
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };

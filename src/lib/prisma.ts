@@ -1,15 +1,17 @@
 import "server-only";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { env } from "@/lib/env";
 
 declare global {
   var _prisma: PrismaClient | undefined;
 }
 
 function createClient() {
+  const { DATABASE_URL, DATABASE_SCHEMA } = env();
   const adapter = new PrismaPg(
-    { connectionString: process.env.DATABASE_URL },
-    { schema: process.env.DATABASE_SCHEMA || "main" },
+    { connectionString: DATABASE_URL },
+    { schema: DATABASE_SCHEMA },
   );
   return new PrismaClient({ adapter });
 }

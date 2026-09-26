@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -8,6 +9,7 @@ import { AnimatedBackground } from "@/components/effects/animated-background";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { ThemeProvider } from "@/modules/theme";
 import { routing } from "@/modules/i18n";
+import { env } from "@/lib/env";
 import "../globals.css";
 
 // Named "--font-sans" directly so it plugs into globals.css's
@@ -18,14 +20,9 @@ const fontSans = Plus_Jakarta_Sans({
   subsets: ["latin", "latin-ext"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3002";
-
-// Prerender both locales; unknown ones 404 instead of rendering on demand.
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
+// No generateStaticParams: every page renders per request because the CSP
+// nonce is per request (decision 2026-09-26, see src/lib/security/csp.ts).
+// Keep data fetching cached so this stays fast.
 
 export async function generateMetadata({
   params,
@@ -38,7 +35,7 @@ export async function generateMetadata({
   // into absolute ones. These are site-wide defaults; pages set their own
   // title and alternates (see localeAlternates).
   return {
-    metadataBase: new URL(siteUrl),
+    metadataBase: new URL(env().NEXT_PUBLIC_SITE_URL),
     title: { default: t("title"), template: "%s — AboutSelphy" },
     description: t("description"),
     openGraph: {
@@ -59,6 +56,9 @@ export default async function LocaleLayout({
     notFound();
   }
   setRequestLocale(locale);
+  // Set by src/proxy.ts. Next applies it to its own scripts automatically;
+  // next-themes' pre-paint inline script needs it passed explicitly.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
     <html
@@ -68,7 +68,7 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>
-          <ThemeProvider>
+          <ThemeProvider nonce={nonce}>
             <AnimatedBackground />
             <CustomCursor />
             {children}

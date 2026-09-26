@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/modules/theme";
@@ -19,7 +20,10 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-export default function GlobalNotFound() {
+export default async function GlobalNotFound() {
+  // CSP nonce from src/proxy.ts, for next-themes' inline script.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html
       lang="en"
@@ -27,7 +31,7 @@ export default function GlobalNotFound() {
       className={`${fontSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
+        <ThemeProvider nonce={nonce}>
           <main className="flex flex-1 flex-col items-center justify-center gap-fluid px-gutter py-section text-center">
             <p className="text-fluid-5xl font-extrabold text-brand-text">
               404
