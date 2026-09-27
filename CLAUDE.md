@@ -774,7 +774,39 @@ SEO and security are built into every phase, not saved for the end.
     client state, and clear the `profile` cache tag.
   - Status is a styled native `<select>`: Base UI's Select needs an
     `items` map just to show labels.
-- [ ] Phase 5: Schedule (admin editable, public view, `Event` JSON-LD)
+- [x] Phase 5 (done 2026-09-28): schedule (`modules/schedule`), a weekly
+      plan plus exceptions (the user's choice)
+  - Tables:
+    - `ScheduleSlot`: weekday 1–7, `startTime` "HH:mm" and duration in
+      Europe/Vienna, optional game (SetNull) and en/de title, active.
+    - `ScheduleException`: `cancelled` (slot + date, unique, cascade on
+      slot delete) or `extra` (date, time, duration, game, title). Both
+      have an optional public en/de note. Moving a stream = cancel + extra.
+    - Hand-added CHECK constraints for weekday, time format, duration and
+      the shape of each exception kind.
+  - Time zones:
+    - `time.ts` converts Vienna wall-clock time to instants without a
+      library, via `Intl`. DST verified in both directions and around
+      midnight.
+    - `@db.Date` values are Vienna calendar dates stored as midnight UTC.
+  - `occurrences.ts` (`computeOccurrences`, pure and tested) builds the
+    next 14 days from the cached plan (tag `schedule`, fallback 600 s).
+    Ended streams drop out, one in progress stays, and a missing title
+    falls back to the other language.
+  - Public:
+    - `/[locale]/schedule`: days with Today/Tomorrow, "On now", "Cancelled"
+      (struck through, with note) and "Extra stream".
+    - `Event` JSON-LD per stream (`EventCancelled` for cancelled ones,
+      `VirtualLocation` = Twitch). Nav entry and sitemap.
+    - "Next stream" in the home hero (only while offline) and on the Streams
+      page.
+  - Admin `/admin/schedule`: **staff (moderators too)** can edit.
+    - Weekly slot dialog (weekday, time, minutes with the end time shown,
+      game, titles, active).
+    - Cancel dialog: pick a date, then only slots on that weekday are
+      offered. The server rechecks the weekday and rejects past dates.
+    - Extra-stream dialog, and a list of upcoming changes with delete.
+    - Starts empty: the user enters the real plan.
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
       PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`
 - [ ] Phase 7: SEO and security audit: Lighthouse, Rich Results,
