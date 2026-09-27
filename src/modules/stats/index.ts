@@ -1,4 +1,11 @@
-export { getLiveStatus, getStatsOverview, type LiveStatus, type StatsOverview } from "./service";
+export {
+  getLiveStatus,
+  getStatsOverview,
+  getStreamsMedia,
+  type LiveStatus,
+  type MediaEntry,
+  type StatsOverview,
+} from "./service";
 export { runSync, STATS_CACHE_TAG, type SyncResult } from "./sync";
 export { isTwitchConfigured } from "./platforms/twitch";
 export { isYoutubeConfigured } from "./platforms/youtube";

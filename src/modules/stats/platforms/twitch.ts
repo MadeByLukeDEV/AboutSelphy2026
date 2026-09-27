@@ -111,3 +111,73 @@ export async function getLiveStream(): Promise<LiveStream | null> {
     viewerCount: stream.viewer_count,
   };
 }
+
+export type TwitchMedia = {
+  externalId: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  publishedAt: Date;
+  durationSeconds: number;
+  views: number;
+};
+
+/** "5h8m28s" -> seconds. */
+function parseTwitchDuration(value: string) {
+  const match = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(value);
+  if (!match) return 0;
+  const [, h = "0", m = "0", s = "0"] = match;
+  return Number(h) * 3600 + Number(m) * 60 + Number(s);
+}
+
+/** Latest past broadcasts (VODs). VODs still processing have no thumbnail and are skipped. */
+export async function getRecentVods(count: number): Promise<TwitchMedia[]> {
+  const body = await helix<{
+    data: Array<{
+      id: string;
+      title: string;
+      url: string;
+      thumbnail_url: string;
+      created_at: string;
+      duration: string;
+      view_count: number;
+    }>;
+  }>(`videos?user_id=${await broadcasterId()}&type=archive&first=${count}`);
+  return body.data
+    .filter((v) => v.thumbnail_url && !v.thumbnail_url.includes("404_processing"))
+    .map((v) => ({
+      externalId: v.id,
+      title: v.title.slice(0, 200) || "Twitch broadcast",
+      url: v.url,
+      thumbnailUrl: v.thumbnail_url
+        .replace("%{width}", "640")
+        .replace("%{height}", "360"),
+      publishedAt: new Date(v.created_at),
+      durationSeconds: parseTwitchDuration(v.duration),
+      views: v.view_count,
+    }));
+}
+
+/** Most-viewed clips of all time (Helix returns clips sorted by views). */
+export async function getTopClips(count: number): Promise<TwitchMedia[]> {
+  const body = await helix<{
+    data: Array<{
+      id: string;
+      title: string;
+      url: string;
+      thumbnail_url: string;
+      created_at: string;
+      duration: number;
+      view_count: number;
+    }>;
+  }>(`clips?broadcaster_id=${await broadcasterId()}&first=${count}`);
+  return body.data.map((c) => ({
+    externalId: c.id,
+    title: c.title.slice(0, 200) || "Twitch clip",
+    url: c.url,
+    thumbnailUrl: c.thumbnail_url,
+    publishedAt: new Date(c.created_at),
+    durationSeconds: Math.round(c.duration),
+    views: c.view_count,
+  }));
+}

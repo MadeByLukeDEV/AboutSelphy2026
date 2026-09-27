@@ -4,13 +4,17 @@ import { PlatformError } from "./platforms/errors";
 import {
   getFollowerTotal,
   getLiveStream,
+  getRecentVods,
+  getTopClips,
   isTwitchConfigured,
 } from "./platforms/twitch";
 import {
   getChannelStats,
+  getLatestUploads,
   getRecentAverageViews,
   isYoutubeConfigured,
 } from "./platforms/youtube";
+import { env } from "@/lib/env";
 import * as repo from "./repository";
 
 // The sync job behind POST /api/cron/stats (Dokploy schedule, every 5
@@ -91,6 +95,35 @@ async function snapshotYoutube(): Promise<string> {
   return `youtube: ${rows.map((r) => `${r.metric}=${Math.round(r.value)}`).join(", ")}`;
 }
 
+// Videos for the Streams page, hourly. The "mediaItems" snapshot (value =
+// item count) doubles as the "last synced" marker.
+async function syncTwitchMedia(): Promise<string> {
+  if (!(await isDue("twitch", "mediaItems", HOURLY))) return "twitch media: fresh";
+  const [vods, clips] = await Promise.all([getRecentVods(12), getTopClips(12)]);
+  await repo.replaceMedia("twitch_vod", vods);
+  await repo.replaceMedia("twitch_clip", clips);
+  await repo.insertSnapshots([
+    { platform: "twitch", metric: "mediaItems", value: vods.length + clips.length },
+  ]);
+  return `twitch media: ${vods.length} VODs, ${clips.length} clips`;
+}
+
+async function syncYoutubeMedia(): Promise<string> {
+  if (!(await isDue("youtube", "mediaItems", HOURLY))) return "youtube media: fresh";
+  // A channel's uploads playlist is its id with "UC" replaced by "UU" --
+  // saves a channels.list call.
+  const uploads = `UU${env().YOUTUBE_CHANNEL_ID.slice(2)}`;
+  const items = await getLatestUploads(uploads, 30);
+  const videos = items.filter((i) => !i.isShort);
+  const shorts = items.filter((i) => i.isShort);
+  await repo.replaceMedia("youtube_video", videos);
+  await repo.replaceMedia("youtube_short", shorts);
+  await repo.insertSnapshots([
+    { platform: "youtube", metric: "mediaItems", value: items.length },
+  ]);
+  return `youtube media: ${videos.length} videos, ${shorts.length} shorts`;
+}
+
 async function step(name: string, run: () => Promise<string>, steps: string[]) {
   try {
     steps.push(await run());
@@ -123,12 +156,14 @@ export async function runSync(trigger: SyncTrigger): Promise<SyncResult> {
   if (isTwitchConfigured()) {
     ok = (await step("twitch live", () => sampleTwitchLive(now), steps)) && ok;
     ok = (await step("twitch snapshot", snapshotTwitch, steps)) && ok;
+    ok = (await step("twitch media", syncTwitchMedia, steps)) && ok;
   } else {
     steps.push("twitch: not configured");
   }
 
   if (isYoutubeConfigured()) {
     ok = (await step("youtube snapshot", snapshotYoutube, steps)) && ok;
+    ok = (await step("youtube media", syncYoutubeMedia, steps)) && ok;
   } else {
     steps.push("youtube: not configured");
   }

@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import type { StatPlatform } from "@/generated/prisma/client";
+import type { MediaKind, StatPlatform } from "@/generated/prisma/client";
 
 // Prisma-only and private to the stats module.
 
@@ -111,4 +111,51 @@ export function runningRun(withinMs: number) {
 
 export function recentRuns(take: number) {
   return prisma.syncRun.findMany({ orderBy: { startedAt: "desc" }, take });
+}
+
+export type MediaRow = {
+  externalId: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  publishedAt: Date;
+  durationSeconds: number;
+  views: number;
+};
+
+/**
+ * Makes the stored items of one kind match `items` exactly: upserts them and
+ * deletes the rest (e.g. VODs that expired on Twitch). One transaction, so a
+ * failure leaves the previous list intact.
+ */
+export function replaceMedia(kind: MediaKind, rows: MediaRow[]) {
+  // Only the columns (callers may pass extra fields like isShort).
+  const items = rows.map(
+    ({ externalId, title, url, thumbnailUrl, publishedAt, durationSeconds, views }) => ({
+      externalId, title, url, thumbnailUrl, publishedAt, durationSeconds, views,
+    }),
+  );
+  return prisma.$transaction([
+    prisma.mediaItem.deleteMany({
+      where: { kind, externalId: { notIn: items.map((i) => i.externalId) } },
+    }),
+    ...items.map((item) =>
+      prisma.mediaItem.upsert({
+        where: { kind_externalId: { kind, externalId: item.externalId } },
+        create: { kind, ...item },
+        update: item,
+      }),
+    ),
+  ]);
+}
+
+export function mediaByKind(kind: MediaKind, take: number) {
+  return prisma.mediaItem.findMany({
+    where: { kind },
+    orderBy:
+      kind === "twitch_clip"
+        ? [{ views: "desc" }, { publishedAt: "desc" }]
+        : { publishedAt: "desc" },
+    take,
+  });
 }

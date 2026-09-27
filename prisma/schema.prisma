@@ -106,3 +106,29 @@ model SyncRun {
 
   @@index([startedAt])
 }
+
+/// The latest videos for the Streams page, refreshed hourly by the sync job
+/// (a page never waits on Twitch/YouTube). Items that disappear upstream --
+/// e.g. expired VODs -- are removed on the next successful sync of their kind.
+enum MediaKind {
+  twitch_vod
+  twitch_clip
+  youtube_video
+  youtube_short
+}
+
+model MediaItem {
+  id              String    @id @default(cuid())
+  kind            MediaKind
+  externalId      String    @db.VarChar(80)
+  title           String    @db.VarChar(200)
+  url             String    @db.VarChar(300)
+  thumbnailUrl    String    @db.VarChar(500)
+  publishedAt     DateTime
+  durationSeconds Int
+  views           Int
+  syncedAt        DateTime  @updatedAt
+
+  @@unique([kind, externalId])
+  @@index([kind, publishedAt])
+}

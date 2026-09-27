@@ -82,3 +82,93 @@ export async function getRecentAverageViews(
   const total = views.reduce((sum, v) => sum + v, 0);
   return { average: views.length ? total / views.length : 0, videos: views.length };
 }
+
+export type YoutubeMedia = {
+  externalId: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  publishedAt: Date;
+  durationSeconds: number;
+  views: number;
+  isShort: boolean;
+};
+
+/** ISO 8601 duration ("PT1H2M3S") -> seconds. */
+function parseIsoDuration(value: string) {
+  const match = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(value);
+  if (!match) return 0;
+  const [, d = "0", h = "0", m = "0", s = "0"] = match;
+  return Number(d) * 86400 + Number(h) * 3600 + Number(m) * 60 + Number(s);
+}
+
+/** Shorts can be up to 3 minutes; the API has no explicit "is short" flag. */
+const SHORT_MAX_SECONDS = 180;
+
+/** Latest public, embeddable uploads (2 quota units). */
+export async function getLatestUploads(
+  uploadsPlaylistId: string,
+  count: number,
+): Promise<YoutubeMedia[]> {
+  const playlist = await api<{
+    items?: Array<{ contentDetails: { videoId: string } }>;
+  }>("playlistItems", {
+    part: "contentDetails",
+    playlistId: uploadsPlaylistId,
+    maxResults: String(count),
+  });
+  const ids = (playlist.items ?? []).map((item) => item.contentDetails.videoId);
+  if (ids.length === 0) return [];
+
+  type Thumb = { url: string };
+  const videos = await api<{
+    items?: Array<{
+      id: string;
+      snippet: {
+        title: string;
+        publishedAt: string;
+        thumbnails: { maxres?: Thumb; standard?: Thumb; high?: Thumb; medium?: Thumb };
+      };
+      contentDetails: { duration: string };
+      statistics: { viewCount?: string };
+      status: { privacyStatus: string; embeddable: boolean };
+    }>;
+  }>("videos", { part: "snippet,contentDetails,statistics,status", id: ids.join(",") });
+
+  const items = (videos.items ?? [])
+    .filter((v) => v.status.privacyStatus === "public" && v.status.embeddable)
+    .map((v) => {
+      const t = v.snippet.thumbnails;
+      const durationSeconds = parseIsoDuration(v.contentDetails.duration);
+      return {
+        externalId: v.id,
+        title: v.snippet.title.slice(0, 200),
+        url: `https://www.youtube.com/watch?v=${v.id}`,
+        thumbnailUrl: (t.maxres ?? t.standard ?? t.high ?? t.medium)?.url ?? "",
+        publishedAt: new Date(v.snippet.publishedAt),
+        durationSeconds,
+        views: Number(v.statistics.viewCount ?? 0),
+        isShort: durationSeconds > 0 && durationSeconds <= SHORT_MAX_SECONDS,
+      };
+    })
+    .filter((v) => v.thumbnailUrl);
+
+  // Shorts: prefer the vertical thumbnail (oar2.jpg, 9:16). It's not part of
+  // the documented API, so check it exists and keep the 16:9 one otherwise.
+  return Promise.all(
+    items.map(async (item) => {
+      if (!item.isShort) return item;
+      const vertical = `https://i.ytimg.com/vi/${item.externalId}/oar2.jpg`;
+      try {
+        const res = await fetch(vertical, {
+          method: "HEAD",
+          signal: AbortSignal.timeout(5_000),
+          cache: "no-store",
+        });
+        return res.ok ? { ...item, thumbnailUrl: vertical } : item;
+      } catch {
+        return item;
+      }
+    }),
+  );
+}

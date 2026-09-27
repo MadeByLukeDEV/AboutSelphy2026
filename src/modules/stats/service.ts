@@ -109,3 +109,57 @@ export async function getStatsOverview(): Promise<StatsOverview> {
     },
   };
 }
+
+export type MediaEntry = {
+  kind: "twitch_vod" | "twitch_clip" | "youtube_video" | "youtube_short";
+  externalId: string;
+  title: string;
+  url: string;
+  thumbnailUrl: string;
+  publishedAt: Date;
+  durationSeconds: number;
+  views: number;
+};
+
+const loadMedia = unstable_cache(
+  async () => {
+    const [vods, clips, videos, shorts] = await Promise.all([
+      repo.mediaByKind("twitch_vod", 6),
+      repo.mediaByKind("twitch_clip", 6),
+      repo.mediaByKind("youtube_video", 6),
+      repo.mediaByKind("youtube_short", 8),
+    ]);
+    const plain = (items: typeof vods) =>
+      items.map((item) => ({
+        kind: item.kind,
+        externalId: item.externalId,
+        title: item.title,
+        url: item.url,
+        thumbnailUrl: item.thumbnailUrl,
+        publishedAt: item.publishedAt.toISOString(),
+        durationSeconds: item.durationSeconds,
+        views: item.views,
+      }));
+    return {
+      vods: plain(vods),
+      clips: plain(clips),
+      videos: plain(videos),
+      shorts: plain(shorts),
+    };
+  },
+  ["stats-media"],
+  { tags: [STATS_CACHE_TAG] },
+);
+
+/** Videos for the Streams page, from the DB (synced hourly). */
+export async function getStreamsMedia() {
+  const media = await loadMedia();
+  const revive = (items: (typeof media)["vods"]): MediaEntry[] =>
+    items.map((item) => ({ ...item, publishedAt: new Date(item.publishedAt) }));
+  return {
+    vods: revive(media.vods),
+    clips: revive(media.clips),
+    videos: revive(media.videos),
+    shorts: revive(media.shorts),
+  };
+}
