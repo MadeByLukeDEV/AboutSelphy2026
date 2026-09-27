@@ -251,8 +251,12 @@ brand.
     in sync by hand.
   - Long-form prose (About text, media kit copy) belongs in the DB as
     per-locale fields, not in the JSON catalogs.
-  - `NextIntlClientProvider` currently sends all messages to the client.
-    Once the catalogs grow, pass only the namespaces client components need.
+  - `NextIntlClientProvider` gets only the namespaces its layout's client
+    components use, via `clientMessages([...])`
+    (`src/modules/i18n/client-messages.ts`). Public: `LocaleSwitcher`,
+    `ThemeToggle`. Admin: `Admin`, `ThemeToggle`. **A new client component
+    using `useTranslations("X")` needs "X" added there**, or it renders the
+    raw keys. Before this, every public page shipped the admin texts too.
 - Accessibility: semantic landmarks, visible focus rings, alt text,
   AA contrast (bright `#00FFA8` on white fails, so use it for accents and
   surfaces, not body text on light backgrounds; use the `text-brand-text`
@@ -611,7 +615,8 @@ three variables set):
 | --- | --- |
 | Build-time Arguments | none. `NEXT_PUBLIC_SITE_URL` defaults to `https://aboutselphy.com` in the Dockerfile; set it only for another domain. |
 | Build-time Secrets | none. The build needs no secrets and no database (lazy clients). |
-| Environment (runtime) | `DATABASE_URL` (`aboutselphy_main`, internal host), `AUTH_DATABASE_URL` (`aboutselphy_auth_reader`, internal host), `BETTER_AUTH_SECRET` (same as the auth service) |
+| Environment (runtime) | `DATABASE_URL` (`aboutselphy_main`, internal host), `AUTH_DATABASE_URL` (`aboutselphy_auth_reader`, internal host), `BETTER_AUTH_SECRET` (same as the auth service). For the stats sync also: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY` (same as the Social app), `CRON_SECRET` (new plain hex) |
+| Schedules (Dokploy "Schedules" tab, runs inside the container) | every 5 minutes (`*/5 * * * *`): `wget -qO- --post-data="" --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000/api/cron/stats` |
 
 Optional runtime variables that default to production: `DATABASE_SCHEMA`
 (`main`), `AUTH_URL` (`https://auth.aboutselphy.com`),
@@ -685,8 +690,37 @@ SEO and security are built into every phase, not saved for the end.
         `revalidateTag(PROFILE_CACHE_TAG, { expire: 0 })`. Moderators see the
         page read-only.
   - [ ] Games editing in admin (or with Phase 4)
-- [ ] Phase 3: `stats` module: YouTube + Twitch sync, `StatSnapshot`, cron
-      route, EventSub live status and viewer sampling
+- [x] Phase 3 (done 2026-09-27): `stats` module
+  - Tables: `StatSnapshot` (platform/metric/value/capturedAt),
+    `StreamSession` (one Twitch broadcast with running viewer aggregates:
+    average = viewerSum / sampleCount, peak, start to last sample), `SyncRun`
+    (every run's outcome, for the admin view).
+  - `runSync()` (`modules/stats/sync.ts`), each step failing on its own:
+    - **every run**: Twitch `streams`. If live, add a viewer sample (skipped
+      if the last one is < 4 min old, so "Sync now" can't double-count).
+    - **hourly**: Twitch follower total and YouTube subscribers/views/videos.
+    - **daily**: YouTube average views of the last 10 uploads.
+    - It clears the `stats` cache tag.
+  - Triggers:
+    - `POST /api/cron/stats`: bearer `CRON_SECRET`, constant-time compare,
+      POST only, 503 without a secret. Called every 5 min by a **Dokploy
+      schedule inside the container** via `http://127.0.0.1:3000`, so no
+      Cloudflare and no public webhook.
+    - The staff-only "Sync now" button in `/admin/stats`.
+  - **No Twitch EventSub**: polling every 5 minutes is enough for averages
+    and the live badge. Add EventSub only if instant live detection
+    matters (it needs a public callback plus the Cloudflare Bot Fight Mode
+    skip rule, see Social).
+  - Checked facts: the follower total works with an **app** token.
+    `channels.list` costs 1 quota unit. The Twitch schedule
+    (`/helix/schedule`) is empty, so Phase 5 uses our own schedule.
+  - Read side: `getLiveStatus()` (a session sampled in the last 11 min =
+    live, computed outside the cache) and `getStatsOverview()` (latest per
+    metric + 30-day Twitch aggregates), both cached under tag `stats`.
+  - UI:
+    - `/admin/stats`: live status, latest numbers with "as of", Twitch 30
+      days, the last 10 runs, and the setup checklist.
+    - Home hero: "Live now" badge (game + title, links to Twitch).
 - [ ] Phase 4: Streams (live status, latest videos, embed facades)
 - [ ] Phase 5: Schedule (admin editable, public view, `Event` JSON-LD)
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
