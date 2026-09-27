@@ -43,7 +43,11 @@ export const config = {
       // Everything except API routes, Next internals, generated icons
       // (/icon/32, /apple-icon: no file extension, but not pages) and
       // files with an extension (robots.txt, sitemap.xml, images...).
-      source: "/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)",
+      // No backslashes in here: the production build turned `\\.` into a
+      // plain "." and `.*\\..*` then excluded every path except "/", so no
+      // page got the CSP. Use a character class ([.]) instead, and re-check
+      // the CSP on a production build after any matcher change.
+      source: "/((?!api|_next|_vercel|icon/|apple-icon|.*[.].*).*)",
       // Skip next/link prefetches: they don't render HTML, so they don't
       // need a CSP (recommended by the Next.js CSP guide).
       missing: [

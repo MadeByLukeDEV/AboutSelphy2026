@@ -406,6 +406,11 @@ cron routes, env handling or headers.
     listens for `securitypolicyviolation` events and console errors on
     `/en`, `/de` and both 404s, in prod **and** dev. Check
     securityheaders.com after deploy.
+  - **Proxy matcher**: no backslashes in `config.matcher` source strings.
+    The production build turned `\.` into `.`, so `.*\..*` excluded every
+    path but `/` and the CSP silently vanished from all pages (dev was
+    fine). Use `[.]`. After **any** matcher change, check the CSP header
+    on a production build (`pnpm build && pnpm start`), not in dev.
 - **Authorization everywhere**: every Server Action and route handler
   re-checks the session and role itself (`requireAdmin()`/`requireStaff()`).
   `proxy.ts` is only the first gate. Server Actions are public POST endpoints,
