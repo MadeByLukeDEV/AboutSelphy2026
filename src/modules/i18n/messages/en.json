@@ -48,7 +48,8 @@
       "schedule": "Schedule",
       "partners": "Partners",
       "inquiries": "Inquiries",
-      "stats": "Stats"
+      "stats": "Stats",
+      "games": "Games"
     },
     "notBuilt": "Not built yet",
     "roles": {
@@ -66,7 +67,8 @@
         "schedule": "Plan the weekly stream schedule shown on the site.",
         "partners": "Manage past partners, brand deals and sponsor packages for the media kit.",
         "inquiries": "Read and answer sponsor inquiries sent through the media kit.",
-        "stats": "Check when the YouTube and Twitch numbers were last synced."
+        "stats": "Check when the YouTube and Twitch numbers were last synced.",
+        "games": "Add games, set their status and order for “What I play”."
       }
     },
     "about": {
@@ -136,6 +138,49 @@
       "cronLabel": "Cron secret",
       "twitchLabel": "Twitch API",
       "youtubeLabel": "YouTube API"
+    },
+    "games": {
+      "intro": "The games shown under “What I play” on the home page, in this order.",
+      "adminOnly": "Only admins can change the games.",
+      "add": "Add game",
+      "edit": "Edit",
+      "delete": "Delete",
+      "moveUp": "Move {name} up",
+      "moveDown": "Move {name} down",
+      "empty": "No games yet. Add the first one.",
+      "dialogAdd": "Add a game",
+      "dialogEdit": "Edit {name}",
+      "name": "Name",
+      "status": "Status",
+      "statuses": {
+        "main": "Main game",
+        "regular": "Also playing",
+        "new": "New",
+        "former": "Used to play"
+      },
+      "blurb": "Short description",
+      "blurbHint": "One or two sentences, shown under the game name.",
+      "english": "English",
+      "german": "German",
+      "tags": "Tags",
+      "tagsHint": "Comma-separated, up to 6 (e.g. Hourglass PvP, Tucking). Shown as-is in both languages.",
+      "save": "Save game",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "saved": "Game saved.",
+      "deleted": "Game deleted.",
+      "confirmTitle": "Delete {name}?",
+      "confirmText": "It disappears from the home page right away. This can't be undone.",
+      "confirmDelete": "Delete game",
+      "errors": {
+        "required": "Required.",
+        "tooLong": "Too long.",
+        "tagTooLong": "Each tag can have at most 30 characters.",
+        "tooManyTags": "At most 6 tags.",
+        "forbidden": "Only admins can change the games.",
+        "invalid": "Some fields aren't valid.",
+        "failed": "Couldn't save. Try again in a moment."
+      }
     }
   },
   "Streams": {

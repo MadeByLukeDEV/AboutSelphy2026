@@ -764,7 +764,16 @@ SEO and security are built into every phase, not saved for the end.
   - **YouTube API key restriction**: it must be "IP addresses" (the server
     IP) or none. **"HTTP referrers" breaks every server call** (403
     `API_KEY_HTTP_REFERRER_BLOCKED`: server requests have no referrer).
-- [ ] Games editing in `/admin` (add games, change status/blurbs)
+- [x] Games editing (`/admin/games`, admin only):
+  - List with up/down reorder (the repository rewrites a clean 0..n
+    `sortOrder`), add/edit dialog (name, status, en/de blurb, tags
+    comma-separated, max 6 × 30 chars), and delete with confirmation.
+  - Slugs are generated from the name and made unique with a -2/-3
+    suffix.
+  - Actions check **auth before validation**, return the fresh list for
+    client state, and clear the `profile` cache tag.
+  - Status is a styled native `<select>`: Base UI's Select needs an
+    `items` map just to show labels.
 - [ ] Phase 5: Schedule (admin editable, public view, `Event` JSON-LD)
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
       PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`

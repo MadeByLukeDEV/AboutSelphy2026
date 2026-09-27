@@ -48,7 +48,8 @@
       "schedule": "Streamplan",
       "partners": "Partner",
       "inquiries": "Anfragen",
-      "stats": "Statistiken"
+      "stats": "Statistiken",
+      "games": "Spiele"
     },
     "notBuilt": "Noch nicht gebaut",
     "roles": {
@@ -66,7 +67,8 @@
         "schedule": "Den wöchentlichen Streamplan für die Website planen.",
         "partners": "Bisherige Partner, Kooperationen und Sponsoring-Pakete für das Mediakit verwalten.",
         "inquiries": "Sponsoring-Anfragen aus dem Mediakit lesen und beantworten.",
-        "stats": "Prüfen, wann die YouTube- und Twitch-Zahlen zuletzt abgeglichen wurden."
+        "stats": "Prüfen, wann die YouTube- und Twitch-Zahlen zuletzt abgeglichen wurden.",
+        "games": "Spiele hinzufügen, Status und Reihenfolge für „Was ich spiele“ festlegen."
       }
     },
     "about": {
@@ -136,6 +138,49 @@
       "cronLabel": "Cron-Secret",
       "twitchLabel": "Twitch-API",
       "youtubeLabel": "YouTube-API"
+    },
+    "games": {
+      "intro": "Die Spiele unter „Was ich spiele“ auf der Startseite, in dieser Reihenfolge.",
+      "adminOnly": "Nur Admins können die Spiele ändern.",
+      "add": "Spiel hinzufügen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "moveUp": "{name} nach oben verschieben",
+      "moveDown": "{name} nach unten verschieben",
+      "empty": "Noch keine Spiele. Füg das erste hinzu.",
+      "dialogAdd": "Spiel hinzufügen",
+      "dialogEdit": "{name} bearbeiten",
+      "name": "Name",
+      "status": "Status",
+      "statuses": {
+        "main": "Hauptspiel",
+        "regular": "Spiele ich auch",
+        "new": "Neu",
+        "former": "Früher gespielt"
+      },
+      "blurb": "Kurzbeschreibung",
+      "blurbHint": "Ein, zwei Sätze unter dem Spielnamen.",
+      "english": "Englisch",
+      "german": "Deutsch",
+      "tags": "Tags",
+      "tagsHint": "Durch Kommas getrennt, bis zu 6 (z. B. Hourglass PvP, Tucking). Werden in beiden Sprachen gleich angezeigt.",
+      "save": "Spiel speichern",
+      "saving": "Speichert…",
+      "cancel": "Abbrechen",
+      "saved": "Spiel gespeichert.",
+      "deleted": "Spiel gelöscht.",
+      "confirmTitle": "{name} löschen?",
+      "confirmText": "Es verschwindet sofort von der Startseite. Das lässt sich nicht rückgängig machen.",
+      "confirmDelete": "Spiel löschen",
+      "errors": {
+        "required": "Pflichtfeld.",
+        "tooLong": "Zu lang.",
+        "tagTooLong": "Jeder Tag darf höchstens 30 Zeichen haben.",
+        "tooManyTags": "Höchstens 6 Tags.",
+        "forbidden": "Nur Admins können die Spiele ändern.",
+        "invalid": "Einige Felder sind ungültig.",
+        "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal."
+      }
     }
   },
   "Streams": {
