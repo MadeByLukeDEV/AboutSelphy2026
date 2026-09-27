@@ -18,7 +18,9 @@
       "twitch": "Auf Twitch ansehen",
       "youtube": "YouTube",
       "linkTree": "Alle meine Links"
-    }
+    },
+    "liveNow": "Gerade live",
+    "liveLink": "Stream auf Twitch ansehen"
   },
   "NotFound": {
     "title": "Seite nicht gefunden",
@@ -89,6 +91,51 @@
         "invalid": "Einige Felder sind ungültig. Prüf die markierten Felder.",
         "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal."
       }
+    },
+    "stats": {
+      "intro": "Die Zahlen hinter dem Mediakit. Alle 5 Minuten läuft ein Abgleich; langsam wachsende Zahlen werden stündlich aktualisiert.",
+      "syncNow": "Jetzt abgleichen",
+      "syncing": "Gleicht ab…",
+      "synced": "Abgleich fertig.",
+      "syncedWithErrors": "Abgleich mit Fehlern beendet. Details im letzten Lauf unten.",
+      "syncSkipped": "Es läuft bereits ein Abgleich.",
+      "syncForbidden": "Du musst als Staff angemeldet sein.",
+      "liveHeading": "Live-Status",
+      "live": "Gerade live: {title}",
+      "offline": "Offline",
+      "numbersHeading": "Aktuelle Zahlen",
+      "metric": "Kennzahl",
+      "value": "Wert",
+      "asOf": "Stand",
+      "noData": "Noch keine Daten. Starte einen Abgleich.",
+      "metrics": {
+        "twitch/followers": "Twitch-Follower",
+        "youtube/subscribers": "YouTube-Abonnenten",
+        "youtube/views": "YouTube-Aufrufe (gesamt)",
+        "youtube/videos": "YouTube-Videos",
+        "youtube/recentAverageViews": "YouTube-Ø-Aufrufe (letzte 10 Videos)"
+      },
+      "twitchHeading": "Twitch, letzte 30 Tage",
+      "twitchNote": "Twitch hat keine API für Durchschnittszuschauer, daher stammen diese Werte aus eigenen Messungen alle 5 Minuten während du live bist.",
+      "streams": "Streams",
+      "hours": "Gestreamte Stunden",
+      "avgViewers": "Ø Zuschauer",
+      "peakViewers": "Höchste Zuschauerzahl",
+      "sampledSince": "Gemessen seit {date}",
+      "noStreams": "Noch keine Streams gemessen. Die Werte erscheinen nach dem nächsten Stream.",
+      "runsHeading": "Letzte Abgleiche",
+      "runStarted": "Gestartet",
+      "runTrigger": "Auslöser",
+      "runResult": "Ergebnis",
+      "ok": "OK",
+      "failed": "Fehler",
+      "running": "Läuft",
+      "configHeading": "Einrichtung",
+      "configured": "Eingerichtet",
+      "notConfigured": "Nicht eingerichtet",
+      "cronLabel": "Cron-Secret",
+      "twitchLabel": "Twitch-API",
+      "youtubeLabel": "YouTube-API"
     }
   }
 }

@@ -6,6 +6,7 @@ import { getHomeContent, CHANNELS, PROFILE_IMAGES } from "@/modules/profile";
 import { HomeHero } from "@/modules/profile/components/home-hero";
 import { AboutSection } from "@/modules/profile/components/about-section";
 import { GamesList } from "@/modules/profile/components/games-list";
+import { getLiveStatus } from "@/modules/stats";
 import {
   JsonLd,
   personSchema,
@@ -25,7 +26,10 @@ export async function generateMetadata({
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
-  const content = await getHomeContent(locale);
+  const [content, liveStatus] = await Promise.all([
+    getHomeContent(locale),
+    getLiveStatus(),
+  ]);
   const base = siteUrl();
   const url = `${base}/${locale}`;
 
@@ -53,7 +57,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         ]}
       />
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
-        <HomeHero displayName={content.displayName} tagline={content.tagline} />
+        <HomeHero
+          displayName={content.displayName}
+          tagline={content.tagline}
+          live={liveStatus.live ? liveStatus : null}
+        />
         <div className="grid gap-section lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
           <AboutSection bio={content.bio} />
           <GamesList games={content.games} />

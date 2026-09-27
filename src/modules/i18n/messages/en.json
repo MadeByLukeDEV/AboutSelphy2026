@@ -18,7 +18,9 @@
       "twitch": "Watch on Twitch",
       "youtube": "YouTube",
       "linkTree": "All my links"
-    }
+    },
+    "liveNow": "Live now",
+    "liveLink": "Watch the stream on Twitch"
   },
   "NotFound": {
     "title": "Page not found",
@@ -89,6 +91,51 @@
         "invalid": "Some fields aren't valid. Check the marked fields.",
         "failed": "Couldn't save. Try again in a moment."
       }
+    },
+    "stats": {
+      "intro": "The numbers behind the media kit. A sync runs every 5 minutes; slow-moving numbers are refreshed hourly.",
+      "syncNow": "Sync now",
+      "syncing": "Syncing…",
+      "synced": "Sync finished.",
+      "syncedWithErrors": "Sync finished with errors. See the latest run below.",
+      "syncSkipped": "A sync is already running.",
+      "syncForbidden": "You need to be signed in as staff.",
+      "liveHeading": "Live status",
+      "live": "Live now: {title}",
+      "offline": "Offline",
+      "numbersHeading": "Latest numbers",
+      "metric": "Metric",
+      "value": "Value",
+      "asOf": "As of",
+      "noData": "No data yet. Run a sync.",
+      "metrics": {
+        "twitch/followers": "Twitch followers",
+        "youtube/subscribers": "YouTube subscribers",
+        "youtube/views": "YouTube views (all time)",
+        "youtube/videos": "YouTube videos",
+        "youtube/recentAverageViews": "YouTube average views (last 10 videos)"
+      },
+      "twitchHeading": "Twitch, last 30 days",
+      "twitchNote": "Twitch has no API for average viewers, so these come from our own samples every 5 minutes while live.",
+      "streams": "Streams",
+      "hours": "Hours streamed",
+      "avgViewers": "Average viewers",
+      "peakViewers": "Peak viewers",
+      "sampledSince": "Sampling since {date}",
+      "noStreams": "No streams sampled yet. Numbers appear after the next stream.",
+      "runsHeading": "Recent syncs",
+      "runStarted": "Started",
+      "runTrigger": "Trigger",
+      "runResult": "Result",
+      "ok": "OK",
+      "failed": "Failed",
+      "running": "Running",
+      "configHeading": "Setup",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "cronLabel": "Cron secret",
+      "twitchLabel": "Twitch API",
+      "youtubeLabel": "YouTube API"
     }
   }
 }

@@ -12,9 +12,12 @@ import { PROFILE_IMAGES } from "../images";
 export async function HomeHero({
   displayName,
   tagline,
+  live,
 }: {
   displayName: string;
   tagline: string;
+  /** Current Twitch broadcast, from the stats sync (at most ~5 min old). */
+  live: { title: string; gameName: string } | null;
 }) {
   const t = await getTranslations("Home");
   const { avatar, banner } = PROFILE_IMAGES;
@@ -51,6 +54,22 @@ export async function HomeHero({
       </div>
 
       <div className="flex flex-col gap-5 px-2 pt-4 sm:px-6">
+        {live && (
+          <a
+            href={CHANNELS.twitch}
+            className="flex w-fit max-w-full items-center gap-3 rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm hover:bg-red-500/15"
+          >
+            <span className="relative flex size-2.5 shrink-0" aria-hidden>
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-red-500 opacity-60 motion-reduce:hidden" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-red-500" />
+            </span>
+            <span className="font-semibold">{t("liveNow")}</span>
+            <span className="min-w-0 truncate text-muted-foreground">
+              {live.gameName}: {live.title}
+            </span>
+            <span className="sr-only">({t("liveLink")})</span>
+          </a>
+        )}
         {tagline && (
           <p className="max-w-[48ch] text-fluid-lg text-muted-foreground">
             {tagline}
