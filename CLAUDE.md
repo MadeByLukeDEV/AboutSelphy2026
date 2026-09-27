@@ -111,11 +111,21 @@ Read `node_modules/next/dist/docs/` before writing framework code if unsure.
      --to-schema prisma/schema.prisma --script >
      prisma/migrations/<YYYYMMDDHHMMSS>_<name>/migration.sql`
   3. Review the SQL, then run `pnpm exec prisma migrate deploy`.
+     **The SQL must not contain `CREATE SCHEMA`.** `aboutselphy_main` owns
+     `main` but has no database-level `CREATE` right, and Postgres checks
+     that right even for `IF NOT EXISTS`. The first migration failed with
+     `42501 permission denied for database` until that line was removed
+     (then `prisma migrate resolve --rolled-back <name>` and deploy again).
+     Prisma also can't express `CHECK` constraints; add them to the SQL by
+     hand (e.g. the `Profile` singleton check).
   4. Run `pnpm exec prisma generate`.
 
   `prisma/migrations/migration_lock.toml` (`provider = "postgresql"`) was
-  created by hand and is committed. No migrations exist yet; the first model
-  brings the first one.
+  created by hand and is committed.
+- **Seed data**: `pnpm db:seed` (`scripts/seed-profile.mts`) inserts the
+  initial profile text and games. It's **insert-only**: existing rows are
+  never overwritten, so it can't undo admin edits. Dev and prod share the
+  database, so it writes real content. It already ran on 2026-09-27.
 - **Scripts that import `src/lib/prisma.ts`** (which has
   `import "server-only"`) must run with
   `NODE_OPTIONS=--conditions=react-server pnpm exec tsx <file>.mts`.
@@ -642,8 +652,23 @@ SEO and security are built into every phase, not saved for the end.
       Prisma + Postgres (schema `main`, least-privilege roles), security
       headers + CSP nonce, `env.ts`, root metadata, robots/sitemap/manifest,
       placeholder icons, Dockerfile (tested, builds on Dokploy)
-- [ ] Phase 1: central auth integration + `/admin` shell
-- [ ] Phase 2: Home / About (+ `Person`/`WebSite` JSON-LD)
+- [x] Phase 1 (done 2026-09-27): central auth (`modules/auth`, proxy gate +
+      `requireStaffPage`/`requireStaff`/`requireAdmin`), `/admin` shell
+      (full width, sidebar, overview), sign-out via the auth service
+- [ ] Phase 2: Home / About
+  - [x] `profile` module: `Profile` (singleton, de/en tagline + bio) and
+        `Game` (status main/regular/new/former, de/en blurb, tags) tables,
+        seeded; `getHomeContent(locale)` cached with `unstable_cache`, tag
+        `profile` (not `use cache`: it needs PPR, which breaks the nonce
+        CSP). Admin saves must call
+        `revalidateTag(PROFILE_CACHE_TAG, { expire: 0 })`.
+  - [x] Home page: hero (monogram avatar, name, tagline, Twitch/YouTube/
+        link-tree links with `rel="me"`), About, "What I play"; shared
+        `SiteHeader`; `WebSite` + `Person` (`sameAs` = `CHANNELS`) +
+        `ProfilePage` JSON-LD via the `JsonLd` component (nonce, `<`
+        escaped). Production server response ~15 ms.
+  - [ ] Admin "About" editor (texts) + avatar/banner upload
+  - [ ] Games editing in admin (or with Phase 4)
 - [ ] Phase 3: `stats` module: YouTube + Twitch sync, `StatSnapshot`, cron
       route, EventSub live status and viewer sampling
 - [ ] Phase 4: Streams (live status, latest videos, embed facades)
