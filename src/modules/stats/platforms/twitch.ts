@@ -122,6 +122,22 @@ export type TwitchMedia = {
   views: number;
 };
 
+/**
+ * Only https links on Twitch's own domains end up in an href. Twitch builds
+ * these URLs itself; this is defense in depth against anything unexpected.
+ */
+function isTwitchUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "https:" &&
+      (url.hostname === "twitch.tv" || url.hostname.endsWith(".twitch.tv"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** "5h8m28s" -> seconds. */
 function parseTwitchDuration(value: string) {
   const match = /^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/.exec(value);
@@ -144,7 +160,12 @@ export async function getRecentVods(count: number): Promise<TwitchMedia[]> {
     }>;
   }>(`videos?user_id=${await broadcasterId()}&type=archive&first=${count}`);
   return body.data
-    .filter((v) => v.thumbnail_url && !v.thumbnail_url.includes("404_processing"))
+    .filter(
+      (v) =>
+        isTwitchUrl(v.url) &&
+        v.thumbnail_url &&
+        !v.thumbnail_url.includes("404_processing"),
+    )
     .map((v) => ({
       externalId: v.id,
       title: v.title.slice(0, 200) || "Twitch broadcast",
@@ -171,7 +192,7 @@ export async function getTopClips(count: number): Promise<TwitchMedia[]> {
       view_count: number;
     }>;
   }>(`clips?broadcaster_id=${await broadcasterId()}&first=${count}`);
-  return body.data.map((c) => ({
+  return body.data.filter((c) => isTwitchUrl(c.url)).map((c) => ({
     externalId: c.id,
     title: c.title.slice(0, 200) || "Twitch clip",
     url: c.url,
