@@ -7,3 +7,9 @@ allowBuilds:
   prisma: true
   sharp: false
   unrs-resolver: false
+
+overrides:
+  # prisma@7.10.0 pins mysql2 3.15.3 (used only by Prisma Studio for MySQL,
+  # never by this Postgres app), which has a high CVE. Same major, patched.
+  # Remove when a prisma release ships a fixed mysql2.
+  mysql2: ^3.24.4
