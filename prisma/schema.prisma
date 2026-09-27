@@ -50,6 +50,9 @@ model Game {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
+  scheduleSlots      ScheduleSlot[]
+  scheduleExceptions ScheduleException[]
+
   @@index([status, sortOrder])
 }
 
@@ -131,4 +134,59 @@ model MediaItem {
 
   @@unique([kind, externalId])
   @@index([kind, publishedAt])
+}
+
+// ─── schedule ────────────────────────────────────────────────────────────
+// The weekly stream plan. Times are wall-clock times in Europe/Vienna (DST
+// aware when turned into instants); dates are Vienna calendar dates.
+
+/// A stream that repeats every week.
+model ScheduleSlot {
+  id              String   @id @default(cuid())
+  /// ISO weekday: 1 = Monday ... 7 = Sunday.
+  weekday         Int      @db.SmallInt
+  /// "HH:mm", Europe/Vienna.
+  startTime       String   @db.VarChar(5)
+  durationMinutes Int      @db.SmallInt
+  gameId          String?
+  game            Game?    @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  titleEn         String   @default("") @db.VarChar(120)
+  titleDe         String   @default("") @db.VarChar(120)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  exceptions ScheduleException[]
+
+  @@index([weekday])
+}
+
+enum ScheduleExceptionKind {
+  cancelled // one occurrence of a slot doesn't happen
+  extra // a one-off stream on a date
+}
+
+/// A change to the weekly plan on one date. Moving a stream = cancel + extra.
+model ScheduleException {
+  id              String                @id @default(cuid())
+  kind            ScheduleExceptionKind
+  /// Europe/Vienna calendar date.
+  date            DateTime              @db.Date
+  /// cancelled: the slot whose occurrence is cancelled.
+  slotId          String?
+  slot            ScheduleSlot?         @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  /// extra: when, how long, what.
+  startTime       String?               @db.VarChar(5)
+  durationMinutes Int?                  @db.SmallInt
+  gameId          String?
+  game            Game?                 @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  titleEn         String                @default("") @db.VarChar(120)
+  titleDe         String                @default("") @db.VarChar(120)
+  /// Optional public note, e.g. why a stream is cancelled.
+  noteEn          String                @default("") @db.VarChar(200)
+  noteDe          String                @default("") @db.VarChar(200)
+  createdAt       DateTime              @default(now())
+
+  @@unique([slotId, date])
+  @@index([date])
 }
