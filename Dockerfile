@@ -38,19 +38,33 @@ ENV NODE_ENV=production \
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --prod --frozen-lockfile && pnpm store prune
+# In the same layer, delete pnpm's package store (node_modules holds hard
+# links, so the files survive) and root's caches (pnpm metadata,
+# corepack's pnpm, prisma). Nothing runs as root at runtime, so nothing
+# could use them. Saves ~600 MB.
+#
+# Then remove the package managers the base image ships (npm, npx, yarn,
+# corepack): the app never uses them at runtime, and Docker Scout flags
+# high CVEs in npm's bundled dependencies (brace-expansion, ip-address,
+# pacote, picomatch, sigstore). Deleting them removes that code entirely.
+RUN pnpm install --prod --frozen-lockfile \
+ && rm -rf "$(pnpm store path)" /root/.cache /root/.local/share/pnpm \
+ && rm -rf /usr/local/lib/node_modules /opt/yarn-* \
+      /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+      /usr/local/bin/yarn /usr/local/bin/yarnpkg \
+      /usr/local/bin/pnpm /usr/local/bin/pnpx
 
 # Every directory the app reads at runtime needs its own COPY line -- a
 # missing one fails silently (lesson from Social's missing public/).
-COPY --from=builder /app/.next ./.next
+# Only .next is owned by the unprivileged `node` user (Next writes its
+# cache there); everything else stays read-only to it. COPY --chown, not
+# a later `RUN chown -R`, which would store .next a second time.
+COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src/generated ./src/generated
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma7.config.ts /app/next.config.ts ./
 
-# Run as the image's unprivileged `node` user. It owns only .next (Next
-# writes its cache there); everything else stays read-only to it.
-RUN chown -R node:node /app/.next
 USER node
 
 EXPOSE 3000
