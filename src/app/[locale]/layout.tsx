@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,15 +9,9 @@ import { CustomCursor } from "@/components/effects/custom-cursor";
 import { ThemeProvider } from "@/modules/theme";
 import { routing } from "@/modules/i18n";
 import { siteUrl } from "@/lib/env";
+import { fontSans } from "../fonts";
 import "../globals.css";
 
-// Named "--font-sans" directly so it plugs into globals.css's
-// `--font-sans: var(--font-sans)` indirection without touching that file.
-// latin-ext covers German umlauts/ß.
-const fontSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin", "latin-ext"],
-});
 
 // No generateStaticParams: every page renders per request because the CSP
 // nonce is per request (decision 2026-09-26, see src/lib/security/csp.ts).

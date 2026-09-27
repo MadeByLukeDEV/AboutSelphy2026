@@ -21,5 +21,37 @@
     "light": "Helles Design",
     "dark": "Dunkles Design",
     "system": "Systemeinstellung"
+  },
+  "Admin": {
+    "metaTitle": "Admin",
+    "brand": "AboutSelphy Admin",
+    "navLabel": "Admin-Bereiche",
+    "nav": {
+      "overview": "Übersicht",
+      "about": "Über mich",
+      "schedule": "Streamplan",
+      "partners": "Partner",
+      "inquiries": "Anfragen",
+      "stats": "Statistiken"
+    },
+    "notBuilt": "Noch nicht gebaut",
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderator"
+    },
+    "signOut": "Abmelden",
+    "viewSite": "Website ansehen",
+    "overview": {
+      "greeting": "Hi {name}",
+      "intro": "Hier werden die Inhalte der Website verwaltet. Bereiche werden hier freigeschaltet, sobald sie gebaut sind.",
+      "sectionsHeading": "Bereiche",
+      "sections": {
+        "about": "Über-mich-Text und Bio bearbeiten, auf Deutsch und Englisch.",
+        "schedule": "Den wöchentlichen Streamplan für die Website planen.",
+        "partners": "Bisherige Partner, Kooperationen und Sponsoring-Pakete für das Mediakit verwalten.",
+        "inquiries": "Sponsoring-Anfragen aus dem Mediakit lesen und beantworten.",
+        "stats": "Prüfen, wann die YouTube- und Twitch-Zahlen zuletzt abgeglichen wurden."
+      }
+    }
   }
 }

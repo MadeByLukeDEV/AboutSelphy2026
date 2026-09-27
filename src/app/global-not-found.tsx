@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/modules/theme";
+import { fontSans } from "./fonts";
 import "./globals.css";
 
 // 404 for URLs that match no route at all. There is no single root layout
@@ -10,11 +10,6 @@ import "./globals.css";
 // will get its own), so this renders its own <html>. It can't know the
 // visitor's locale, so it's bilingual and links to "/", which the proxy
 // redirects to the right language.
-const fontSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
-  subsets: ["latin", "latin-ext"],
-});
-
 export const metadata: Metadata = {
   title: "404 — AboutSelphy",
   robots: { index: false },

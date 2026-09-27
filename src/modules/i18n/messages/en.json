@@ -21,5 +21,37 @@
     "light": "Light theme",
     "dark": "Dark theme",
     "system": "System theme"
+  },
+  "Admin": {
+    "metaTitle": "Admin",
+    "brand": "AboutSelphy admin",
+    "navLabel": "Admin sections",
+    "nav": {
+      "overview": "Overview",
+      "about": "About",
+      "schedule": "Schedule",
+      "partners": "Partners",
+      "inquiries": "Inquiries",
+      "stats": "Stats"
+    },
+    "notBuilt": "Not built yet",
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderator"
+    },
+    "signOut": "Sign out",
+    "viewSite": "View site",
+    "overview": {
+      "greeting": "Hi {name}",
+      "intro": "This is where the website's content gets managed. Sections switch on here as they're built.",
+      "sectionsHeading": "Sections",
+      "sections": {
+        "about": "Edit the About text and bio, in German and English.",
+        "schedule": "Plan the weekly stream schedule shown on the site.",
+        "partners": "Manage past partners, brand deals and sponsor packages for the media kit.",
+        "inquiries": "Read and answer sponsor inquiries sent through the media kit.",
+        "stats": "Check when the YouTube and Twitch numbers were last synced."
+      }
+    }
   }
 }
