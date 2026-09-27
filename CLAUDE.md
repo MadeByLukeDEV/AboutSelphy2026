@@ -63,9 +63,9 @@ Same stack as `social.aboutselphy.com`, apart from the database:
 - **Auth**: staff sessions come from the central BetterAuth service at
   `auth.aboutselphy.com` (Discord login, admin plugin, roles `admin` /
   `moderator`). This app has no auth instance of its own for staff. See "Auth".
-- **next-intl** (German/English, device-default locale, no locale prefix in
-  URLs) and **next-themes** (dark/light, system default), set up the same way
-  as Social
+- **next-intl** (German/English, locale-prefixed URLs `/de` and `/en`,
+  unlike Social; see "i18n") and **next-themes** (dark/light, system
+  default)
 - react-hook-form + zod, sonner toasts, lucide-react, simple-icons
 - Package manager: **pnpm**. Deployment: **Dokploy** (Docker, Traefik,
   Cloudflare in front)
@@ -434,15 +434,55 @@ cron routes, env handling or headers.
   (`ADMIN_DATABASE_URL`). API keys are restricted (the YouTube key is
   limited to the Data API).
 - **Dependencies**: pin exact versions for framework and auth packages, run
-  `pnpm audit` before each release, and add no new packages without a reason.
+  `pnpm audit --prod` before each release, and add no new packages without
+  a reason. Known state (2026-09-27):
+  - `pnpm-workspace.yaml` overrides `mysql2` to `^3.24.4`. prisma@7.10.0
+    pins 3.15.3 (high CVE), which is used only by Prisma Studio for MySQL.
+    Remove the override once a Prisma release ships a fixed version.
+  - **Accepted**: `deepmerge-ts` < 8 (stack exhaustion on recursive
+    objects) inside `@prisma/config`. It only merges this project's own
+    Prisma config, never untrusted input. The fix is a major bump inside
+    Prisma, so wait for Prisma to take it.
 - **Uploads** (if any, e.g. partner logos): check type by magic bytes, cap
   size, re-encode images, and never serve user-uploaded SVG inline.
 
-## Deployment (Dokploy): lessons carried over
+## Deployment (Dokploy)
 
-- Use a three-stage `Dockerfile` (`deps` → `builder` → `runner`) on
-  `node:22-alpine`, copied from Social. The runner runs
-  `pnpm exec prisma migrate deploy && pnpm start`.
+- **`Dockerfile`** (done, tested locally 2026-09-27): three stages
+  (`deps` → `builder` → `runner`) on `node:22-alpine`, like Social, and not
+  `standalone`, because the runner needs the prisma CLI.
+  - The runner starts with
+    `node_modules/.bin/prisma migrate deploy && exec node_modules/.bin/next start`.
+    The binaries are called directly, not through `pnpm`: pnpm and the other
+    package managers are deleted from the runner, and corepack cached pnpm
+    in root's home anyway.
+  - It runs as the unprivileged **`node`** user. Only `.next` is owned by
+    `node` (`COPY --chown`, never `RUN chown -R`, which stores the files
+    twice).
+  - The runner's install layer deletes the pnpm store, root's caches, and
+    npm/npx/yarn/corepack/pnpm. That brings the image from 2.09 GB to
+    1.43 GB and removes npm's bundled high CVEs. Docker Scout shows **no
+    high/critical vulnerabilities** in the image.
+  - `NEXT_PUBLIC_*` are **build args**, because they're inlined into client
+    JS at build time. Set them in Dokploy's build args, not only as env.
+  - `HEALTHCHECK` calls `/api/health` (`SELECT 1` with a 3 s timeout,
+    200/503, no error details). The first check during the 30 s start period
+    fails while `migrate deploy` runs, which is expected. Use
+    `/api/health` as Dokploy's health check path too.
+  - `shadcn` is a devDependency: it's only needed at build time for
+    `@import "shadcn/tailwind.css"`, and it pulls in TypeScript/ts-morph.
+- **Test the image locally** before merging Dockerfile changes (Docker
+  Desktop is installed per-user at
+  `%LOCALAPPDATA%\Programs\DockerDesktop`):
+  1. `docker build -t aboutselphy-main:test .` (with no env, which proves
+     the lazy clients).
+  2. Run it with `--env-file`, using an **unquoted** copy of `.env.local`
+     (docker keeps the quotes) that is deleted after the run.
+  3. Check the logs (`migrate deploy`), `/api/health`, `docker inspect`
+     health, a page load, and the Playwright CSP check against the
+     container.
+  4. Scan with `docker scout cves <image> --only-severity critical,high`.
+  5. Remove the container and image.
 - **Every runtime directory needs an explicit `COPY`** in the runner stage
   (`public/`, `src/generated`, `prisma/`, `prisma7.config.ts`,
   `next.config.ts`). A missing copy fails silently.
@@ -462,9 +502,11 @@ cron routes, env handling or headers.
 
 ## Git and GitHub (same pattern as Social)
 
-- Use GitHub account `MadeByLukeDEV`. Git has not been initialised here yet.
-  Run `git init` and create the repo only when the user asks. **Never add a
-  remote, push, or open a PR without asking.**
+- The repo is `git@github.com:MadeByLukeDEV/AboutSelphy2026.git`, with
+  commit author `madebyluke <aboutselphy@gmail.com>` (set in the repo's
+  git config). History is linear like Social's: push the branch, then
+  `git merge --ff-only` it into `main` and push `main`. Don't merge a branch
+  whose verification hasn't run yet. **Never open a PR without asking.**
 - Put every feature or fix on its own branch off `main`: `feature_<name>`,
   `fix_<name>`, `chore_<name>`, `content_<name>`, `docs_<name>` (snake prefix
   + kebab name, e.g. `feature_mediakit-page`, `fix_docker-build-lazy-clients`).
