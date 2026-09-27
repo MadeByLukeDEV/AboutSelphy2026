@@ -22,6 +22,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { FormSelect } from "@/components/form/form-select";
+import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { AdminSchedule } from "../admin-service";
 import {
@@ -42,9 +44,6 @@ import {
 
 type Slot = AdminSchedule["slots"][number];
 type Games = AdminSchedule["games"];
-
-const selectClass =
-  "h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
 function endTime(start: string, minutes: number) {
   const [h, m] = start.split(":").map(Number);
@@ -307,19 +306,30 @@ function FormShell({
   );
 }
 
-function GameSelect({ id, games, register }: { id: string; games: Games; register: object }) {
+function GameSelect<T extends FieldValues>({
+  id,
+  games,
+  control,
+  name,
+}: {
+  id: string;
+  games: Games;
+  control: Control<T>;
+  name: FieldPath<T>;
+}) {
   const t = useTranslations("Admin.schedule");
   return (
     <Field>
       <FieldLabel htmlFor={id}>{t("game")}</FieldLabel>
-      <select id={id} className={selectClass} {...register}>
-        <option value="">{t("noGame")}</option>
-        {games.map((game) => (
-          <option key={game.id} value={game.id}>
-            {game.name}
-          </option>
-        ))}
-      </select>
+      <FormSelect
+        control={control}
+        name={name}
+        id={id}
+        options={[
+          { value: "", label: t("noGame") },
+          ...games.map((game) => ({ value: game.id, label: game.name })),
+        ]}
+      />
     </Field>
   );
 }
@@ -359,13 +369,15 @@ function SlotForm({
       <div className="grid gap-4 sm:grid-cols-3">
         <Field>
           <FieldLabel htmlFor="weekday">{t("weekday")}</FieldLabel>
-          <select id="weekday" className={selectClass} {...form.register("weekday")}>
-            {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-              <option key={day} value={day}>
-                {t(`weekdays.${day}` as "weekdays.1")}
-              </option>
-            ))}
-          </select>
+          <FormSelect
+            control={form.control}
+            name="weekday"
+            id="weekday"
+            options={[1, 2, 3, 4, 5, 6, 7].map((day) => ({
+              value: String(day),
+              label: t(`weekdays.${day}` as "weekdays.1"),
+            }))}
+          />
         </Field>
         <Field data-invalid={!!errors.startTime}>
           <FieldLabel htmlFor="startTime">{t("startTime")}</FieldLabel>
@@ -379,7 +391,7 @@ function SlotForm({
           <FieldError errors={errorText(errors.durationMinutes?.message)} />
         </Field>
       </div>
-      <GameSelect id="gameId" games={games} register={form.register("gameId")} />
+      <GameSelect id="gameId" games={games} control={form.control} name="gameId" />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field data-invalid={!!errors.titleEn}>
           <FieldLabel htmlFor="titleEn">{t("titleEn")}</FieldLabel>
@@ -449,14 +461,15 @@ function CancelForm({
       </Field>
       <Field data-invalid={!!errors.slotId}>
         <FieldLabel htmlFor="cancel-slot">{t("slot")}</FieldLabel>
-        <select id="cancel-slot" className={selectClass} disabled={options.length === 0} {...form.register("slotId")}>
-          <option value="">{!date ? t("pickDate") : options.length === 0 ? t("noSlotOnDate") : "–"}</option>
-          {options.map((slot) => (
-            <option key={slot.id} value={slot.id}>
-              {slotLabel(slot)}
-            </option>
-          ))}
-        </select>
+        <FormSelect
+          control={form.control}
+          name="slotId"
+          id="cancel-slot"
+          disabled={options.length === 0}
+          invalid={!!errors.slotId}
+          placeholder={!date ? t("pickDate") : options.length === 0 ? t("noSlotOnDate") : "–"}
+          options={options.map((slot) => ({ value: slot.id, label: slotLabel(slot) }))}
+        />
         {errors.slotId && <FieldError>{t("errors.required")}</FieldError>}
       </Field>
       <NoteFields register={form.register} errors={errors} />
@@ -521,7 +534,7 @@ function ExtraForm({
           <FieldError errors={errorText(errors.durationMinutes?.message)} />
         </Field>
       </div>
-      <GameSelect id="extra-game" games={games} register={form.register("gameId")} />
+      <GameSelect id="extra-game" games={games} control={form.control} name="gameId" />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="extra-titleEn">{t("titleEn")}</FieldLabel>

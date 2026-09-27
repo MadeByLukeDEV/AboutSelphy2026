@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FormSelect } from "@/components/form/form-select";
 import { cn } from "@/lib/utils";
 import type { AdminGame } from "../admin-service";
 import {
@@ -259,17 +260,15 @@ function GameForm({
           </Field>
           <Field>
             <FieldLabel htmlFor="status">{t("status")}</FieldLabel>
-            <select
+            <FormSelect
+              control={form.control}
+              name="status"
               id="status"
-              className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
-              {...form.register("status")}
-            >
-              {GAME_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {t(`statuses.${status}`)}
-                </option>
-              ))}
-            </select>
+              options={GAME_STATUSES.map((status) => ({
+                value: status,
+                label: t(`statuses.${status}`),
+              }))}
+            />
           </Field>
         </div>
 

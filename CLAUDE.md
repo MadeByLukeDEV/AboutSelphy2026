@@ -211,6 +211,11 @@ brand.
 - shadcn `base-nova` / Base UI: forms use `Field`/`FieldGroup`/`FieldLabel`/
   `FieldError` + react-hook-form + zod (there is no `Form` component). Custom
   triggers use the `render` prop, not `asChild`.
+- **Dropdowns in forms**: use `FormSelect` (`src/components/form/form-select.tsx`,
+  Base UI Select + react-hook-form `Controller`), **never a native `<select>`**:
+  its option list is drawn by the OS and ignores the dark theme (white popup,
+  pale text). Options are `{ value: string; label }`, and `""` works as a
+  "none" value. Numbers come back as strings, so schemas use `z.coerce`.
 - Use `useSyncExternalStore` for client-only and mounted checks, not
   `useEffect(() => setMounted(true))`, which the React Compiler lint rule
   flags.
@@ -772,8 +777,7 @@ SEO and security are built into every phase, not saved for the end.
     suffix.
   - Actions check **auth before validation**, return the fresh list for
     client state, and clear the `profile` cache tag.
-  - Status is a styled native `<select>`: Base UI's Select needs an
-    `items` map just to show labels.
+  - Status uses `FormSelect` (see Frontend conventions).
 - [x] Phase 5 (done 2026-09-28): schedule (`modules/schedule`), a weekly
       plan plus exceptions (the user's choice)
   - Tables:
