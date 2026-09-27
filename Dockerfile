@@ -52,7 +52,16 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 # corepack): the app never uses them at runtime, and Docker Scout flags
 # high CVEs in npm's bundled dependencies (brace-expansion, ip-address,
 # pacote, picomatch, sigstore). Deleting them removes that code entirely.
+#
+# Prisma's schema engine (needed by `migrate deploy` at startup) is
+# downloaded by @prisma/engines' postinstall, which does NOT fail the
+# install when the download fails -- a slow network once produced an image
+# that built fine and then crashed on start, unable to download it as the
+# unprivileged node user. `prisma version` (still root here) fetches a
+# missing engine, and the `ls` fails the build if it's still not there.
 RUN pnpm install --prod --frozen-lockfile \
+ && node_modules/.bin/prisma version >/dev/null \
+ && ls node_modules/.pnpm/@prisma+engines@*/node_modules/@prisma/engines/schema-engine-* \
  && rm -rf "$(pnpm store path)" /root/.cache /root/.local/share/pnpm \
  && rm -rf /usr/local/lib/node_modules /opt/yarn-* \
       /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
