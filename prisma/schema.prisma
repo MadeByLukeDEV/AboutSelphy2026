@@ -12,3 +12,43 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ─── profile ─────────────────────────────────────────────────────────────
+// Who AboutSelphy is: the public home/about content. Long-form text is
+// stored per locale (de/en) and edited in /admin; it is plain text
+// (paragraphs separated by blank lines), never rendered as HTML.
+
+/// Singleton row (id is always 1).
+model Profile {
+  id          Int      @id @default(1)
+  displayName String   @db.VarChar(80)
+  taglineDe   String   @db.VarChar(200)
+  taglineEn   String   @db.VarChar(200)
+  bioDe       String   @db.Text
+  bioEn       String   @db.Text
+  updatedAt   DateTime @updatedAt
+}
+
+enum GameStatus {
+  main // what most streams are about
+  regular // played often
+  new // recently started
+  former // no longer played, kept for context
+}
+
+/// A game AboutSelphy plays (or played), shown on the home page.
+model Game {
+  id        String     @id @default(cuid())
+  slug      String     @unique @db.VarChar(60)
+  name      String     @db.VarChar(80)
+  status    GameStatus
+  sortOrder Int        @default(0)
+  blurbDe   String     @db.VarChar(400)
+  blurbEn   String     @db.VarChar(400)
+  /// Short labels (mostly proper nouns like "Hourglass PvP"), not translated.
+  tags      String[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([status, sortOrder])
+}
