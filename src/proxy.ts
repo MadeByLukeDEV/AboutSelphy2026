@@ -40,9 +40,10 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      // Everything except API routes, Next internals and files with an
-      // extension (favicon.ico, robots.txt, images...).
-      source: "/((?!api|_next|_vercel|.*\\..*).*)",
+      // Everything except API routes, Next internals, generated icons
+      // (/icon/32, /apple-icon: no file extension, but not pages) and
+      // files with an extension (robots.txt, sitemap.xml, images...).
+      source: "/((?!api|_next|_vercel|icon|apple-icon|.*\\..*).*)",
       // Skip next/link prefetches: they don't render HTML, so they don't
       // need a CSP (recommended by the Next.js CSP guide).
       missing: [
