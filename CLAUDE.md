@@ -474,8 +474,13 @@ cron routes, env handling or headers.
 - **Test the image locally** before merging Dockerfile changes (Docker
   Desktop is installed per-user at
   `%LOCALAPPDATA%\Programs\DockerDesktop`):
-  1. `docker build -t aboutselphy-main:test .` (with no env, which proves
-     the lazy clients).
+  1. Build from a **fresh clone of the pushed branch** (`git clone --depth 1
+     -b <branch> …` into the scratchpad), **never from the working tree**.
+     Dokploy builds from a clone, and the working tree hides problems: an
+     empty `public/` existed locally but not in git, so the first Dokploy
+     build failed on `COPY /app/public` (fixed with `public/.gitkeep`;
+     delete it once real assets exist). Build with no env set, which also
+     proves the lazy clients.
   2. Run it with `--env-file`, using an **unquoted** copy of `.env.local`
      (docker keeps the quotes) that is deleted after the run.
   3. Check the logs (`migrate deploy`), `/api/health`, `docker inspect`
