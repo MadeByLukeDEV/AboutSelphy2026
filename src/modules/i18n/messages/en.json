@@ -137,5 +137,32 @@
       "twitchLabel": "Twitch API",
       "youtubeLabel": "YouTube API"
     }
+  },
+  "Streams": {
+    "metaTitle": "Streams & videos",
+    "metaDescription": "Watch AboutSelphy live on Twitch – Sea of Thieves Hourglass PvP, Hunt: Showdown and more – plus past broadcasts, top clips and Shorts on YouTube.",
+    "title": "Streams & videos",
+    "intro": "Live on Twitch, highlights and Shorts on YouTube. Players load only when you press play.",
+    "liveHeading": "Live now",
+    "offlineHeading": "Not live right now",
+    "offlineText": "Follow on Twitch to get notified when the next stream starts.",
+    "followOnTwitch": "Follow on Twitch",
+    "vodsHeading": "Past broadcasts",
+    "vodsNote": "Twitch keeps broadcasts only for a limited time.",
+    "clipsHeading": "Top clips",
+    "youtubeHeading": "On YouTube",
+    "videosHeading": "Videos",
+    "shortsHeading": "Shorts",
+    "play": "Play: {title}",
+    "playLive": "Play the live stream",
+    "views": "{count, plural, one {# view} other {# views}}",
+    "openOn": "Open on {platform}",
+    "moreOn": "More on {platform}",
+    "empty": "Nothing here yet."
+  },
+  "Nav": {
+    "label": "Main",
+    "home": "Home",
+    "streams": "Streams"
   }
 }

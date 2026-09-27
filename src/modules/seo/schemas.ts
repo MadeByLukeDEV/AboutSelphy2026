@@ -67,3 +67,32 @@ export function profilePageSchema(options: {
       : {}),
   };
 }
+
+/** schema.org VideoObject for a YouTube video/Short (permanent URLs only). */
+export function videoSchema(video: {
+  name: string;
+  url: string;
+  embedUrl: string;
+  thumbnailUrl: string;
+  uploadDate: Date;
+  durationSeconds: number;
+  views: number;
+  siteUrl: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    name: video.name,
+    url: video.url,
+    embedUrl: video.embedUrl,
+    thumbnailUrl: video.thumbnailUrl,
+    uploadDate: video.uploadDate.toISOString(),
+    ...(video.durationSeconds > 0 ? { duration: `PT${video.durationSeconds}S` } : {}),
+    interactionStatistic: {
+      "@type": "InteractionCounter",
+      interactionType: { "@type": "WatchAction" },
+      userInteractionCount: video.views,
+    },
+    author: { "@id": personId(video.siteUrl) },
+  };
+}

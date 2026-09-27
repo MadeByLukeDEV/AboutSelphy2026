@@ -38,7 +38,12 @@ export function buildCsp(
     // next/font self-hosts fonts.
     "font-src": ["'self'"],
     "connect-src": ["'self'"],
-    "frame-src": ["'none'"],
+    // Click-to-load players on the Streams page (src/modules/streams).
+    "frame-src": [
+      "https://player.twitch.tv",
+      "https://clips.twitch.tv",
+      "https://www.youtube-nocookie.com",
+    ],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
     "form-action": ["'self'", authOrigin],

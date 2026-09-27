@@ -8,7 +8,10 @@ type SitemapEntry = MetadataRoute.Sitemap[number];
 // content updatedAt), never from `new Date()`, which tells crawlers
 // everything changed on every build.
 export const PUBLIC_PAGES: Array<{
-  path: "/";
+  path: "/" | "/streams";
   changeFrequency: SitemapEntry["changeFrequency"];
   priority: number;
-}> = [{ path: "/", changeFrequency: "weekly", priority: 1 }];
+}> = [
+  { path: "/", changeFrequency: "weekly", priority: 1 },
+  { path: "/streams", changeFrequency: "daily", priority: 0.8 },
+];

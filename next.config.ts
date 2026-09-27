@@ -50,6 +50,13 @@ const nextConfig: NextConfig = {
     // Only our own image paths may go through the optimizer -- anything
     // else is refused instead of being resized on demand.
     localPatterns: [{ pathname: "/profile/**", search: "" }],
+    // Video thumbnails for the Streams page. Loaded through our optimizer,
+    // so the browser only ever fetches images from our own origin and the
+    // CSP img-src can stay 'self'.
+    remotePatterns: [
+      { protocol: "https", hostname: "static-cdn.jtvnw.net", pathname: "/**" },
+      { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
+    ],
   },
   experimental: {
     // app/global-not-found.tsx: there is no single root layout (the
