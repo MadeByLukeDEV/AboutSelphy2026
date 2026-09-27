@@ -7,13 +7,21 @@ import { STATS_CACHE_TAG } from "./sync";
 // clears -- so the data is at most one sync (5 min) old. "Now"-relative
 // values (is it live?) are computed outside the cache.
 
+/**
+ * Fallback expiry. revalidateTag only clears the cache in the process that
+ * ran the sync -- fine in production (the Dokploy job calls the same
+ * container), but any other process (a dev server, a second replica) would
+ * otherwise keep its first copy forever.
+ */
+const CACHE_SECONDS = 300;
+
 /** A session whose last sample is at most this old counts as live. */
 const LIVE_WINDOW_MS = 11 * 60_000;
 
 const loadLatestSession = unstable_cache(
   async () => repo.latestSession(),
   ["stats-latest-session"],
-  { tags: [STATS_CACHE_TAG] },
+  { tags: [STATS_CACHE_TAG], revalidate: CACHE_SECONDS },
 );
 
 export type LiveStatus =
@@ -74,7 +82,7 @@ const loadOverview = unstable_cache(
     };
   },
   ["stats-overview"],
-  { tags: [STATS_CACHE_TAG] },
+  { tags: [STATS_CACHE_TAG], revalidate: CACHE_SECONDS },
 );
 
 export async function getStatsOverview(): Promise<StatsOverview> {
@@ -148,7 +156,7 @@ const loadMedia = unstable_cache(
     };
   },
   ["stats-media"],
-  { tags: [STATS_CACHE_TAG] },
+  { tags: [STATS_CACHE_TAG], revalidate: CACHE_SECONDS },
 );
 
 /** Videos for the Streams page, from the DB (synced hourly). */

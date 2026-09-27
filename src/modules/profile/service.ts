@@ -15,7 +15,9 @@ const loadContent = unstable_cache(
     return { profile, games };
   },
   ["profile-content"],
-  { tags: [PROFILE_CACHE_TAG] },
+  // Fallback expiry for processes that didn't run the admin save (see
+  // stats/service.ts); the save itself clears the tag immediately.
+  { tags: [PROFILE_CACHE_TAG], revalidate: 600 },
 );
 
 export type GameStatus = "main" | "regular" | "new" | "former";

@@ -312,6 +312,12 @@ checks before it's considered done.
     with tags, invalidated by admin edits and the stats sync).
   - A page render must never wait on Twitch or YouTube.
   - Keep server render time low and check TTFB in Lighthouse.
+  - Every `unstable_cache` has a **fallback `revalidate`** (stats 300 s,
+    profile 600 s) as well as its tag. `revalidateTag` only clears the cache
+    in the process that ran it. In production that's fine, because the
+    Dokploy job calls the same container. A local dev server, or a second
+    replica, would otherwise keep its first copy forever. This was hit on
+    2026-09-28: a dev server kept showing old Streams data.
 - **i18n routing differs from Social**: public pages use **locale-prefixed
   URLs** (`/de/…`, `/en/…`, next-intl routing with `localePrefix`). With
   Social's cookie/Accept-Language approach, Google only ever indexes one
@@ -643,8 +649,15 @@ Variables planned for later phases:
   OAuth), `TOKEN_ENCRYPTION_KEY` (32-byte hex)
 - `CRON_SECRET` (stats sync), `TURNSTILE_SITE_KEY` (public) /
   `TURNSTILE_SECRET_KEY` (inquiry form)
-- `REDIS_URL` (optional, only if caching is added. Reuse the shared instance,
-  and every call must fail soft)
+- `REDIS_URL`: set in `.env.local` since 2026-09-28 but **not used yet**.
+  Planned uses:
+  - Phase 6: per-IP rate limiting of the inquiry form.
+  - A shared Next cache handler, if the app ever runs more than one
+    container.
+
+  Reuse the shared instance, and every call must fail soft (Social's
+  lessons: ACL `NOPERM` flakiness, `enableReadyCheck: false`). Add it to
+  `env.ts` together with its first use.
 
 ## Open decisions
 
