@@ -491,8 +491,9 @@ cron routes, env handling or headers.
     npm/npx/yarn/corepack/pnpm. That brings the image from 2.09 GB to
     1.43 GB and removes npm's bundled high CVEs. Docker Scout shows **no
     high/critical vulnerabilities** in the image.
-  - `NEXT_PUBLIC_*` are **build args**, because they're inlined into client
-    JS at build time. Set them in Dokploy's build args, not only as env.
+  - `NEXT_PUBLIC_SITE_URL` is the only build arg (default production URL),
+    and the Dockerfile carries it into the runtime stage. See "Environment
+    variables" for what goes into which Dokploy field.
   - `HEALTHCHECK` calls `/api/health` (`SELECT 1` with a 3 s timeout,
     200/503, no error details). The first check during the 30 s start period
     fails while `migrate deploy` runs, which is expected. Use
@@ -588,13 +589,33 @@ pnpm exec prisma studio
 
 ## Environment variables
 
-Keep `.env.example` complete and commented, as in Social.
-- `DATABASE_URL`: Postgres, a plain connection string. URL-encode special
-  characters in the password. `DATABASE_SCHEMA` is the app's schema
-  (`main`). Locally these live in `.env.local`.
-- `AUTH_URL`, `AUTH_DATABASE_URL`, `AUTH_DATABASE_SCHEMA` (`auth`),
-  `BETTER_AUTH_SECRET` (same as the auth service), `AUTH_COOKIE_PREFIX`
-- `NEXT_PUBLIC_SITE_URL` (`https://aboutselphy.com`), `NEXT_PUBLIC_ROOT_DOMAIN`
+Keep `.env.example` complete and commented, as in Social. Locally
+everything lives in `.env.local`. Every server variable is validated in
+`src/lib/env.ts`, and **defaults are the production values**, so Dokploy
+only needs what has no safe default.
+
+**Dokploy** (verified 2026-09-27 with a fresh-clone image and only these
+three variables set):
+
+| Dokploy field | Variables |
+| --- | --- |
+| Build-time Arguments | none. `NEXT_PUBLIC_SITE_URL` defaults to `https://aboutselphy.com` in the Dockerfile; set it only for another domain. |
+| Build-time Secrets | none. The build needs no secrets and no database (lazy clients). |
+| Environment (runtime) | `DATABASE_URL` (`aboutselphy_main`, internal host), `AUTH_DATABASE_URL` (`aboutselphy_auth_reader`, internal host), `BETTER_AUTH_SECRET` (same as the auth service) |
+
+Optional runtime variables that default to production: `DATABASE_SCHEMA`
+(`main`), `AUTH_URL` (`https://auth.aboutselphy.com`),
+`AUTH_DATABASE_SCHEMA` (`auth`), `AUTH_COOKIE_PREFIX` (`better-auth`).
+`NEXT_PUBLIC_SITE_URL` is carried from the build into the runtime stage
+by the Dockerfile. **Never set it as a runtime variable in Dokploy**: a
+value that differs from the build's would disagree with the
+robots/sitemap/client JS baked at build time. `NEXT_PUBLIC_ROOT_DOMAIN`
+was removed because this app has no subdomain logic.
+
+When a feature adds variables, add them to `env.ts` (with a production
+default where one is safe), `.env.example`, and this table.
+
+Variables planned for later phases:
 - `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `TWITCH_BROADCASTER_LOGIN`,
   `TWITCH_WEBHOOK_SECRET`, `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_ID` (the
   media kit's data sources. Features render a placeholder when these are

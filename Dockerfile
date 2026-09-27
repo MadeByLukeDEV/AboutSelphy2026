@@ -19,19 +19,24 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-# NEXT_PUBLIC_* values are inlined into client JS at build time, so they
-# must be build args (set them in Dokploy's build args, not only env).
+# The only build input. It's baked into robots.txt, sitemap.xml and
+# client JS at build time, and the runner below reuses the same value, so
+# it's defined once. The default is production; override it only for
+# another domain (Dokploy: Build-time Arguments). The build needs no
+# secrets and no database.
 ARG NEXT_PUBLIC_SITE_URL=https://aboutselphy.com
-ARG NEXT_PUBLIC_ROOT_DOMAIN=aboutselphy.com
-ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
-    NEXT_PUBLIC_ROOT_DOMAIN=$NEXT_PUBLIC_ROOT_DOMAIN
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN pnpm exec prisma generate
 RUN pnpm build
 
 # ---- runner: production deps + build output, non-root ----
 FROM node:22-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production \
+# Same value as the build (see builder): server code reads it at runtime
+# too, so it must match what was baked into robots/sitemap/JS.
+ARG NEXT_PUBLIC_SITE_URL=https://aboutselphy.com
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
+    NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0
