@@ -1,0 +1,2 @@
+# Keeps public/ in git while it has no assets: the Dockerfile copies it,
+# and Dokploy builds from a fresh clone where an empty dir would not exist.
