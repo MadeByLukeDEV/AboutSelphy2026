@@ -28,6 +28,6 @@ Modules are added here as they are built.
 | Module | Owns | Depends on |
 |--------|------|------------|
 | `theme` | next-themes provider + light/dark/system toggle | `i18n` (labels) |
-| `profile` | `Profile` + `Game` tables, cached home content (`getHomeContent`), channel links, home page components | `i18n` (locale type) |
+| `profile` | `Profile` + `Game` tables, cached home content (`getHomeContent`), channel links, static profile images, home page components, admin profile editor (`saveProfileAction`) | `i18n`, `auth` (guards) |
 | `seo` | public page list for the sitemap, JSON-LD component + schema.org builders (Person, WebSite, ProfilePage) | `i18n` (alternates) |
 | `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |

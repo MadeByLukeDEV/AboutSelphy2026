@@ -677,7 +677,13 @@ SEO and security are built into every phase, not saved for the end.
         optimizer to `/profile/**`. Channel-page hero: banner with the
         avatar overlapping its edge (`relative z-10`, or the banner paints
         over it). Avatar is the Person JSON-LD `image`.
-  - [ ] Admin "About" editor (tagline + bio, de/en)
+  - [x] Admin "About" editor (`/admin/about`): display name, tagline and bio
+        in en/de side by side, react-hook-form + zod (`modules/profile/
+        schema.ts`, error messages are i18n keys), live character counts.
+        `saveProfileAction` re-checks `requireAdmin()` and re-validates,
+        returns error codes only, and clears the cache via
+        `revalidateTag(PROFILE_CACHE_TAG, { expire: 0 })`. Moderators see the
+        page read-only.
   - [ ] Games editing in admin (or with Phase 4)
 - [ ] Phase 3: `stats` module: YouTube + Twitch sync, `StatSnapshot`, cron
       route, EventSub live status and viewer sampling

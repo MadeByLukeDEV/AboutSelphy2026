@@ -66,6 +66,29 @@
         "inquiries": "Sponsoring-Anfragen aus dem Mediakit lesen und beantworten.",
         "stats": "Prüfen, wann die YouTube- und Twitch-Zahlen zuletzt abgeglichen wurden."
       }
+    },
+    "about": {
+      "intro": "Der Text auf der Startseite. Englisch und Deutsch werden nebeneinander bearbeitet; beide sind Pflicht.",
+      "adminOnly": "Nur Admins können das Profil bearbeiten. Frag den Owner, wenn sich etwas ändern soll.",
+      "displayName": "Anzeigename",
+      "tagline": "Tagline",
+      "taglineHint": "Ein Satz unter deinem Namen. Wird auch für Suchergebnisse verwendet.",
+      "bio": "Über mich",
+      "bioHint": "Reiner Text. Zwischen Absätzen eine leere Zeile lassen.",
+      "english": "Englisch",
+      "german": "Deutsch",
+      "count": "{count} / {max}",
+      "save": "Änderungen speichern",
+      "saving": "Speichert…",
+      "saved": "Profil gespeichert. Die Startseite zeigt jetzt den neuen Text.",
+      "viewPage": "Startseite ansehen",
+      "errors": {
+        "required": "Pflichtfeld.",
+        "tooLong": "Zu lang.",
+        "forbidden": "Nur Admins können das Profil speichern.",
+        "invalid": "Einige Felder sind ungültig. Prüf die markierten Felder.",
+        "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal."
+      }
     }
   }
 }

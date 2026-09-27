@@ -13,7 +13,7 @@ import {
 // section's page lands.
 export const ADMIN_SECTIONS = [
   { key: "overview", href: "/admin", icon: LayoutDashboard, built: true },
-  { key: "about", href: "/admin/about", icon: UserRound, built: false },
+  { key: "about", href: "/admin/about", icon: UserRound, built: true },
   { key: "schedule", href: "/admin/schedule", icon: CalendarDays, built: false },
   { key: "partners", href: "/admin/partners", icon: Handshake, built: false },
   { key: "inquiries", href: "/admin/inquiries", icon: Inbox, built: false },

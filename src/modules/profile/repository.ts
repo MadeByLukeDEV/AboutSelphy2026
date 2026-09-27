@@ -10,3 +10,17 @@ export function findProfile() {
 export function findGames() {
   return prisma.game.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] });
 }
+
+export function upsertProfile(data: {
+  displayName: string;
+  taglineEn: string;
+  taglineDe: string;
+  bioEn: string;
+  bioDe: string;
+}) {
+  return prisma.profile.upsert({
+    where: { id: 1 },
+    create: { id: 1, ...data },
+    update: data,
+  });
+}

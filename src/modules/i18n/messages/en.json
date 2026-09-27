@@ -66,6 +66,29 @@
         "inquiries": "Read and answer sponsor inquiries sent through the media kit.",
         "stats": "Check when the YouTube and Twitch numbers were last synced."
       }
+    },
+    "about": {
+      "intro": "The text on the home page. English and German are edited side by side; both are required.",
+      "adminOnly": "Only admins can edit the profile. Ask the owner if something needs to change.",
+      "displayName": "Display name",
+      "tagline": "Tagline",
+      "taglineHint": "One sentence under your name. Also used for search results.",
+      "bio": "About me",
+      "bioHint": "Plain text. Leave an empty line between paragraphs.",
+      "english": "English",
+      "german": "German",
+      "count": "{count} / {max}",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saved": "Profile saved. The home page shows the new text now.",
+      "viewPage": "View home page",
+      "errors": {
+        "required": "Required.",
+        "tooLong": "Too long.",
+        "forbidden": "Only admins can save the profile.",
+        "invalid": "Some fields aren't valid. Check the marked fields.",
+        "failed": "Couldn't save. Try again in a moment."
+      }
     }
   }
 }
