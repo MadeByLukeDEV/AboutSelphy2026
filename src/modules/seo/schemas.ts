@@ -96,3 +96,33 @@ export function videoSchema(video: {
     author: { "@id": personId(video.siteUrl) },
   };
 }
+
+/** schema.org Event for one scheduled Twitch stream. */
+export function streamEventSchema(event: {
+  name: string;
+  description: string;
+  start: Date;
+  end: Date;
+  cancelled: boolean;
+  twitchUrl: string;
+  image: string;
+  siteUrl: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.name,
+    description: event.description,
+    startDate: event.start.toISOString(),
+    endDate: event.end.toISOString(),
+    eventStatus: event.cancelled
+      ? "https://schema.org/EventCancelled"
+      : "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+    location: { "@type": "VirtualLocation", url: event.twitchUrl },
+    image: event.image,
+    organizer: { "@id": personId(event.siteUrl) },
+    performer: { "@id": personId(event.siteUrl) },
+    isAccessibleForFree: true,
+  };
+}

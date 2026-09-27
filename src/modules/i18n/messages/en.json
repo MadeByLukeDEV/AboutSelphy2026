@@ -20,7 +20,9 @@
       "linkTree": "All my links"
     },
     "liveNow": "Live now",
-    "liveLink": "Watch the stream on Twitch"
+    "liveLink": "Watch the stream on Twitch",
+    "nextStream": "Next stream",
+    "nextStreamLink": "See the full schedule"
   },
   "NotFound": {
     "title": "Page not found",
@@ -64,7 +66,7 @@
       "sectionsHeading": "Sections",
       "sections": {
         "about": "Edit the About text and bio, in German and English.",
-        "schedule": "Plan the weekly stream schedule shown on the site.",
+        "schedule": "Weekly stream plan, cancellations and extra streams.",
         "partners": "Manage past partners, brand deals and sponsor packages for the media kit.",
         "inquiries": "Read and answer sponsor inquiries sent through the media kit.",
         "stats": "Check when the YouTube and Twitch numbers were last synced.",
@@ -181,6 +183,71 @@
         "invalid": "Some fields aren't valid.",
         "failed": "Couldn't save. Try again in a moment."
       }
+    },
+    "schedule": {
+      "intro": "The weekly plan repeats automatically. Use changes to cancel a single stream or add an extra one. Times are Vienna time.",
+      "weeklyHeading": "Weekly plan",
+      "changesHeading": "Changes",
+      "addSlot": "Add weekly stream",
+      "cancelStream": "Cancel a stream",
+      "addExtra": "Add extra stream",
+      "edit": "Edit",
+      "delete": "Delete",
+      "noSlots": "No weekly streams yet.",
+      "noChanges": "No upcoming changes.",
+      "inactive": "Paused",
+      "noGame": "No game",
+      "untitled": "No title",
+      "weekdays": {
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday",
+        "7": "Sunday"
+      },
+      "weekday": "Day",
+      "startTime": "Start",
+      "duration": "Length (minutes)",
+      "endsAt": "Ends at {time}",
+      "game": "Game",
+      "titleEn": "Title (English)",
+      "titleDe": "Title (German)",
+      "titleHint": "Optional. Shown next to the game.",
+      "active": "Active",
+      "activeHint": "Paused streams stay saved but don't appear on the site.",
+      "date": "Date",
+      "slot": "Stream",
+      "pickDate": "Pick a date first.",
+      "noSlotOnDate": "No weekly stream on that day.",
+      "noteEn": "Note (English)",
+      "noteDe": "Note (German)",
+      "noteHint": "Optional, shown publicly (e.g. the reason).",
+      "cancelledLabel": "Cancelled: {stream}",
+      "extraLabel": "Extra: {stream}",
+      "dialogSlotAdd": "Add weekly stream",
+      "dialogSlotEdit": "Edit weekly stream",
+      "dialogCancel": "Cancel one stream",
+      "dialogExtra": "Add an extra stream",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "saved": "Schedule updated.",
+      "confirmDeleteSlot": "Delete this weekly stream? Its cancellations are removed too.",
+      "errors": {
+        "required": "Required.",
+        "tooLong": "Too long.",
+        "invalidTime": "Use HH:MM.",
+        "invalidDuration": "Between 15 and 1440 minutes.",
+        "invalidDate": "Pick a valid date.",
+        "forbidden": "You need to be signed in as staff.",
+        "invalid": "Some fields aren't valid.",
+        "failed": "Couldn't save. Try again in a moment.",
+        "weekdayMismatch": "That stream doesn't happen on this date.",
+        "unknownSlot": "That stream no longer exists.",
+        "pastDate": "Pick today or a later date."
+      }
     }
   },
   "Streams": {
@@ -203,11 +270,28 @@
     "views": "{count, plural, one {# view} other {# views}}",
     "openOn": "Open on {platform}",
     "moreOn": "More on {platform}",
-    "empty": "Nothing here yet."
+    "empty": "Nothing here yet.",
+    "nextStream": "Next stream: {when}"
   },
   "Nav": {
     "label": "Main",
     "home": "Home",
-    "streams": "Streams"
+    "streams": "Streams",
+    "schedule": "Schedule"
+  },
+  "Schedule": {
+    "metaTitle": "Stream schedule",
+    "metaDescription": "When AboutSelphy is live on Twitch: the stream plan for the next two weeks – Sea of Thieves, Hunt: Showdown and more, with cancellations and extra streams.",
+    "title": "Stream schedule",
+    "intro": "The next two weeks on Twitch. All times are Vienna time ({zone}).",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inProgress": "On now",
+    "cancelled": "Cancelled",
+    "extra": "Extra stream",
+    "defaultTitle": "Live on Twitch",
+    "empty": "No streams planned for the next two weeks yet.",
+    "followHint": "Follow on Twitch to get notified when a stream starts.",
+    "followOnTwitch": "Follow on Twitch"
   }
 }

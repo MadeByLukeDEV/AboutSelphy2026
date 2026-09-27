@@ -20,7 +20,9 @@
       "linkTree": "Alle meine Links"
     },
     "liveNow": "Gerade live",
-    "liveLink": "Stream auf Twitch ansehen"
+    "liveLink": "Stream auf Twitch ansehen",
+    "nextStream": "Nächster Stream",
+    "nextStreamLink": "Zum ganzen Streamplan"
   },
   "NotFound": {
     "title": "Seite nicht gefunden",
@@ -64,7 +66,7 @@
       "sectionsHeading": "Bereiche",
       "sections": {
         "about": "Über-mich-Text und Bio bearbeiten, auf Deutsch und Englisch.",
-        "schedule": "Den wöchentlichen Streamplan für die Website planen.",
+        "schedule": "Wöchentlicher Streamplan, Absagen und Extra-Streams.",
         "partners": "Bisherige Partner, Kooperationen und Sponsoring-Pakete für das Mediakit verwalten.",
         "inquiries": "Sponsoring-Anfragen aus dem Mediakit lesen und beantworten.",
         "stats": "Prüfen, wann die YouTube- und Twitch-Zahlen zuletzt abgeglichen wurden.",
@@ -181,6 +183,71 @@
         "invalid": "Einige Felder sind ungültig.",
         "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal."
       }
+    },
+    "schedule": {
+      "intro": "Der Wochenplan wiederholt sich automatisch. Mit Änderungen sagst du einzelne Streams ab oder fügst Extra-Streams hinzu. Zeiten in Wiener Zeit.",
+      "weeklyHeading": "Wochenplan",
+      "changesHeading": "Änderungen",
+      "addSlot": "Wöchentlichen Stream hinzufügen",
+      "cancelStream": "Stream absagen",
+      "addExtra": "Extra-Stream hinzufügen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "noSlots": "Noch keine wöchentlichen Streams.",
+      "noChanges": "Keine anstehenden Änderungen.",
+      "inactive": "Pausiert",
+      "noGame": "Kein Spiel",
+      "untitled": "Kein Titel",
+      "weekdays": {
+        "1": "Montag",
+        "2": "Dienstag",
+        "3": "Mittwoch",
+        "4": "Donnerstag",
+        "5": "Freitag",
+        "6": "Samstag",
+        "7": "Sonntag"
+      },
+      "weekday": "Tag",
+      "startTime": "Start",
+      "duration": "Dauer (Minuten)",
+      "endsAt": "Endet um {time}",
+      "game": "Spiel",
+      "titleEn": "Titel (Englisch)",
+      "titleDe": "Titel (Deutsch)",
+      "titleHint": "Optional. Wird neben dem Spiel angezeigt.",
+      "active": "Aktiv",
+      "activeHint": "Pausierte Streams bleiben gespeichert, erscheinen aber nicht auf der Seite.",
+      "date": "Datum",
+      "slot": "Stream",
+      "pickDate": "Wähle zuerst ein Datum.",
+      "noSlotOnDate": "An diesem Tag gibt es keinen wöchentlichen Stream.",
+      "noteEn": "Hinweis (Englisch)",
+      "noteDe": "Hinweis (Deutsch)",
+      "noteHint": "Optional, öffentlich sichtbar (z. B. der Grund).",
+      "cancelledLabel": "Abgesagt: {stream}",
+      "extraLabel": "Extra: {stream}",
+      "dialogSlotAdd": "Wöchentlichen Stream hinzufügen",
+      "dialogSlotEdit": "Wöchentlichen Stream bearbeiten",
+      "dialogCancel": "Einen Stream absagen",
+      "dialogExtra": "Extra-Stream hinzufügen",
+      "save": "Speichern",
+      "saving": "Speichert…",
+      "cancel": "Abbrechen",
+      "saved": "Streamplan aktualisiert.",
+      "confirmDeleteSlot": "Diesen wöchentlichen Stream löschen? Seine Absagen werden ebenfalls entfernt.",
+      "errors": {
+        "required": "Pflichtfeld.",
+        "tooLong": "Zu lang.",
+        "invalidTime": "Format HH:MM.",
+        "invalidDuration": "Zwischen 15 und 1440 Minuten.",
+        "invalidDate": "Wähle ein gültiges Datum.",
+        "forbidden": "Du musst als Staff angemeldet sein.",
+        "invalid": "Einige Felder sind ungültig.",
+        "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal.",
+        "weekdayMismatch": "Dieser Stream findet an diesem Datum nicht statt.",
+        "unknownSlot": "Diesen Stream gibt es nicht mehr.",
+        "pastDate": "Wähle heute oder ein späteres Datum."
+      }
     }
   },
   "Streams": {
@@ -203,11 +270,28 @@
     "views": "{count, plural, one {# Aufruf} other {# Aufrufe}}",
     "openOn": "Auf {platform} öffnen",
     "moreOn": "Mehr auf {platform}",
-    "empty": "Hier ist noch nichts."
+    "empty": "Hier ist noch nichts.",
+    "nextStream": "Nächster Stream: {when}"
   },
   "Nav": {
     "label": "Hauptmenü",
     "home": "Start",
-    "streams": "Streams"
+    "streams": "Streams",
+    "schedule": "Streamplan"
+  },
+  "Schedule": {
+    "metaTitle": "Streamplan",
+    "metaDescription": "Wann AboutSelphy live auf Twitch ist: der Streamplan der nächsten zwei Wochen – Sea of Thieves, Hunt: Showdown und mehr, mit Absagen und Extra-Streams.",
+    "title": "Streamplan",
+    "intro": "Die nächsten zwei Wochen auf Twitch. Alle Zeiten in Wiener Zeit ({zone}).",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "inProgress": "Läuft gerade",
+    "cancelled": "Abgesagt",
+    "extra": "Extra-Stream",
+    "defaultTitle": "Live auf Twitch",
+    "empty": "Für die nächsten zwei Wochen sind noch keine Streams geplant.",
+    "followHint": "Folge auf Twitch, um benachrichtigt zu werden, wenn ein Stream startet.",
+    "followOnTwitch": "Auf Twitch folgen"
   }
 }

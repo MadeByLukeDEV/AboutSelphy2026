@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { env, siteUrl } from "@/lib/env";
 import { localeAlternates, type Locale } from "@/modules/i18n";
 import { getLiveStatus, getStreamsMedia } from "@/modules/stats";
+import { getNextStream } from "@/modules/schedule";
 import { CHANNELS } from "@/modules/profile";
 import { LiveSection } from "@/modules/streams/components/live-section";
 import { MediaSection } from "@/modules/streams/components/media-section";
@@ -37,7 +38,11 @@ export default async function StreamsPage({
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
   const t = await getTranslations("Streams");
-  const [live, media] = await Promise.all([getLiveStatus(), getStreamsMedia()]);
+  const [live, media, nextStream] = await Promise.all([
+    getLiveStatus(),
+    getStreamsMedia(),
+    getNextStream(locale),
+  ]);
   const base = siteUrl();
   // Twitch embeds must name the embedding page's hostname.
   const parentHost = new URL(base).hostname;
@@ -70,7 +75,12 @@ export default async function StreamsPage({
           </p>
         </header>
 
-        <LiveSection live={live} parentHost={parentHost} channel={channel} />
+        <LiveSection
+          live={live}
+          parentHost={parentHost}
+          channel={channel}
+          nextStream={nextStream}
+        />
 
         <MediaSection
           id="vods-heading"

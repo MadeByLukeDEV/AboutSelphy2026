@@ -19,6 +19,7 @@ export async function SiteHeader() {
           items={[
             { href: "/", label: t("home") },
             { href: "/streams", label: t("streams") },
+            { href: "/schedule", label: t("schedule") },
           ]}
         />
       </div>

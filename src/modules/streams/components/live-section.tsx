@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
+import { Link } from "@/modules/i18n";
 import { buttonVariants } from "@/components/ui/button";
 import type { LiveStatus } from "@/modules/stats";
 import { PROFILE_IMAGES, CHANNELS } from "@/modules/profile";
@@ -11,12 +12,15 @@ export async function LiveSection({
   live,
   parentHost,
   channel,
+  nextStream,
 }: {
   live: LiveStatus;
+  nextStream: { start: Date; gameName: string | null } | null;
   parentHost: string;
   channel: string;
 }) {
   const t = await getTranslations("Streams");
+  const format = await getFormatter();
 
   if (!live.live) {
     return (
@@ -28,6 +32,22 @@ export async function LiveSection({
           <h2 id="live-heading" className="text-fluid-xl font-bold">
             {t("offlineHeading")}
           </h2>
+          {nextStream ? (
+            <p>
+              <Link href="/schedule" className="underline-offset-4 hover:underline">
+                {t("nextStream", {
+                  when:
+                    format.dateTime(nextStream.start, {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }) + (nextStream.gameName ? ` – ${nextStream.gameName}` : ""),
+                })}
+              </Link>
+            </p>
+          ) : null}
           <p className="text-muted-foreground">{t("offlineText")}</p>
         </div>
         <a href={CHANNELS.twitch} className={buttonVariants({ size: "lg" })}>

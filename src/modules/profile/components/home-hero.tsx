@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
+import { CalendarClock } from "lucide-react";
+import { Link } from "@/modules/i18n";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CHANNELS } from "../links";
@@ -13,13 +15,17 @@ export async function HomeHero({
   displayName,
   tagline,
   live,
+  nextStream,
 }: {
   displayName: string;
   tagline: string;
   /** Current Twitch broadcast, from the stats sync (at most ~5 min old). */
   live: { title: string; gameName: string } | null;
+  /** Next planned stream (schedule module); shown only while offline. */
+  nextStream: { start: Date; gameName: string | null; title: string } | null;
 }) {
   const t = await getTranslations("Home");
+  const format = await getFormatter();
   const { avatar, banner } = PROFILE_IMAGES;
 
   return (
@@ -69,6 +75,28 @@ export async function HomeHero({
             </span>
             <span className="sr-only">({t("liveLink")})</span>
           </a>
+        )}
+        {!live && nextStream && (
+          <Link
+            href="/schedule"
+            className="flex w-fit max-w-full items-center gap-3 rounded-xl border bg-background/60 px-3 py-2 text-sm hover:bg-muted"
+          >
+            <CalendarClock className="size-4 shrink-0 text-brand-text" aria-hidden />
+            <span className="font-semibold">{t("nextStream")}</span>
+            <span className="min-w-0 truncate text-muted-foreground">
+              <time dateTime={nextStream.start.toISOString()}>
+                {format.dateTime(nextStream.start, {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </time>
+              {nextStream.gameName && ` – ${nextStream.gameName}`}
+            </span>
+            <span className="sr-only">({t("nextStreamLink")})</span>
+          </Link>
         )}
         {tagline && (
           <p className="max-w-[48ch] text-fluid-lg text-muted-foreground">

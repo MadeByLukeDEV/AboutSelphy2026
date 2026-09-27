@@ -10,7 +10,7 @@ export function SiteNav({
   items,
 }: {
   label: string;
-  items: Array<{ href: "/" | "/streams"; label: string }>;
+  items: Array<{ href: "/" | "/streams" | "/schedule"; label: string }>;
 }) {
   const pathname = usePathname();
 
