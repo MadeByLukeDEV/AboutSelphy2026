@@ -8,6 +8,7 @@ import { AdminNav } from "@/components/admin/admin-nav";
 import { ThemeProvider, ThemeToggle } from "@/modules/theme";
 import { requireStaffPage, SignOutButton } from "@/modules/auth";
 import { siteUrl } from "@/lib/env";
+import { clientMessages } from "@/modules/i18n/client-messages";
 import { fontSans } from "../fonts";
 import "../globals.css";
 
@@ -40,7 +41,10 @@ export default async function AdminLayout({
       className={`${fontSans.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-muted/40">
-        <NextIntlClientProvider>
+        {/* Client components in /admin: nav, forms, sync button, theme. */}
+        <NextIntlClientProvider
+          messages={await clientMessages(["Admin", "ThemeToggle"])}
+        >
           <ThemeProvider nonce={nonce}>
             <div className="flex min-h-dvh flex-col md:flex-row">
               <aside className="flex flex-col gap-4 border-b bg-background px-gutter py-4 md:sticky md:top-0 md:h-dvh md:w-64 md:shrink-0 md:border-r md:border-b-0 md:px-4 md:py-6">

@@ -9,6 +9,7 @@ import { CustomCursor } from "@/components/effects/custom-cursor";
 import { ThemeProvider } from "@/modules/theme";
 import { SiteHeader } from "@/components/site/site-header";
 import { routing } from "@/modules/i18n";
+import { clientMessages } from "@/modules/i18n/client-messages";
 import { siteUrl } from "@/lib/env";
 import { fontSans } from "../fonts";
 import "../globals.css";
@@ -63,7 +64,10 @@ export default async function LocaleLayout({
       className={`${fontSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>
+        {/* Client components on public pages: LocaleSwitcher, ThemeToggle. */}
+        <NextIntlClientProvider
+          messages={await clientMessages(["LocaleSwitcher", "ThemeToggle"])}
+        >
           <ThemeProvider nonce={nonce}>
             <AnimatedBackground />
             <CustomCursor />
