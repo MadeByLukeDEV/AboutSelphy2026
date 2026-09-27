@@ -16,6 +16,21 @@ const schema = z.object({
     .regex(/^[a-z_][a-z0-9_]*$/, "lowercase identifier")
     .default("main"),
   NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3002"),
+
+  // Central staff auth (auth.aboutselphy.com). Same values as the auth
+  // service; see src/modules/auth/session.ts.
+  AUTH_URL: z.url().default("https://auth.aboutselphy.com"),
+  AUTH_DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  AUTH_DATABASE_SCHEMA: z
+    .string()
+    .regex(/^[a-z_][a-z0-9_]*$/, "lowercase identifier")
+    .default("auth"),
+  // Verifies the session cookie's HMAC; BetterAuth requires >= 32 chars.
+  BETTER_AUTH_SECRET: z.string().min(32),
+  AUTH_COOKIE_PREFIX: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]+$/)
+    .default("better-auth"),
 });
 
 const siteUrlSchema = schema.shape.NEXT_PUBLIC_SITE_URL;

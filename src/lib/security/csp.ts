@@ -12,7 +12,12 @@ export function createNonce(): string {
   return Buffer.from(crypto.randomUUID()).toString("base64");
 }
 
-export function buildCsp(nonce: string): string {
+export function buildCsp(
+  nonce: string,
+  // Origin of the central auth service: the sign-out button is a form POST
+  // to it (src/modules/auth/components/sign-out-button.tsx).
+  authOrigin: string,
+): string {
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
     // 'strict-dynamic': scripts loaded by a nonce'd script are trusted too
@@ -36,7 +41,7 @@ export function buildCsp(nonce: string): string {
     "frame-src": ["'none'"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
-    "form-action": ["'self'"],
+    "form-action": ["'self'", authOrigin],
     "frame-ancestors": ["'none'"],
     "manifest-src": ["'self'"],
     "worker-src": ["'self'", "blob:"],
