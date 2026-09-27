@@ -29,6 +29,7 @@ Modules are added here as they are built.
 |--------|------|------------|
 | `theme` | next-themes provider + light/dark/system toggle | `i18n` (labels) |
 | `profile` | `Profile` + `Game` tables, cached home content (`getHomeContent`), channel links, static profile images, home page components, admin profile editor (`saveProfileAction`) | `i18n`, `auth` (guards) |
-| `stats` | `StatSnapshot`, `StreamSession`, `SyncRun`; Twitch/YouTube clients; sync job (`runSync`, cron + "Sync now"); cached read side (`getLiveStatus`, `getStatsOverview`); admin status | `auth` (guards) |
+| `stats` | `StatSnapshot`, `StreamSession`, `SyncRun`, `MediaItem`; Twitch/YouTube clients; sync job (`runSync`, cron + "Sync now"); cached read side (`getLiveStatus`, `getStatsOverview`, `getStreamsMedia`); admin status | `auth` (guards) |
+| `streams` | Streams page UI: click-to-load `VideoFacade`, media cards/sections, live section, embed URL builders | `stats` (media, live), `profile` (channels, banner) |
 | `seo` | public page list for the sitemap, JSON-LD component + schema.org builders (Person, WebSite, ProfilePage) | `i18n` (alternates) |
 | `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |

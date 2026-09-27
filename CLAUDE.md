@@ -394,8 +394,12 @@ cron routes, env handling or headers.
     - `frame-src 'none'`, `frame-ancestors 'none'`, `object-src 'none'`,
       and `upgrade-insecure-requests` in production.
     - **Add origins only together with the feature that needs them**, with
-      a comment: Twitch/YouTube players → `frame-src`, their CDNs →
-      `img-src`, Turnstile → `script-src`/`frame-src`.
+      a comment. Currently `frame-src` = `player.twitch.tv`,
+      `clips.twitch.tv`, `www.youtube-nocookie.com` (Streams page players).
+      Video thumbnails do **not** need `img-src`: they load through our
+      image optimizer (`images.remotePatterns`: `static-cdn.jtvnw.net`,
+      `i.ytimg.com/vi/**`), so the browser only fetches same-origin
+      images. Turnstile → `script-src`/`frame-src` later.
   - **How the nonce flows**:
     - `src/proxy.ts` sets the `Content-Security-Policy` **request** header
       (Next reads the nonce from it and applies it to its own scripts), the
@@ -721,7 +725,33 @@ SEO and security are built into every phase, not saved for the end.
     - `/admin/stats`: live status, latest numbers with "as of", Twitch 30
       days, the last 10 runs, and the setup checklist.
     - Home hero: "Live now" badge (game + title, links to Twitch).
-- [ ] Phase 4: Streams (live status, latest videos, embed facades)
+- [x] Phase 4 (done 2026-09-28): Streams page `/[locale]/streams`
+  - `MediaItem` (kind twitch_vod/twitch_clip/youtube_video/youtube_short),
+    written by two hourly sync steps. Each kind is replaced in one
+    transaction, so expired VODs disappear, and a failed fetch keeps the
+    old list. The "mediaItems" snapshot is the freshness marker.
+  - What's fetched:
+    - Twitch: 12 latest VODs (processing ones skipped) and the top 12
+      clips of all time (Helix sorts clips by views).
+    - YouTube: the latest 30 uploads via the uploads playlist (`UU` +
+      channel id minus `UC`), public and embeddable only. Up to 180 s
+      counts as a Short.
+    - Shorts use the vertical `oar2.jpg` thumbnail (undocumented, so
+      HEAD-checked with a fallback to 16:9).
+    - The channel is mostly Shorts (29 of 30 uploads).
+  - UI (`modules/streams`):
+    - A click-to-load `VideoFacade`: an optimized thumbnail plus a play
+      button, and the iframe only after a click. Labels are passed as
+      props, so there's no client message namespace.
+    - Twitch embeds need `parent` = the site's hostname (from `siteUrl()`).
+    - Sections: live (channel player) or offline note, past broadcasts,
+      top clips, YouTube videos and Shorts (9:16 grid).
+    - `VideoObject` JSON-LD for YouTube items; header nav (`SiteNav`) with
+      active state; `/streams` in `PUBLIC_PAGES`.
+  - **YouTube API key restriction**: it must be "IP addresses" (the server
+    IP) or none. **"HTTP referrers" breaks every server call** (403
+    `API_KEY_HTTP_REFERRER_BLOCKED`: server requests have no referrer).
+- [ ] Games editing in `/admin` (add games, change status/blurbs)
 - [ ] Phase 5: Schedule (admin editable, public view, `Event` JSON-LD)
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
       PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`
