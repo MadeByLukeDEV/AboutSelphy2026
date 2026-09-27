@@ -9,7 +9,7 @@ import { AnimatedBackground } from "@/components/effects/animated-background";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { ThemeProvider } from "@/modules/theme";
 import { routing } from "@/modules/i18n";
-import { env } from "@/lib/env";
+import { siteUrl } from "@/lib/env";
 import "../globals.css";
 
 // Named "--font-sans" directly so it plugs into globals.css's
@@ -35,7 +35,7 @@ export async function generateMetadata({
   // into absolute ones. These are site-wide defaults; pages set their own
   // title and alternates (see localeAlternates).
   return {
-    metadataBase: new URL(env().NEXT_PUBLIC_SITE_URL),
+    metadataBase: new URL(siteUrl()),
     title: { default: t("title"), template: "%s — AboutSelphy" },
     description: t("description"),
     openGraph: {

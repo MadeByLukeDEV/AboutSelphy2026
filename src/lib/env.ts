@@ -18,6 +18,16 @@ const schema = z.object({
   NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3002"),
 });
 
+const siteUrlSchema = schema.shape.NEXT_PUBLIC_SITE_URL;
+
+// The public site URL alone (no trailing slash), for code that also runs at
+// build time -- robots.txt, sitemap.xml, metadata -- where the rest of the
+// server env (DATABASE_URL, ...) doesn't exist. NEXT_PUBLIC_SITE_URL is a
+// Docker build arg for exactly this reason.
+export function siteUrl(): string {
+  return siteUrlSchema.parse(process.env.NEXT_PUBLIC_SITE_URL).replace(/\/$/, "");
+}
+
 export type Env = z.infer<typeof schema>;
 
 let cached: Env | undefined;

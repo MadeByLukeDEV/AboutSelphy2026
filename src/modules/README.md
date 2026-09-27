@@ -28,4 +28,5 @@ Modules are added here as they are built.
 | Module | Owns | Depends on |
 |--------|------|------------|
 | `theme` | next-themes provider + light/dark/system toggle | `i18n` (labels) |
+| `seo` | public page list for the sitemap (JSON-LD helpers come in Phase 2) | `i18n` (alternates) |
 | `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |
