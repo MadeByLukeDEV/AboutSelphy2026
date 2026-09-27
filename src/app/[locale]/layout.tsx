@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AnimatedBackground } from "@/components/effects/animated-background";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { ThemeProvider } from "@/modules/theme";
+import { SiteHeader } from "@/components/site/site-header";
 import { routing } from "@/modules/i18n";
 import { siteUrl } from "@/lib/env";
 import { fontSans } from "../fonts";
@@ -32,6 +33,8 @@ export async function generateMetadata({
     title: { default: t("title"), template: "%s — AboutSelphy" },
     description: t("description"),
     openGraph: {
+      title: t("title"),
+      description: t("description"),
       siteName: "AboutSelphy",
       type: "website",
       locale: locale === "de" ? "de_DE" : "en_US",
@@ -64,6 +67,7 @@ export default async function LocaleLayout({
           <ThemeProvider nonce={nonce}>
             <AnimatedBackground />
             <CustomCursor />
+            <SiteHeader />
             {children}
             <Toaster />
           </ThemeProvider>

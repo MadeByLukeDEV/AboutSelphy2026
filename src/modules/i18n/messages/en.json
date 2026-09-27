@@ -4,7 +4,21 @@
     "description": "AboutSelphy is a streamer and content creator. Find out who I am, what I stream, when I'm live, and how brands can work with me."
   },
   "Home": {
-    "tagline": "Something new is being built here."
+    "avatarAlt": "{name}'s avatar",
+    "aboutHeading": "About me",
+    "gamesHeading": "What I play",
+    "gameStatus": {
+      "main": "Main game",
+      "regular": "Also playing",
+      "new": "New",
+      "former": "Used to play"
+    },
+    "links": {
+      "label": "Channels",
+      "twitch": "Watch on Twitch",
+      "youtube": "YouTube",
+      "linkTree": "All my links"
+    }
   },
   "NotFound": {
     "title": "Page not found",
