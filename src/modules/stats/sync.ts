@@ -1,20 +1,21 @@
 import "server-only";
 import { revalidateTag } from "next/cache";
-import { PlatformError } from "./platforms/errors";
+import { PlatformError } from "@/lib/platforms/errors";
 import {
   getFollowerTotal,
   getLiveStream,
   getRecentVods,
   getTopClips,
   isTwitchConfigured,
-} from "./platforms/twitch";
+} from "@/lib/platforms/twitch";
 import {
   getChannelStats,
   getLatestUploads,
   getRecentAverageViews,
   isYoutubeConfigured,
-} from "./platforms/youtube";
+} from "@/lib/platforms/youtube";
 import { env } from "@/lib/env";
+import { fillMissingGameArt } from "@/modules/profile";
 import * as repo from "./repository";
 
 // The sync job behind POST /api/cron/stats (Dokploy schedule, every 5
@@ -157,6 +158,7 @@ export async function runSync(trigger: SyncTrigger): Promise<SyncResult> {
     ok = (await step("twitch live", () => sampleTwitchLive(now), steps)) && ok;
     ok = (await step("twitch snapshot", snapshotTwitch, steps)) && ok;
     ok = (await step("twitch media", syncTwitchMedia, steps)) && ok;
+    ok = (await step("game covers", fillMissingGameArt, steps)) && ok;
   } else {
     steps.push("twitch: not configured");
   }

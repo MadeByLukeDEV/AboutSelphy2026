@@ -202,3 +202,24 @@ export async function getTopClips(count: number): Promise<TwitchMedia[]> {
     views: c.view_count,
   }));
 }
+
+export type TwitchGame = { id: string; name: string; boxArtUrl: string };
+
+/**
+ * A Twitch category by its exact name (case-insensitive on Twitch's side),
+ * with its box art sized 285x380 (Twitch's standard 3:4 cover). null when
+ * no category has that name.
+ */
+export async function findTwitchGame(name: string): Promise<TwitchGame | null> {
+  const body = await helix<{
+    data: Array<{ id: string; name: string; box_art_url: string }>;
+  }>(`games?name=${encodeURIComponent(name)}`);
+  const game = body.data[0];
+  // Only Twitch's own CDN (also the only host images.remotePatterns allows).
+  if (!game?.box_art_url?.startsWith("https://static-cdn.jtvnw.net/")) return null;
+  return {
+    id: game.id,
+    name: game.name,
+    boxArtUrl: game.box_art_url.replace("{width}", "285").replace("{height}", "380"),
+  };
+}

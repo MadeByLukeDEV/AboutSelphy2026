@@ -1,7 +1,7 @@
 import "server-only";
 import { env } from "@/lib/env";
-import { isTwitchConfigured } from "./platforms/twitch";
-import { isYoutubeConfigured } from "./platforms/youtube";
+import { isTwitchConfigured } from "@/lib/platforms/twitch";
+import { isYoutubeConfigured } from "@/lib/platforms/youtube";
 import { recentRuns } from "./repository";
 
 // Uncached: the status view must show the current state of the sync.
