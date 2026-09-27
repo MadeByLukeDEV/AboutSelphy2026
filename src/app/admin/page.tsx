@@ -19,7 +19,7 @@ export default async function AdminOverviewPage() {
   );
 
   return (
-    <div className="flex max-w-3xl flex-col gap-10">
+    <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-2">
         <h1 className="text-fluid-3xl font-extrabold tracking-tight">
           {t("overview.greeting", { name: session.user.name })}

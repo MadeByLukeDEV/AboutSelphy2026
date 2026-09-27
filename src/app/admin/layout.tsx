@@ -42,7 +42,7 @@ export default async function AdminLayout({
       <body className="min-h-full bg-muted/40">
         <NextIntlClientProvider>
           <ThemeProvider nonce={nonce}>
-            <div className="mx-auto flex min-h-dvh max-w-7xl flex-col md:flex-row">
+            <div className="flex min-h-dvh flex-col md:flex-row">
               <aside className="flex flex-col gap-4 border-b bg-background px-gutter py-4 md:sticky md:top-0 md:h-dvh md:w-64 md:shrink-0 md:border-r md:border-b-0 md:px-4 md:py-6">
                 <div className="flex items-center justify-between gap-2 md:px-3">
                   <p className="font-bold tracking-tight">{t("brand")}</p>
