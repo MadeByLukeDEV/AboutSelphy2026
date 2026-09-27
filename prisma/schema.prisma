@@ -47,6 +47,13 @@ model Game {
   blurbEn   String     @db.VarChar(400)
   /// Short labels (mostly proper nouns like "Hourglass PvP"), not translated.
   tags      String[]
+  /// Twitch category name to look up when it differs from `name`
+  /// (e.g. "Hunt: Showdown 1896"). Empty = use `name`.
+  twitchCategory String  @default("") @db.VarChar(80)
+  /// Resolved Twitch category id and 285x380 box art (static-cdn.jtvnw.net),
+  /// filled on save and by the sync if missing. null = no cover found.
+  twitchGameId   String? @db.VarChar(20)
+  boxArtUrl      String? @db.VarChar(300)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 

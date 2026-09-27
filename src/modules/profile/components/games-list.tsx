@@ -1,9 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { cn } from "@/lib/utils";
 import type { HomeContent } from "../service";
+import { GameCover } from "./game-cover";
 
-// One row per game, not a card grid. The main game gets the only brand
-// accent (a left rule); former games are muted.
+// One row per game with its Twitch cover, not a card grid. The main game
+// gets the only brand accent (a left rule) and a larger cover; former games
+// are muted.
 export async function GamesList({ games }: { games: HomeContent["games"] }) {
   const t = await getTranslations("Home");
   if (games.length === 0) return null;
@@ -18,37 +20,46 @@ export async function GamesList({ games }: { games: HomeContent["games"] }) {
           <li
             key={game.slug}
             className={cn(
-              "flex flex-col gap-2 py-5",
+              "flex gap-4 py-5",
               game.status === "main" && "border-l-4 border-l-primary pl-4",
               game.status === "former" && "text-muted-foreground",
             )}
           >
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h3
-                className={cn(
-                  "font-bold",
-                  game.status === "main" ? "text-fluid-xl" : "text-fluid-lg",
-                )}
-              >
-                {game.name}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {t(`gameStatus.${game.status}`)}
-              </p>
+            <GameCover
+              name={game.name}
+              boxArtUrl={game.boxArtUrl}
+              muted={game.status === "former"}
+              className={game.status === "main" ? "w-18" : "w-14"}
+              sizes={game.status === "main" ? "4.5rem" : "3.5rem"}
+            />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h3
+                  className={cn(
+                    "font-bold",
+                    game.status === "main" ? "text-fluid-xl" : "text-fluid-lg",
+                  )}
+                >
+                  {game.name}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {t(`gameStatus.${game.status}`)}
+                </p>
+              </div>
+              <p className="max-w-prose">{game.blurb}</p>
+              {game.tags.length > 0 && (
+                <ul className="flex flex-wrap gap-1.5" aria-label={game.name}>
+                  {game.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-md border px-2 py-0.5 text-xs font-medium"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <p className="max-w-prose">{game.blurb}</p>
-            {game.tags.length > 0 && (
-              <ul className="flex flex-wrap gap-1.5" aria-label={game.name}>
-                {game.tags.map((tag) => (
-                  <li
-                    key={tag}
-                    className="rounded-md border px-2 py-0.5 text-xs font-medium"
-                  >
-                    {tag}
-                  </li>
-                ))}
-              </ul>
-            )}
           </li>
         ))}
       </ul>

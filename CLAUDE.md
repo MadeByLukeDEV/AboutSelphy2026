@@ -778,6 +778,21 @@ SEO and security are built into every phase, not saved for the end.
   - Actions check **auth before validation**, return the fresh list for
     client state, and clear the `profile` cache tag.
   - Status uses `FormSelect` (see Frontend conventions).
+  - **Covers** come from Twitch box art, not uploads:
+    - On save, `findTwitchGame()` (`src/lib/platforms/twitch.ts`) looks the
+      game up by `twitchCategory` or else `name`, storing `twitchGameId` and a
+      285x380 `boxArtUrl` (only from `static-cdn.jtvnw.net`). Twitch's own
+      names can differ, e.g. "Hunt: Showdown 1896" and "WARDOGS"; exact
+      name lookup still matched all four games.
+    - A failed lookup never blocks the save. The sync's "game covers" step
+      fills missing ones hourly.
+    - `GameCover` shows the art at 3:4, or initials without it.
+  - Platform clients live in **`src/lib/platforms/`** (moved from
+    `modules/stats`), so `profile` and `stats` can both use them without a
+    module cycle. `stats` depends on `profile` only for
+    `fillMissingGameArt()`.
+  - Slugs strip accents with `p{Diacritic}/gu`. The file tools turn
+    `̀` escapes into literal characters, so avoid those escapes.
 - [x] Phase 5 (done 2026-09-28): schedule (`modules/schedule`), a weekly
       plan plus exceptions (the user's choice)
   - Tables:

@@ -37,6 +37,7 @@ export async function createGame(data: {
   blurbEn: string;
   blurbDe: string;
   tags: string[];
+  twitchCategory: string;
 }) {
   const last = await prisma.game.aggregate({ _max: { sortOrder: true } });
   return prisma.game.create({
@@ -46,9 +47,31 @@ export async function createGame(data: {
 
 export function updateGame(
   id: string,
-  data: { name: string; status: GameStatus; blurbEn: string; blurbDe: string; tags: string[] },
+  data: {
+    name: string;
+    status: GameStatus;
+    blurbEn: string;
+    blurbDe: string;
+    tags: string[];
+    twitchCategory: string;
+  },
 ) {
   return prisma.game.update({ where: { id }, data });
+}
+
+export function findGame(id: string) {
+  return prisma.game.findUnique({ where: { id } });
+}
+
+export function setGameArt(
+  id: string,
+  art: { twitchGameId: string | null; boxArtUrl: string | null },
+) {
+  return prisma.game.update({ where: { id }, data: art });
+}
+
+export function findGamesWithoutArt(take: number) {
+  return prisma.game.findMany({ where: { boxArtUrl: null }, take });
 }
 
 export function deleteGame(id: string) {

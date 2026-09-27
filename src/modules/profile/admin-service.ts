@@ -1,12 +1,16 @@
 import "server-only";
 import { revalidateTag } from "next/cache";
+import { findTwitchGame, isTwitchConfigured } from "@/lib/platforms/twitch";
 import {
   createGame,
   deleteGame,
+  findGame,
   findGameBySlug,
   findGames,
+  findGamesWithoutArt,
   findProfile,
   moveGame,
+  setGameArt,
   updateGame,
   upsertProfile,
 } from "./repository";
@@ -43,7 +47,11 @@ export async function saveProfile(input: ProfileInput): Promise<ProfileInput> {
 
 // ─── games ───────────────────────────────────────────────────────────────
 
-export type AdminGame = GameInput & { id: string; slug: string };
+export type AdminGame = GameInput & {
+  id: string;
+  slug: string;
+  boxArtUrl: string | null;
+};
 
 function toAdminGame(game: {
   id: string;
@@ -53,9 +61,11 @@ function toAdminGame(game: {
   blurbEn: string;
   blurbDe: string;
   tags: string[];
+  twitchCategory: string;
+  boxArtUrl: string | null;
 }): AdminGame {
-  const { id, slug, name, status, blurbEn, blurbDe, tags } = game;
-  return { id, slug, name, status, blurbEn, blurbDe, tags };
+  const { id, slug, name, status, blurbEn, blurbDe, tags, twitchCategory, boxArtUrl } = game;
+  return { id, slug, name, status, blurbEn, blurbDe, tags, twitchCategory, boxArtUrl };
 }
 
 export async function getGamesForEdit(): Promise<AdminGame[]> {
@@ -67,7 +77,7 @@ async function uniqueSlug(name: string) {
   const base =
     name
       .normalize("NFKD")
-      .replace(/[̀-ͯ]/g, "")
+      .replace(/\p{Diacritic}/gu, "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
@@ -77,26 +87,68 @@ async function uniqueSlug(name: string) {
   return slug;
 }
 
-export async function addGame(input: GameInput): Promise<AdminGame[]> {
-  await createGame({ ...input, slug: await uniqueSlug(input.name) });
+/**
+ * Looks up the game's Twitch cover (by twitchCategory, else name) and stores
+ * it. Never fails the save: without Twitch credentials, or when Twitch is
+ * down, the game keeps what it had; the hourly sync fills gaps later.
+ */
+async function resolveArt(game: { id: string; name: string; twitchCategory: string }) {
+  if (!isTwitchConfigured()) return;
+  try {
+    const found = await findTwitchGame(game.twitchCategory || game.name);
+    await setGameArt(game.id, {
+      twitchGameId: found?.id ?? null,
+      boxArtUrl: found?.boxArtUrl ?? null,
+    });
+  } catch (error) {
+    console.error(`[profile] cover lookup for "${game.name}" failed`, error);
+  }
+}
+
+async function changedGames() {
   revalidateTag(PROFILE_CACHE_TAG, { expire: 0 });
   return getGamesForEdit();
 }
 
+export async function addGame(input: GameInput): Promise<AdminGame[]> {
+  const game = await createGame({ ...input, slug: await uniqueSlug(input.name) });
+  await resolveArt(game);
+  return changedGames();
+}
+
 export async function editGame(id: string, input: GameInput): Promise<AdminGame[]> {
-  await updateGame(id, input);
-  revalidateTag(PROFILE_CACHE_TAG, { expire: 0 });
-  return getGamesForEdit();
+  const before = await findGame(id);
+  const game = await updateGame(id, input);
+  // Only look the cover up again when it could have changed.
+  if (
+    !before?.boxArtUrl ||
+    before.name !== game.name ||
+    before.twitchCategory !== game.twitchCategory
+  ) {
+    await resolveArt(game);
+  }
+  return changedGames();
 }
 
 export async function removeGame(id: string): Promise<AdminGame[]> {
   await deleteGame(id);
-  revalidateTag(PROFILE_CACHE_TAG, { expire: 0 });
-  return getGamesForEdit();
+  return changedGames();
 }
 
 export async function reorderGame(id: string, direction: "up" | "down"): Promise<AdminGame[]> {
   await moveGame(id, direction);
-  revalidateTag(PROFILE_CACHE_TAG, { expire: 0 });
-  return getGamesForEdit();
+  return changedGames();
+}
+
+/**
+ * For the stats sync (hourly): look up covers for games that have none yet,
+ * e.g. saved while Twitch was unreachable. Returns a short summary.
+ */
+export async function fillMissingGameArt(): Promise<string> {
+  const games = await findGamesWithoutArt(10);
+  if (games.length === 0) return "game covers: complete";
+  for (const game of games) await resolveArt(game);
+  const stillMissing = (await findGamesWithoutArt(10)).length;
+  if (stillMissing < games.length) revalidateTag(PROFILE_CACHE_TAG, { expire: 0 });
+  return `game covers: ${games.length - stillMissing} found, ${stillMissing} without a Twitch match`;
 }

@@ -28,7 +28,7 @@ export type ProfileInput = z.infer<typeof profileInputSchema>;
 
 export const GAME_STATUSES = ["main", "regular", "new", "former"] as const;
 
-export const GAME_LIMITS = { name: 80, blurb: 400, tag: 30, tags: 6 } as const;
+export const GAME_LIMITS = { name: 80, blurb: 400, tag: 30, tags: 6, twitchCategory: 80 } as const;
 
 export const gameInputSchema = z.object({
   name: text(GAME_LIMITS.name),
@@ -38,6 +38,11 @@ export const gameInputSchema = z.object({
   tags: z
     .array(z.string().trim().min(1).max(GAME_LIMITS.tag, { message: "tagTooLong" }))
     .max(GAME_LIMITS.tags, { message: "tooManyTags" }),
+  /** Twitch category name for the cover lookup, when it differs from name. */
+  twitchCategory: z
+    .string()
+    .trim()
+    .max(GAME_LIMITS.twitchCategory, { message: "tooLong" }),
 });
 
 export type GameInput = z.infer<typeof gameInputSchema>;

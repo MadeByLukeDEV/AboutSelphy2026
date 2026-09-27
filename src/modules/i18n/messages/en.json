@@ -182,7 +182,10 @@
         "forbidden": "Only admins can change the games.",
         "invalid": "Some fields aren't valid.",
         "failed": "Couldn't save. Try again in a moment."
-      }
+      },
+      "twitchCategory": "Twitch category",
+      "twitchCategoryHint": "The cover image comes from Twitch. Leave empty if the game has the same name on Twitch; otherwise enter its exact Twitch name (e.g. “Hunt: Showdown 1896”).",
+      "noCover": "No cover found on Twitch – check the Twitch category name."
     },
     "schedule": {
       "intro": "The weekly plan repeats automatically. Use changes to cancel a single stream or add an extra one. Times are Vienna time.",

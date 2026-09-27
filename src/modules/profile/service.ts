@@ -33,6 +33,7 @@ export type HomeContent = {
     status: GameStatus;
     blurb: string;
     tags: string[];
+    boxArtUrl: string | null;
   }>;
   updatedAt: Date | null;
 };
@@ -63,6 +64,7 @@ export async function getHomeContent(locale: Locale): Promise<HomeContent> {
       status: game.status,
       blurb: de ? game.blurbDe : game.blurbEn,
       tags: game.tags,
+      boxArtUrl: game.boxArtUrl,
     })),
     // unstable_cache serializes to JSON, so dates come back as strings.
     updatedAt: profile ? new Date(profile.updatedAt) : null,

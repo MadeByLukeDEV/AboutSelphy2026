@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSelect } from "@/components/form/form-select";
+import { GameCover } from "./game-cover";
 import { cn } from "@/lib/utils";
 import type { AdminGame } from "../admin-service";
 import {
@@ -55,6 +56,7 @@ const EMPTY: FormValues = {
   blurbEn: "",
   blurbDe: "",
   tags: "",
+  twitchCategory: "",
 };
 
 // Lists the games with reorder/edit/delete and an add button. State is seeded
@@ -128,6 +130,13 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
                   <ArrowDown aria-hidden />
                 </Button>
               </div>
+              <GameCover
+                name={game.name}
+                boxArtUrl={game.boxArtUrl}
+                muted={game.status === "former"}
+                className="w-12"
+                sizes="3rem"
+              />
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <div className="flex flex-wrap items-baseline gap-x-3">
                   <p className={cn("font-semibold", game.status === "former" && "text-muted-foreground")}>
@@ -136,6 +145,9 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
                   <p className="text-sm text-muted-foreground">{t(`statuses.${game.status}`)}</p>
                 </div>
                 <p className="line-clamp-2 text-sm text-muted-foreground">{game.blurbEn}</p>
+                {!game.boxArtUrl && (
+                  <p className="text-xs text-muted-foreground">{t("noCover")}</p>
+                )}
                 {game.tags.length > 0 && (
                   <p className="flex flex-wrap gap-1.5">
                     {game.tags.map((tag) => (
@@ -208,9 +220,19 @@ function GameForm({
   const [isPending, startTransition] = useTransition();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: game ? { ...game, tags: game.tags.join(", ") } : EMPTY,
+    defaultValues: game
+      ? {
+          name: game.name,
+          status: game.status,
+          blurbEn: game.blurbEn,
+          blurbDe: game.blurbDe,
+          twitchCategory: game.twitchCategory,
+          tags: game.tags.join(", "),
+        }
+      : EMPTY,
   });
   const { errors } = form.formState;
+  const nameValue = useWatch({ control: form.control, name: "name" });
   const [tagError, setTagError] = useState<string | null>(null);
 
   const messageFor = (code: string | undefined) =>
@@ -280,6 +302,18 @@ function GameForm({
           {blurb("blurbEn", t("english"), "en")}
           {blurb("blurbDe", t("german"), "de")}
         </div>
+
+        <Field data-invalid={!!errors.twitchCategory}>
+          <FieldLabel htmlFor="twitchCategory">{t("twitchCategory")}</FieldLabel>
+          <Input
+            id="twitchCategory"
+            placeholder={nameValue || undefined}
+            aria-invalid={!!errors.twitchCategory}
+            {...form.register("twitchCategory")}
+          />
+          <FieldDescription>{t("twitchCategoryHint")}</FieldDescription>
+          <FieldError errors={messageFor(errors.twitchCategory?.message)} />
+        </Field>
 
         <Field data-invalid={!!tagError}>
           <FieldLabel htmlFor="tags">{t("tags")}</FieldLabel>
