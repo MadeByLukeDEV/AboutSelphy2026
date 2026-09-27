@@ -667,7 +667,17 @@ SEO and security are built into every phase, not saved for the end.
         `SiteHeader`; `WebSite` + `Person` (`sameAs` = `CHANNELS`) +
         `ProfilePage` JSON-LD via the `JsonLd` component (nonce, `<`
         escaped). Production server response ~15 ms.
-  - [ ] Admin "About" editor (texts) + avatar/banner upload
+  - [x] Avatar + banner (2026-09-27): committed static files in
+        `public/profile/` (avatar 800x800, banner 1640x664 PNG), not
+        uploads -- the user chose to drop them into the repo. Replace a file
+        (same name) and deploy to change it. Paths in
+        `modules/profile/images.ts`. Served via next/image: AVIF/WebP,
+        banner 857 KB -> 6 KB (phone) / 22 KB (desktop); banner `preload`
+        (Next 16 replaced `priority`); `images.localPatterns` limits the
+        optimizer to `/profile/**`. Channel-page hero: banner with the
+        avatar overlapping its edge (`relative z-10`, or the banner paints
+        over it). Avatar is the Person JSON-LD `image`.
+  - [ ] Admin "About" editor (tagline + bio, de/en)
   - [ ] Games editing in admin (or with Phase 4)
 - [ ] Phase 3: `stats` module: YouTube + Twitch sync, `StatSnapshot`, cron
       route, EventSub live status and viewer sampling

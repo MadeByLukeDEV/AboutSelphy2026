@@ -17,6 +17,8 @@ export function personSchema(options: {
   description: string;
   sameAs: string[];
   knowsAbout: string[];
+  /** Absolute URL of the profile picture. */
+  image?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -27,6 +29,7 @@ export function personSchema(options: {
     description: options.description,
     sameAs: options.sameAs,
     knowsAbout: options.knowsAbout,
+    ...(options.image ? { image: options.image } : {}),
   };
 }
 

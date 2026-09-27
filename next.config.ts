@@ -43,6 +43,14 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // No "X-Powered-By: Next.js" fingerprint.
   poweredByHeader: false,
+  images: {
+    // AVIF first, WebP fallback: the source PNGs in public/profile are
+    // ~0.6-0.9 MB each, the served files a fraction of that.
+    formats: ["image/avif", "image/webp"],
+    // Only our own image paths may go through the optimizer -- anything
+    // else is refused instead of being resized on demand.
+    localPatterns: [{ pathname: "/profile/**", search: "" }],
+  },
   experimental: {
     // app/global-not-found.tsx: there is no single root layout (the
     // [locale] segment is the root layout for public pages).

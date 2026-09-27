@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { siteUrl } from "@/lib/env";
 import { localeAlternates, type Locale } from "@/modules/i18n";
-import { getHomeContent, CHANNELS } from "@/modules/profile";
+import { getHomeContent, CHANNELS, PROFILE_IMAGES } from "@/modules/profile";
 import { HomeHero } from "@/modules/profile/components/home-hero";
 import { AboutSection } from "@/modules/profile/components/about-section";
 import { GamesList } from "@/modules/profile/components/games-list";
@@ -39,6 +39,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             name: content.displayName,
             description: content.tagline,
             sameAs: Object.values(CHANNELS),
+            image: `${base}${PROFILE_IMAGES.avatar.src}`,
             knowsAbout: content.games
               .filter((game) => game.status !== "former")
               .map((game) => game.name),
