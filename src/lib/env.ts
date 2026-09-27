@@ -31,6 +31,26 @@ const schema = z.object({
     .string()
     .regex(/^[A-Za-z0-9_-]+$/)
     .default("better-auth"),
+
+  // Platform APIs for the stats sync (src/modules/stats). All optional:
+  // without them the sync reports "not configured" and the site still works.
+  TWITCH_CLIENT_ID: z.string().min(1).optional(),
+  TWITCH_CLIENT_SECRET: z.string().min(1).optional(),
+  TWITCH_BROADCASTER_LOGIN: z
+    .string()
+    .regex(/^[a-zA-Z0-9_]{3,25}$/)
+    .default("aboutselphy"),
+  YOUTUBE_API_KEY: z.string().min(1).optional(),
+  YOUTUBE_CHANNEL_ID: z
+    .string()
+    .regex(/^UC[A-Za-z0-9_-]{22}$/)
+    .default("UCROyDUHpZmACVVPGyQjgyjw"),
+  // Bearer token for POST /api/cron/stats. Plain hex, >= 32 chars. Without it
+  // the cron route refuses every request (fails closed).
+  CRON_SECRET: z
+    .string()
+    .regex(/^[a-f0-9]{32,}$/, "plain lowercase hex, at least 32 chars")
+    .optional(),
 });
 
 const siteUrlSchema = schema.shape.NEXT_PUBLIC_SITE_URL;

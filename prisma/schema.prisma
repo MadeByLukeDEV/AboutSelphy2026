@@ -52,3 +52,57 @@ model Game {
 
   @@index([status, sortOrder])
 }
+
+// ─── stats ───────────────────────────────────────────────────────────────
+// Numbers for the media kit and the live badge, written only by the sync
+// job (/api/cron/stats, every 5 minutes). Never entered by hand.
+
+enum StatPlatform {
+  twitch
+  youtube
+}
+
+/// A point-in-time value of one metric (e.g. twitch/followers). The media kit
+/// shows the latest per metric with its capturedAt as the "as of" date;
+/// older rows give growth over time.
+model StatSnapshot {
+  id         BigInt       @id @default(autoincrement())
+  platform   StatPlatform
+  metric     String       @db.VarChar(40)
+  value      Float
+  capturedAt DateTime     @default(now())
+
+  @@index([platform, metric, capturedAt])
+}
+
+/// One Twitch broadcast, built from viewer_count samples taken while live
+/// (Twitch has no API for average/peak viewers). Running aggregates instead
+/// of raw samples: average = viewerSum / sampleCount.
+model StreamSession {
+  /// Twitch's stream id.
+  id          String   @id @db.VarChar(40)
+  startedAt   DateTime
+  /// Time of the latest sample. A session seen in the last ~11 minutes is
+  /// live; otherwise this is (roughly) when it ended.
+  lastSeenAt  DateTime
+  title       String   @db.VarChar(200)
+  gameName    String   @db.VarChar(120)
+  peakViewers Int
+  viewerSum   BigInt
+  sampleCount Int
+
+  @@index([lastSeenAt])
+}
+
+/// One run of the sync job, for the /admin/stats status view.
+model SyncRun {
+  id         BigInt    @id @default(autoincrement())
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  ok         Boolean   @default(false)
+  /// Short human-readable summary or error (no secrets, no stack traces).
+  summary    String    @db.VarChar(1000)
+  trigger    String    @db.VarChar(20)
+
+  @@index([startedAt])
+}
