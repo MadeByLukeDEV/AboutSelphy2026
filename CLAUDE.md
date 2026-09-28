@@ -900,8 +900,31 @@ SEO and security are built into every phase, not saved for the end.
       its dark lightness band). Date labels are HTML, not SVG text, which
       would shrink with the chart on phones.
     - Current games (main/regular/occasional/new, home-page switch on).
-    - Still `noindex`, not in nav/sitemap until partners, packages, PDF
-      and the OG card exist (steps 2 and 3).
+    - Still `noindex`, not in nav/sitemap until the PDF and the OG card
+      exist (step 3).
+  - [x] Step 2 (2026-09-28): partners and packages.
+    - Tables `Partner` (name, https link, optional referral code, en/de
+      description, logo asset, `visible`, order) and `Package` (en/de title
+      and description, `priceFrom` in whole euros or null = "price on
+      request", `visible`, order). Hand-added CHECKs: partner url starts
+      with `https://`, price 0–1,000,000.
+    - `/admin/partners` ("Partners & packages", admin only): list with
+      reorder, "Show in media kit" switch, add/edit dialog, delete, logo
+      upload. Hidden entries can be prepared (the user is still testing
+      Dubby Energy). Real partners so far: Exitlag and Dixper (referral
+      codes), entered by the user.
+    - Partner url: trimmed, must start with lowercase `https://` (the DB
+      CHECK is case-sensitive), `z.url` https, no username/password.
+      Codes `[\w-]`.
+    - Logos: `LOGO_PRESET` (`fit: "inside"` 400x200, never cropped,
+      transparency kept); `storeImage` now stores the real output size.
+      A logo that can't be attached is deleted again.
+    - Public: "Partners" cards (logo, description, code with a copy
+      button, link with `rel="sponsored noopener noreferrer"`, new tab)
+      and "Packages" (price "from €150" / "Price on request", link to the
+      form). Each section is left out while it has nothing visible.
+    - Security review: nothing significant; its two hardening notes
+      (credentials in URLs, orphaned logo) are applied.
   - **Shared DB + migrations**: `migrate deploy` from a dev machine changes
     the production database before production runs the new code. Adding
     enum values broke reads in any process with an older Prisma client

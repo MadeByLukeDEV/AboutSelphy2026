@@ -10,7 +10,15 @@ import { localeAlternates, type Locale } from "@/modules/i18n";
 import { clientMessages } from "@/modules/i18n/client-messages";
 import { isTurnstileConfigured, TURNSTILE_ACTION } from "@/modules/inquiries";
 import { InquiryForm } from "@/modules/inquiries/components/inquiry-form";
-import { AudienceSummary, getMediaKit, GrowthSection, MediaKitGames, PlatformStats } from "@/modules/mediakit";
+import {
+  AudienceSummary,
+  getMediaKit,
+  GrowthSection,
+  MediaKitGames,
+  PackagesSection,
+  PartnersSection,
+  PlatformStats,
+} from "@/modules/mediakit";
 import { CHANNELS, PROFILE_IMAGES } from "@/modules/profile";
 
 export async function generateMetadata({
@@ -83,6 +91,10 @@ export default async function MediaKitPage({
       <GrowthSection growth={kit.growth} />
 
       <MediaKitGames games={kit.games} />
+
+      <PartnersSection partners={kit.partners} />
+
+      <PackagesSection packages={kit.packages} />
 
       <section id="inquiry" aria-labelledby="inquiry-heading" className="flex flex-col gap-6 scroll-mt-8">
         <div className="flex flex-col gap-2">
