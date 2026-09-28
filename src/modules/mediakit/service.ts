@@ -40,6 +40,8 @@ export type PublicPartner = {
   code: string;
   description: string;
   logoUrl: string | null;
+  /** For the PDF, which embeds the image bytes. */
+  logoId: string | null;
 };
 
 export type PublicPackage = {
@@ -80,6 +82,7 @@ export async function getMediaKit(locale: Locale): Promise<MediaKit> {
       code: p.code,
       description: de ? p.descriptionDe : p.descriptionEn,
       logoUrl: p.logoId ? assetUrl(p.logoId) : null,
+      logoId: p.logoId,
     })),
     packages: offers.packages.map((p) => ({
       id: p.id,
