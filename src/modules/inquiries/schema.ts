@@ -4,10 +4,11 @@ import { z } from "zod";
 // same schema runs in the browser (instant feedback) and in the action.
 
 export const INQUIRY_BUDGETS = [
-  "under_500",
-  "from_500_to_2000",
-  "from_2000_to_5000",
-  "over_5000",
+  "under_100",
+  "from_100_to_250",
+  "from_250_to_500",
+  "over_500",
+  "product_only",
   "unsure",
 ] as const;
 

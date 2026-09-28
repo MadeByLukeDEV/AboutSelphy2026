@@ -840,10 +840,15 @@ SEO and security are built into every phase, not saved for the end.
       midnight.
     - `@db.Date` values are Vienna calendar dates stored as midnight UTC.
   - `occurrences.ts` (`computeOccurrences`, pure and tested) builds the
-    next 14 days from the cached plan (tag `schedule`, fallback 600 s).
+    next 7 days (`SCHEDULE_DAYS`, the user's choice) from the cached plan (tag `schedule`, fallback 600 s).
     Ended streams drop out, one in progress stays, and a missing title
     falls back to the other language.
   - Public:
+    - Times on `/[locale]/schedule` are shown in the **visitor's time zone**
+      (`StreamTime`, a client component: Vienna on the server and the first
+      render, then the browser zone via `useSyncExternalStore`, with the
+      zone name). Day headings stay Vienna dates. The home "Next stream"
+      is still Vienna time.
     - `/[locale]/schedule`: days with Today/Tomorrow, "On now", "Cancelled"
       (struck through, with note) and "Extra stream".
     - `Event` JSON-LD per stream (`EventCancelled` for cancelled ones,
@@ -860,6 +865,9 @@ SEO and security are built into every phase, not saved for the end.
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
       PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`
   - [x] Inquiry form + inbox (2026-09-28, `modules/inquiries`):
+    - Budget ranges are small-creator sized (under €100, €100–250,
+      €250–500, over €500, product or game key only, unsure; changed
+      2026-09-28, migration `smaller_inquiry_budgets`).
     - `Inquiry` table: company, name, email, budget enum, message ≤ 3000,
       locale, status new/in_progress/done/spam. No IP address stored.
     - `submitInquiryAction` (public) checks in this order: honeypot
