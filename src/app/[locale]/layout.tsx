@@ -66,7 +66,7 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col">
         {/* Client components on public pages: LocaleSwitcher, ThemeToggle. */}
         <NextIntlClientProvider
-          messages={await clientMessages(["LocaleSwitcher", "ThemeToggle"])}
+          messages={await clientMessages(["Countdown", "LocaleSwitcher", "ThemeToggle"])}
         >
           <ThemeProvider nonce={nonce}>
             <AnimatedBackground />

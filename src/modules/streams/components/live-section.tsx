@@ -1,4 +1,5 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Countdown, LocalDateTime } from "@/components/time/local-time";
 import { Link } from "@/modules/i18n";
 import { buttonVariants } from "@/components/ui/button";
 import type { LiveStatus } from "@/modules/stats";
@@ -20,7 +21,7 @@ export async function LiveSection({
   channel: string;
 }) {
   const t = await getTranslations("Streams");
-  const format = await getFormatter();
+  const locale = await getLocale();
 
   if (!live.live) {
     return (
@@ -35,17 +36,14 @@ export async function LiveSection({
           {nextStream ? (
             <p>
               <Link href="/schedule" className="underline-offset-4 hover:underline">
-                {t("nextStream", {
-                  when:
-                    format.dateTime(nextStream.start, {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }) + (nextStream.gameName ? ` – ${nextStream.gameName}` : ""),
-                })}
-              </Link>
+                {t("nextStream")}{" "}
+                <LocalDateTime start={nextStream.start.toISOString()} locale={locale} long />
+                {nextStream.gameName && ` – ${nextStream.gameName}`}
+              </Link>{" "}
+              <Countdown
+                start={nextStream.start.toISOString()}
+                className="font-semibold whitespace-nowrap text-brand-text"
+              />
             </p>
           ) : null}
           <p className="text-muted-foreground">{t("offlineText")}</p>

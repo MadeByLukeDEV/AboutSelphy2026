@@ -847,8 +847,13 @@ SEO and security are built into every phase, not saved for the end.
     - Times on `/[locale]/schedule` are shown in the **visitor's time zone**
       (`StreamTime`, a client component: Vienna on the server and the first
       render, then the browser zone via `useSyncExternalStore`, with the
-      zone name). Day headings stay Vienna dates. The home "Next stream"
-      is still Vienna time.
+      zone name). Day headings stay Vienna dates.
+    - "Next stream" (home hero, Streams page) also uses the visitor's zone
+      plus a live **countdown** (`src/components/time/`: `LocalDateTime`,
+      `Countdown`, shared `useBrowserZone`/`useNow` ticker). The countdown
+      renders nothing on the server (it depends on the current second) and
+      appears after hydration; its texts are the `Countdown` namespace in
+      the public `clientMessages`.
     - `/[locale]/schedule`: days with Today/Tomorrow, "On now", "Cancelled"
       (struck through, with note) and "Extra stream".
     - `Event` JSON-LD per stream (`EventCancelled` for cancelled ones,

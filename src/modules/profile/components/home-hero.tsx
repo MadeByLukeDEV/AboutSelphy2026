@@ -1,9 +1,10 @@
 import Image from "next/image";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { CalendarClock } from "lucide-react";
 import { Link } from "@/modules/i18n";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Countdown, LocalDateTime } from "@/components/time/local-time";
 import { CHANNELS } from "../links";
 import { PROFILE_IMAGES } from "../images";
 
@@ -25,7 +26,7 @@ export async function HomeHero({
   nextStream: { start: Date; gameName: string | null; title: string } | null;
 }) {
   const t = await getTranslations("Home");
-  const format = await getFormatter();
+  const locale = await getLocale();
   const { avatar, banner } = PROFILE_IMAGES;
 
   return (
@@ -82,18 +83,15 @@ export async function HomeHero({
             className="flex w-fit max-w-full items-center gap-3 rounded-xl border bg-background/60 px-3 py-2 text-sm hover:bg-muted"
           >
             <CalendarClock className="size-4 shrink-0 text-brand-text" aria-hidden />
-            <span className="font-semibold">{t("nextStream")}</span>
-            <span className="min-w-0 truncate text-muted-foreground">
-              <time dateTime={nextStream.start.toISOString()}>
-                {format.dateTime(nextStream.start, {
-                  weekday: "short",
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </time>
-              {nextStream.gameName && ` – ${nextStream.gameName}`}
+            <span className="flex min-w-0 flex-col">
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-semibold">{t("nextStream")}</span>
+                <Countdown start={nextStream.start.toISOString()} className="font-semibold text-brand-text" />
+              </span>
+              <span className="min-w-0 truncate text-muted-foreground">
+                <LocalDateTime start={nextStream.start.toISOString()} locale={locale} />
+                {nextStream.gameName && ` – ${nextStream.gameName}`}
+              </span>
             </span>
             <span className="sr-only">({t("nextStreamLink")})</span>
           </Link>

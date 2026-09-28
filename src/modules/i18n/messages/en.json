@@ -312,7 +312,7 @@
     "openOn": "Open on {platform}",
     "moreOn": "More on {platform}",
     "empty": "Nothing here yet.",
-    "nextStream": "Next stream: {when}"
+    "nextStream": "Next stream:"
   },
   "Nav": {
     "label": "Main",
@@ -379,5 +379,10 @@
     "metaDescription": "Work with AboutSelphy: audience numbers from Twitch and YouTube, past partners and packages – and a form to send a sponsorship inquiry.",
     "title": "Media kit",
     "intro": "Everything brands need to know about working with me. The full media kit with live audience numbers is coming soon – you can already send an inquiry."
+  },
+  "Countdown": {
+    "in": "in {time}",
+    "soon": "starting soon",
+    "days": "{d}d {h}h"
   }
 }

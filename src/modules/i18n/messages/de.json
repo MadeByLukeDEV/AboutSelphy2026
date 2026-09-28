@@ -312,7 +312,7 @@
     "openOn": "Auf {platform} öffnen",
     "moreOn": "Mehr auf {platform}",
     "empty": "Hier ist noch nichts.",
-    "nextStream": "Nächster Stream: {when}"
+    "nextStream": "Nächster Stream:"
   },
   "Nav": {
     "label": "Hauptmenü",
@@ -379,5 +379,10 @@
     "metaDescription": "Mit AboutSelphy zusammenarbeiten: Reichweite auf Twitch und YouTube, bisherige Partner und Pakete – und ein Formular für deine Sponsoring-Anfrage.",
     "title": "Mediakit",
     "intro": "Alles, was Marken über eine Zusammenarbeit mit mir wissen müssen. Das vollständige Mediakit mit Live-Zahlen kommt bald – eine Anfrage kannst du schon jetzt senden."
+  },
+  "Countdown": {
+    "in": "in {time}",
+    "soon": "startet gleich",
+    "days": "{d} T. {h} Std."
   }
 }
