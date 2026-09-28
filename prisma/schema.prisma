@@ -54,6 +54,9 @@ model Game {
   /// filled on save and by the sync if missing. null = no cover found.
   twitchGameId   String? @db.VarChar(20)
   boxArtUrl      String? @db.VarChar(300)
+  /// Uploaded cover (Asset). Takes priority over the Twitch box art.
+  customCoverId  String?  @unique
+  customCover    Asset?   @relation(fields: [customCoverId], references: [id], onDelete: SetNull)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -196,4 +199,22 @@ model ScheduleException {
 
   @@unique([slotId, date])
   @@index([date])
+}
+
+// ─── assets ──────────────────────────────────────────────────────────────
+// Images uploaded in /admin (game covers now, partner logos later). Stored
+// in the DB -- the container has no persistent disk -- after validation and
+// re-encoding to WebP (src/modules/assets). Served by /api/media/[id]; an
+// asset never changes, a new upload gets a new id.
+
+model Asset {
+  id        String   @id @default(cuid())
+  data      Bytes
+  mimeType  String   @db.VarChar(40)
+  width     Int
+  height    Int
+  bytes     Int
+  createdAt DateTime @default(now())
+
+  gameCover Game?
 }

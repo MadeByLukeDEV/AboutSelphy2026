@@ -49,7 +49,11 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     // Only our own image paths may go through the optimizer -- anything
     // else is refused instead of being resized on demand.
-    localPatterns: [{ pathname: "/profile/**", search: "" }],
+    localPatterns: [
+      { pathname: "/profile/**", search: "" },
+      // Uploaded images (src/modules/assets).
+      { pathname: "/api/media/**", search: "" },
+    ],
     // Video thumbnails for the Streams page. Loaded through our optimizer,
     // so the browser only ever fetches images from our own origin and the
     // CSP img-src can stay 'self'.
@@ -59,6 +63,10 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
+    // Image uploads in /admin (covers are capped at 4 MB in
+    // src/modules/assets; multipart adds a little overhead). Applies to
+    // every Server Action.
+    serverActions: { bodySizeLimit: "5mb" },
     // app/global-not-found.tsx: there is no single root layout (the
     // [locale] segment is the root layout for public pages).
     globalNotFound: true,
