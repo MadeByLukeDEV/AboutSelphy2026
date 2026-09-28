@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { assetUrl } from "@/modules/assets";
 import type { Locale } from "@/modules/i18n";
 import * as repo from "./repository";
 import { computeOccurrences, type StreamOccurrence } from "./occurrences";
@@ -9,6 +10,12 @@ export const SCHEDULE_CACHE_TAG = "schedule";
 
 /** How far ahead the public schedule and JSON-LD look. */
 export const SCHEDULE_DAYS = 14;
+
+// Same rule as the profile module: an uploaded cover wins over Twitch art.
+function coverUrl(game: { boxArtUrl: string | null; customCoverId: string | null } | null) {
+  if (!game) return null;
+  return game.customCoverId ? assetUrl(game.customCoverId) : game.boxArtUrl;
+}
 
 // Raw plan data, cached (JSON-safe). Occurrences are computed per request
 // from it, because "upcoming" depends on the current time. Edits clear the
@@ -31,6 +38,7 @@ const loadPlan = unstable_cache(
           startTime: slot.startTime,
           durationMinutes: slot.durationMinutes,
           gameName: slot.game?.name ?? null,
+          gameCoverUrl: coverUrl(slot.game),
           titleEn: slot.titleEn,
           titleDe: slot.titleDe,
         })),
@@ -42,6 +50,7 @@ const loadPlan = unstable_cache(
         startTime: e.startTime,
         durationMinutes: e.durationMinutes,
         gameName: e.game?.name ?? null,
+        gameCoverUrl: coverUrl(e.game),
         titleEn: e.titleEn,
         titleDe: e.titleDe,
         noteEn: e.noteEn,

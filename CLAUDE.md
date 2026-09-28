@@ -792,8 +792,13 @@ SEO and security are built into every phase, not saved for the end.
     - **Custom upload** (2026-09-28) takes priority over the Twitch art:
       "Upload cover" / "Replace cover" / "Use Twitch cover" per game in
       `/admin/games` (admin only).
-    - All covers are **one size** (`w-16`, 3:4). The main game is marked
-      only by the brand rule.
+    - All covers are **square (1:1)** and one size per place (`w-20` home,
+      `w-12` admin and schedule). The main game is marked only by the brand
+      rule. Twitch box art (3:4) is cropped to the centre. `GameCover` needs
+      `self-start` in its base class: in a flex row it otherwise stretches
+      to the row height and stops being square.
+    - The public schedule shows each stream's game cover too (the schedule
+      repository selects `boxArtUrl`/`customCoverId`; uploaded cover wins).
     - `GameCover` gets `src` (the uploaded cover, else the Twitch art),
       and shows initials when there's neither.
   - **Uploads** (`modules/assets`, reused for partner logos later):
@@ -804,7 +809,7 @@ SEO and security are built into every phase, not saved for the end.
       JPEG/PNG/WebP/AVIF/GIF. The format is detected from the bytes, so SVG
       and disguised files are rejected; `limitInputPixels` guards against
       decompression bombs.
-    - It re-encodes to WebP (EXIF stripped, 300x400 for covers). Replaced
+    - It re-encodes to WebP (EXIF stripped, 400x400 for covers). Replaced
       or removed covers delete their asset.
     - `experimental.serverActions.bodySizeLimit: "5mb"`, and
       `/api/media/**` is in `images.localPatterns`.

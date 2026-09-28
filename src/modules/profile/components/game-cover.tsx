@@ -1,8 +1,9 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-// A game's cover (3:4): an uploaded image (/api/media/...) or the Twitch
-// box art, both through our image optimizer. Without either: a quiet tile
+// A game's cover, square (1:1) everywhere: an uploaded image (/api/media/...) or the Twitch
+// box art (portrait, cropped to the centre), both through our image
+// optimizer. Without either: a quiet tile
 // with the game's initials. Decorative -- the game name is always shown
 // next to it.
 export function GameCover({
@@ -29,7 +30,7 @@ export function GameCover({
     <div
       aria-hidden
       className={cn(
-        "relative aspect-[3/4] shrink-0 overflow-hidden rounded-lg bg-muted ring-1 ring-border",
+        "relative aspect-square shrink-0 self-start overflow-hidden rounded-lg bg-muted ring-1 ring-border",
         muted && "opacity-60 grayscale",
         className,
       )}

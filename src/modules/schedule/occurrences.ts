@@ -17,6 +17,7 @@ export type Plan = {
     startTime: string;
     durationMinutes: number;
     gameName: string | null;
+    gameCoverUrl: string | null;
     titleEn: string;
     titleDe: string;
   }>;
@@ -28,6 +29,7 @@ export type Plan = {
     startTime: string | null;
     durationMinutes: number | null;
     gameName: string | null;
+    gameCoverUrl: string | null;
     titleEn: string;
     titleDe: string;
     noteEn: string;
@@ -42,6 +44,7 @@ export type StreamOccurrence = {
   start: Date;
   end: Date;
   gameName: string | null;
+  gameCoverUrl: string | null;
   title: string;
   cancelled: boolean;
   note: string;
@@ -83,6 +86,7 @@ export function computeOccurrences(
         start,
         end: new Date(start.getTime() + slot.durationMinutes * 60_000),
         gameName: slot.gameName,
+        gameCoverUrl: slot.gameCoverUrl,
         title: text(slot.titleEn, slot.titleDe),
         cancelled: Boolean(cancellation),
         note: cancellation ? text(cancellation.noteEn, cancellation.noteDe) : "",
@@ -100,6 +104,7 @@ export function computeOccurrences(
         start,
         end: new Date(start.getTime() + extra.durationMinutes! * 60_000),
         gameName: extra.gameName,
+        gameCoverUrl: extra.gameCoverUrl,
         title: text(extra.titleEn, extra.titleDe),
         cancelled: false,
         note: text(extra.noteEn, extra.noteDe),

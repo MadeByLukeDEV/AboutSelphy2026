@@ -29,8 +29,8 @@ export async function GamesList({ games }: { games: HomeContent["games"] }) {
               name={game.name}
               src={game.coverUrl}
               muted={game.status === "former"}
-              className="w-16"
-              sizes="4rem"
+              className="w-20"
+              sizes="5rem"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

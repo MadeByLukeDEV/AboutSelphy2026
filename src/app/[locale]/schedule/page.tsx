@@ -4,7 +4,7 @@ import { siteUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { localeAlternates, type Locale } from "@/modules/i18n";
-import { CHANNELS, PROFILE_IMAGES } from "@/modules/profile";
+import { CHANNELS, GameCover, PROFILE_IMAGES } from "@/modules/profile";
 import { getUpcomingStreams, type StreamOccurrence } from "@/modules/schedule";
 import { JsonLd, streamEventSchema } from "@/modules/seo";
 
@@ -109,44 +109,53 @@ export default async function SchedulePage({
                       <li
                         key={stream.key}
                         className={cn(
-                          "flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-baseline sm:gap-6",
+                          "flex items-start gap-4 px-4 py-3",
                           running && "border-l-4 border-l-red-500",
                         )}
                       >
-                        <p
-                          className={cn(
-                            "shrink-0 font-semibold tabular-nums sm:w-32",
-                            stream.cancelled && "text-muted-foreground line-through",
-                          )}
-                        >
-                          <time dateTime={stream.start.toISOString()}>{time(stream.start)}</time>
-                          {"–"}
-                          <time dateTime={stream.end.toISOString()}>{time(stream.end)}</time>
-                        </p>
-                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                          <p className={cn(stream.cancelled && "text-muted-foreground line-through")}>
-                            {stream.gameName && (
-                              <span className="font-semibold">{stream.gameName}</span>
-                            )}
-                            {stream.gameName && stream.title && " – "}
-                            {stream.title || (!stream.gameName && t("defaultTitle"))}
-                          </p>
-                          {stream.note && (
-                            <p className="text-sm text-muted-foreground">{stream.note}</p>
-                          )}
-                        </div>
-                        {(running || stream.cancelled || stream.extra) && (
+                        <GameCover
+                          name={stream.gameName ?? stream.title ?? ""}
+                          src={stream.gameCoverUrl}
+                          muted={stream.cancelled}
+                          className="w-12"
+                          sizes="3rem"
+                        />
+                        <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
                           <p
                             className={cn(
-                              "shrink-0 text-sm font-medium",
-                              running && "text-red-600 dark:text-red-400",
-                              stream.cancelled && "text-destructive",
-                              stream.extra && !stream.cancelled && "text-brand-text",
+                              "shrink-0 font-semibold tabular-nums sm:w-32",
+                              stream.cancelled && "text-muted-foreground line-through",
                             )}
                           >
-                            {running ? t("inProgress") : stream.cancelled ? t("cancelled") : t("extra")}
+                            <time dateTime={stream.start.toISOString()}>{time(stream.start)}</time>
+                            {"–"}
+                            <time dateTime={stream.end.toISOString()}>{time(stream.end)}</time>
                           </p>
-                        )}
+                          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <p className={cn(stream.cancelled && "text-muted-foreground line-through")}>
+                              {stream.gameName && (
+                                <span className="font-semibold">{stream.gameName}</span>
+                              )}
+                              {stream.gameName && stream.title && " – "}
+                              {stream.title || (!stream.gameName && t("defaultTitle"))}
+                            </p>
+                            {stream.note && (
+                              <p className="text-sm text-muted-foreground">{stream.note}</p>
+                            )}
+                          </div>
+                          {(running || stream.cancelled || stream.extra) && (
+                            <p
+                              className={cn(
+                                "shrink-0 text-sm font-medium",
+                                running && "text-red-600 dark:text-red-400",
+                                stream.cancelled && "text-destructive",
+                                stream.extra && !stream.cancelled && "text-brand-text",
+                              )}
+                            >
+                              {running ? t("inProgress") : stream.cancelled ? t("cancelled") : t("extra")}
+                            </p>
+                          )}
+                        </div>
                       </li>
                     );
                   })}

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 // Prisma-only and private to the schedule module.
 
-const gameName = { select: { name: true } } as const;
+const gameName = { select: { name: true, boxArtUrl: true, customCoverId: true } } as const;
 
 export function findSlots() {
   return prisma.scheduleSlot.findMany({

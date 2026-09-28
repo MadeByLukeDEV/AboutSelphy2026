@@ -15,7 +15,7 @@ const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "avif", "gif"]);
 export type ImagePreset = { width: number; height: number };
 
 /** Game covers: 3:4 like Twitch box art, 2x the largest display size. */
-export const COVER_PRESET: ImagePreset = { width: 300, height: 400 };
+export const COVER_PRESET: ImagePreset = { width: 400, height: 400 };
 
 export class UploadError extends Error {
   constructor(readonly code: "noFile" | "tooLarge" | "notAnImage") {
