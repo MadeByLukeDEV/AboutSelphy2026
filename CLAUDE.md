@@ -410,7 +410,9 @@ cron routes, env handling or headers.
       Video thumbnails do **not** need `img-src`: they load through our
       image optimizer (`images.remotePatterns`: `static-cdn.jtvnw.net`,
       `i.ytimg.com/vi/**`), so the browser only fetches same-origin
-      images. Turnstile → `script-src`/`frame-src` later.
+      images. `challenges.cloudflare.com` is in `script-src` (for pre-CSP3
+      browsers; CSP3 ignores hosts next to `'strict-dynamic'`) and
+      `frame-src` (Turnstile, inquiry form).
   - **How the nonce flows**:
     - `src/proxy.ts` sets the `Content-Security-Policy` **request** header
       (Next reads the nonce from it and applies it to its own scripts), the
@@ -652,13 +654,14 @@ Variables planned for later phases:
   unset, as with `isTwitchConfigured()` in Social)
 - Phase 8: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (YouTube Analytics
   OAuth), `TOKEN_ENCRYPTION_KEY` (32-byte hex)
-- `CRON_SECRET` (stats sync), `TURNSTILE_SITE_KEY` (public) /
-  `TURNSTILE_SECRET_KEY` (inquiry form)
-- `REDIS_URL`: set in `.env.local` since 2026-09-28 but **not used yet**.
-  Planned uses:
-  - Phase 6: per-IP rate limiting of the inquiry form.
-  - A shared Next cache handler, if the app ever runs more than one
-    container.
+- `CRON_SECRET` (stats sync)
+- `TURNSTILE_SITE_KEY` (public, rendered by the server) and
+  `TURNSTILE_SECRET_KEY` (inquiry form, in use since 2026-09-28). Optional
+  `TURNSTILE_HOSTNAMES`. In Dokploy, set only the production hostname,
+  never localhost.
+- `REDIS_URL`: used for the inquiry rate limit (optional, fails open).
+  Later it could back a shared Next cache handler, if the app ever runs
+  more than one container.
 
   Reuse the shared instance, and every call must fail soft (Social's
   lessons: ACL `NOPERM` flakiness, `enableReadyCheck: false`). Add it to
@@ -851,6 +854,45 @@ SEO and security are built into every phase, not saved for the end.
     - Starts empty: the user enters the real plan.
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
       PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`
+  - [x] Inquiry form + inbox (2026-09-28, `modules/inquiries`):
+    - `Inquiry` table: company, name, email, budget enum, message ≤ 3000,
+      locale, status new/in_progress/done/spam. No IP address stored.
+    - `submitInquiryAction` (public) checks in this order: honeypot
+      (`website` field, filled = fake success, nothing stored), zod, a
+      per-IP rate limit (5/h in Redis, key = sha256 of the IP, fails
+      **open**), Turnstile siteverify, then store. Errors are codes only.
+    - **Turnstile** (`turnstile.ts`, Cloudflare's canonical siteverify):
+      it requires `success`, action `inquiry` and a hostname from
+      `TURNSTILE_HOSTNAMES` (default: the host of `NEXT_PUBLIC_SITE_URL`),
+      with a 10 s timeout and tokens ≤ 2048 chars. Verified with
+      Cloudflare's test secret: a `success: true` token for example.com is
+      still rejected (wrong hostname, and without an action).
+    - Widget (`turnstile-widget.tsx`): explicit render, **`api.js` gets the
+      request's CSP nonce** (Cloudflare's recommended CSP setup; without it
+      the widget didn't work), theme auto, visitor language, and a reset
+      after every attempt (tokens are single-use). An error callback shows
+      "Try again". The widget's own `eval` probe is blocked by our CSP,
+      which is harmless (Cloudflare lists no `unsafe-eval` requirement).
+    - **Automated browsers can't pass Turnstile** (headless and headed
+      Playwright both get "verification failed" or an interactive check
+      that detaches). The real-token end-to-end test must be done by hand
+      in a normal browser.
+    - `/[locale]/mediakit` holds only the form so far: **`noindex`, not in
+      the nav or the sitemap** until the full media kit exists. The form
+      texts come from a nested `NextIntlClientProvider` (`Inquiry`) on this
+      page only.
+    - `/admin/inquiries` (staff): status filter with counts, full text
+      (`whitespace-pre-wrap`, never HTML), a mailto reply, status select
+      and delete.
+    - GDPR retention: `purgeOldInquiries()` runs with every cron call and
+      deletes done/spam inquiries whose last change is > 12 months old
+      (tested).
+    - `src/lib/redis.ts`: a lazy ioredis client (Social's settings, no ready
+      check), prefix `aboutselphy:main:`. The ACL user has
+      SET/GET/INCR/EXPIRE/DEL on it (checked).
+    - **Legal**: Austria requires an Impressum and a Datenschutzerklärung.
+      The form's privacy note isn't a substitute. Both pages are still
+      missing.
 - [ ] Phase 7: SEO and security audit: Lighthouse, Rich Results,
       securityheaders.com, `security-review` over the whole app
 - [ ] Phase 8: YouTube Analytics demographics (owner OAuth connect in
