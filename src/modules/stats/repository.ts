@@ -80,8 +80,16 @@ export function updateSession(
   });
 }
 
+/**
+ * The newest broadcast, for the live badge. Only these fields: the result
+ * goes into unstable_cache, which stores JSON, and the row's BigInt
+ * `viewerSum` can't be serialized (every page threw while live, 2026-09-28).
+ */
 export function latestSession() {
-  return prisma.streamSession.findFirst({ orderBy: { lastSeenAt: "desc" } });
+  return prisma.streamSession.findFirst({
+    orderBy: { lastSeenAt: "desc" },
+    select: { title: true, gameName: true, startedAt: true, lastSeenAt: true },
+  });
 }
 
 export function sessionsSince(since: Date) {

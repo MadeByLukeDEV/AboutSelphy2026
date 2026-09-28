@@ -764,6 +764,11 @@ SEO and security are built into every phase, not saved for the end.
   - Checked facts: the follower total works with an **app** token.
     `channels.list` costs 1 quota unit. The Twitch schedule
     (`/helix/schedule`) is empty, so Phase 5 uses our own schedule.
+  - **`unstable_cache` stores JSON**: never cache a raw Prisma row with a
+    `BigInt` (or `Bytes`) column. `latestSession()` returned the whole
+    `StreamSession` (BigInt `viewerSum`), and while live every page threw
+    `Do not know how to serialize a BigInt` in production (2026-09-28, the
+    first sampled stream). Select or map to plain fields first.
   - Read side: `getLiveStatus()` (a session sampled in the last 11 min =
     live, computed outside the cache) and `getStatsOverview()` (latest per
     metric + 30-day Twitch aggregates), both cached under tag `stats`.
