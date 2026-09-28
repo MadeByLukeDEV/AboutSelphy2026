@@ -1029,9 +1029,39 @@ SEO and security are built into every phase, not saved for the end.
     - `src/lib/redis.ts`: a lazy ioredis client (Social's settings, no ready
       check), prefix `aboutselphy:main:`. The ACL user has
       SET/GET/INCR/EXPIRE/DEL on it (checked).
-    - **Legal**: Austria requires an Impressum and a Datenschutzerklärung.
-      The form's privacy note isn't a substitute. Both pages are still
-      missing.
+    - Legal pages: see "Legal pages" below. The form's privacy note links
+      to the policy once it's published.
+- [ ] Legal pages (built 2026-09-29, **not published yet**: the user must
+      enter the operator details and replace the draft's TODO: markers)
+  - `modules/legal`, table `LegalSettings` (singleton, CHECK id = 1):
+    operator name/street/postal code/city/country/email/phone, optional
+    extra Impressum text (Markdown, en/de), privacy policy (Markdown,
+    en/de, up to 30,000 chars), `published`.
+  - `/admin/legal` (admin only). The zod schema's `superRefine` blocks
+    publishing while an operator field is empty or any text still contains
+    `TODO:`; the server action re-runs it.
+  - Public `/[locale]/imprint` (built from the operator fields: § 5 ECG /
+    § 25 MedienG) and `/[locale]/privacy` (controller block + Markdown).
+    Both `notFound()` until published; not in the sitemap (it's built at
+    build time, without the DB).
+  - `SiteFooter` (new, in the `[locale]` layout): copyright, plus the two
+    links once published. The inquiry form links to the policy then too.
+  - Markdown: `react-markdown` 10.1.0 (pinned) with `skipHtml`, an element
+    allowlist (h2/h3/p/lists/a/strong/em/br/hr) and its default URL
+    transform (only http(s)/mailto/relative survive). Tested: script, img,
+    onerror and `javascript:` links are removed.
+  - Privacy draft: `scripts/legal-drafts/privacy.{en,de}.md`, written from
+    what the site actually does (Cloudflare, Turnstile, inquiry retention,
+    hashed-IP rate limit, the one `NEXT_LOCALE` session cookie, theme in
+    localStorage, self-hosted fonts, click-to-load Twitch/YouTube, no
+    tracking). TODO: markers for the hosting provider and log retention.
+    `pnpm db:seed-legal` inserts it (insert-only, never publishes); it ran
+    on 2026-09-28. **Update the draft when the site starts processing data
+    differently** (analytics, new embeds, new forms).
+  - Security review: nothing significant.
+  - **Dev data cache** lives in `.next/dev/cache/fetch-cache` (Next 16 dev
+    builds into `.next/dev`). A direct DB edit doesn't clear a tag, so
+    delete that folder and restart the dev server to see it.
 - [ ] Phase 7: SEO and security audit: Lighthouse, Rich Results,
       securityheaders.com, `security-review` over the whole app
 - [ ] Phase 8: YouTube Analytics demographics (owner OAuth connect in

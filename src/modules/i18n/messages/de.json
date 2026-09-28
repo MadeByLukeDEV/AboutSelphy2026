@@ -53,7 +53,8 @@
       "partners": "Partner & Pakete",
       "inquiries": "Anfragen",
       "stats": "Statistiken",
-      "games": "Spiele"
+      "games": "Spiele",
+      "legal": "Rechtliches"
     },
     "notBuilt": "Noch nicht gebaut",
     "roles": {
@@ -72,7 +73,8 @@
         "partners": "Bisherige Partner, Kooperationen und Sponsoring-Pakete für das Mediakit verwalten.",
         "inquiries": "Sponsoring-Anfragen aus dem Mediakit lesen und beantworten.",
         "stats": "Prüfen, wann die YouTube- und Twitch-Zahlen zuletzt abgeglichen wurden.",
-        "games": "Spiele hinzufügen, Status und Reihenfolge für „Was ich spiele“ festlegen."
+        "games": "Spiele hinzufügen, Status und Reihenfolge für „Was ich spiele“ festlegen.",
+        "legal": "Impressum und Datenschutzerklärung der öffentlichen Seite."
       }
     },
     "about": {
@@ -398,6 +400,46 @@
         "tooLarge": "Das Bild ist größer als 4 MB.",
         "notAnImage": "Die Datei ist kein JPEG-, PNG-, WebP-, AVIF- oder GIF-Bild."
       }
+    },
+    "legal": {
+      "intro": "Das Impressum wird aus den Betreiberangaben unten erstellt, die Datenschutzerklärung ist dein Text. Öffentlich wird erst etwas, wenn du „Veröffentlichen“ einschaltest – und das geht nur, wenn alle Angaben da sind und kein TODO: aus dem Entwurf übrig ist.",
+      "adminOnly": "Nur Admins können die rechtlichen Seiten ändern.",
+      "operatorHeading": "Betreiber",
+      "operatorHint": "Erscheint im Impressum und als Verantwortlicher in der Datenschutzerklärung. In Österreich sind Name, Postanschrift und E-Mail-Adresse Pflicht.",
+      "imprintHeading": "Zusätzlicher Impressumstext",
+      "imprintHint": "Optionales Markdown unter den Angaben, z. B. die grundlegende Richtung der Website nach § 25 MedienG.",
+      "privacyHeading": "Datenschutzerklärung",
+      "privacyHint": "Markdown: ## für Überschriften, - für Listen, [Text](https://…) für Links. HTML wird nicht dargestellt. Ersetze vor dem Veröffentlichen jedes TODO: im Entwurf.",
+      "todosLeft": "{count, plural, one {# TODO: in der Datenschutzerklärung übrig} other {# TODO: in der Datenschutzerklärung übrig}}",
+      "published": "Impressum und Datenschutzerklärung veröffentlichen",
+      "publishedHint": "Fügt die Links im Seitenfuß und den Datenschutz-Link beim Anfrageformular hinzu.",
+      "save": "Speichern",
+      "saving": "Speichert…",
+      "saved": "Gespeichert",
+      "savedPublished": "Gespeichert und veröffentlicht",
+      "fields": {
+        "operatorName": "Vollständiger Name",
+        "street": "Straße und Hausnummer",
+        "postalCode": "Postleitzahl",
+        "city": "Ort",
+        "country": "Land",
+        "email": "E-Mail",
+        "phone": "Telefon (optional)",
+        "imprintExtraEn": "Englisch",
+        "imprintExtraDe": "Deutsch",
+        "privacyEn": "Englisch",
+        "privacyDe": "Deutsch"
+      },
+      "errors": {
+        "forbidden": "Nur Admins können das ändern.",
+        "invalid": "Bitte prüfe die markierten Felder.",
+        "failed": "Speichern fehlgeschlagen. Bitte versuch es noch einmal.",
+        "tooLong": "Zu lang",
+        "invalidEmail": "Gib eine gültige E-Mail-Adresse ein",
+        "invalidPhone": "Nur Ziffern, Leerzeichen, +, -, / und Klammern",
+        "requiredToPublish": "Vor dem Veröffentlichen nötig",
+        "todoLeft": "Ersetze vor dem Veröffentlichen jedes TODO:"
+      }
     }
   },
   "Streams": {
@@ -482,7 +524,8 @@
       "failed": "Senden fehlgeschlagen. Versuch es gleich noch einmal.",
       "widget": "Die Prüfung konnte nicht geladen werden. Deaktiviere Content-Blocker für diese Seite und lade neu."
     },
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "privacyLink": "Datenschutzerklärung"
   },
   "MediaKit": {
     "metaTitle": "Mediakit",
@@ -561,5 +604,20 @@
     "in": "in {time}",
     "soon": "startet gleich",
     "days": "{d} T. {h} Std."
+  },
+  "Legal": {
+    "imprintTitle": "Impressum",
+    "imprintDescription": "Impressum von aboutselphy.com: wer diese Website betreibt und wie du uns erreichst, mit den Angaben nach E-Commerce-Gesetz und Mediengesetz (Österreich).",
+    "privacyTitle": "Datenschutzerklärung",
+    "privacyDescription": "Wie aboutselphy.com mit personenbezogenen Daten umgeht: kein Tracking, ein Sprach-Cookie, das Anfrageformular, Cloudflare, Videos und deine Rechte nach DSGVO.",
+    "statutory": "Angaben gemäß § 5 ECG und § 25 MedienG",
+    "operator": "Betreiber und Medieninhaber",
+    "address": "Anschrift",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "controller": "Verantwortlicher",
+    "updated": "Stand: {date}",
+    "copyright": "© {year} AboutSelphy",
+    "footerLabel": "Rechtliches"
   }
 }

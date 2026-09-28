@@ -53,7 +53,8 @@
       "partners": "Partners & packages",
       "inquiries": "Inquiries",
       "stats": "Stats",
-      "games": "Games"
+      "games": "Games",
+      "legal": "Legal"
     },
     "notBuilt": "Not built yet",
     "roles": {
@@ -72,7 +73,8 @@
         "partners": "Manage past partners, brand deals and sponsor packages for the media kit.",
         "inquiries": "Read and answer sponsor inquiries sent through the media kit.",
         "stats": "Check when the YouTube and Twitch numbers were last synced.",
-        "games": "Add games, set their status and order for “What I play”."
+        "games": "Add games, set their status and order for “What I play”.",
+        "legal": "Legal notice and privacy policy for the public site."
       }
     },
     "about": {
@@ -398,6 +400,46 @@
         "tooLarge": "The image is larger than 4 MB.",
         "notAnImage": "That file isn't a JPEG, PNG, WebP, AVIF or GIF image."
       }
+    },
+    "legal": {
+      "intro": "The legal notice (Impressum) is built from the operator details below; the privacy policy is your text. Nothing is public until you switch on “Publish”, and publishing is blocked while details are missing or a TODO: marker from the draft is left.",
+      "adminOnly": "Only admins can change the legal pages.",
+      "operatorHeading": "Operator",
+      "operatorHint": "Shown in the legal notice and as the controller in the privacy policy. Austrian law requires your name, a postal address and an email address.",
+      "imprintHeading": "Extra legal notice text",
+      "imprintHint": "Optional Markdown shown under the details, e.g. the basic direction of the website (“grundlegende Richtung”) under § 25 MedienG.",
+      "privacyHeading": "Privacy policy",
+      "privacyHint": "Markdown: ## for headings, - for lists, [text](https://…) for links. HTML is not rendered. Replace every TODO: in the draft before publishing.",
+      "todosLeft": "{count, plural, one {# TODO: left in the privacy policy} other {# TODO: left in the privacy policy}}",
+      "published": "Publish the legal notice and privacy policy",
+      "publishedHint": "Adds the footer links and the privacy link at the inquiry form.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "savedPublished": "Saved and published",
+      "fields": {
+        "operatorName": "Full name",
+        "street": "Street and number",
+        "postalCode": "Postal code",
+        "city": "City",
+        "country": "Country",
+        "email": "Email",
+        "phone": "Phone (optional)",
+        "imprintExtraEn": "English",
+        "imprintExtraDe": "German",
+        "privacyEn": "English",
+        "privacyDe": "German"
+      },
+      "errors": {
+        "forbidden": "Only admins can change this.",
+        "invalid": "Please check the highlighted fields.",
+        "failed": "Saving failed. Please try again.",
+        "tooLong": "Too long",
+        "invalidEmail": "Enter a valid email address",
+        "invalidPhone": "Digits, spaces, +, -, / and brackets only",
+        "requiredToPublish": "Required before publishing",
+        "todoLeft": "Replace every TODO: before publishing"
+      }
     }
   },
   "Streams": {
@@ -482,7 +524,8 @@
       "failed": "Couldn't send. Please try again in a moment.",
       "widget": "The human check couldn't load. Disable content blockers for this page and reload."
     },
-    "retry": "Try again"
+    "retry": "Try again",
+    "privacyLink": "Privacy policy"
   },
   "MediaKit": {
     "metaTitle": "Media kit",
@@ -561,5 +604,20 @@
     "in": "in {time}",
     "soon": "starting soon",
     "days": "{d}d {h}h"
+  },
+  "Legal": {
+    "imprintTitle": "Legal notice",
+    "imprintDescription": "Legal notice for aboutselphy.com: who runs this website and how to reach them, including the details required by the Austrian e-commerce and media laws.",
+    "privacyTitle": "Privacy policy",
+    "privacyDescription": "How aboutselphy.com handles personal data: no tracking, one language cookie, the sponsor inquiry form, Cloudflare, video embeds and your rights under GDPR.",
+    "statutory": "Information according to § 5 ECG and § 25 MedienG",
+    "operator": "Operator and media owner",
+    "address": "Address",
+    "email": "Email",
+    "phone": "Phone",
+    "controller": "Controller",
+    "updated": "Last updated: {date}",
+    "copyright": "© {year} AboutSelphy",
+    "footerLabel": "Legal"
   }
 }

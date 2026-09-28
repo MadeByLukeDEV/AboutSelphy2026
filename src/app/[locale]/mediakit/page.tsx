@@ -11,6 +11,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { localeAlternates, type Locale } from "@/modules/i18n";
 import { clientMessages } from "@/modules/i18n/client-messages";
 import { isTurnstileConfigured, TURNSTILE_ACTION } from "@/modules/inquiries";
+import { isLegalPublished } from "@/modules/legal";
 import { InquiryForm } from "@/modules/inquiries/components/inquiry-form";
 import {
   AudienceSummary,
@@ -125,7 +126,12 @@ export default async function MediaKitPage({
           {siteKey && isTurnstileConfigured() ? (
             // Only this page ships the form's texts to the browser.
             <NextIntlClientProvider messages={await clientMessages(["Inquiry"])}>
-              <InquiryForm siteKey={siteKey} action={TURNSTILE_ACTION} nonce={nonce} />
+              <InquiryForm
+                siteKey={siteKey}
+                action={TURNSTILE_ACTION}
+                nonce={nonce}
+                privacyHref={(await isLegalPublished()) ? `/${locale}/privacy` : undefined}
+              />
             </NextIntlClientProvider>
           ) : (
             <p className="rounded-xl border bg-background/60 p-4">{ti("errors.unavailable")}</p>

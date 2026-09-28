@@ -2,6 +2,7 @@ import {
   CalendarDays,
   Gamepad2,
   ChartNoAxesColumn,
+  Scale,
   Handshake,
   Inbox,
   LayoutDashboard,
@@ -20,6 +21,7 @@ export const ADMIN_SECTIONS = [
   { key: "partners", href: "/admin/partners", icon: Handshake, built: true },
   { key: "inquiries", href: "/admin/inquiries", icon: Inbox, built: true },
   { key: "stats", href: "/admin/stats", icon: ChartNoAxesColumn, built: true },
+  { key: "legal", href: "/admin/legal", icon: Scale, built: true },
 ] as const satisfies ReadonlyArray<{
   key: string;
   href: string;

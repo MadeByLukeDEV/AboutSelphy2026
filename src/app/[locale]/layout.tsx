@@ -8,6 +8,7 @@ import { AnimatedBackground } from "@/components/effects/animated-background";
 import { CustomCursor } from "@/components/effects/custom-cursor";
 import { ThemeProvider } from "@/modules/theme";
 import { SiteHeader } from "@/components/site/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
 import { routing } from "@/modules/i18n";
 import { clientMessages } from "@/modules/i18n/client-messages";
 import { siteUrl } from "@/lib/env";
@@ -73,6 +74,7 @@ export default async function LocaleLayout({
             <CustomCursor />
             <SiteHeader />
             {children}
+            <SiteFooter />
             <Toaster />
           </ThemeProvider>
         </NextIntlClientProvider>

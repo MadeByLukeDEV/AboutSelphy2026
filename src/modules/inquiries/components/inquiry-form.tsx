@@ -34,10 +34,13 @@ export function InquiryForm({
   siteKey,
   action,
   nonce,
+  privacyHref,
 }: {
   siteKey: string;
   action: string;
   nonce?: string;
+  /** Link to the privacy policy, once the legal pages are published. */
+  privacyHref?: string;
 }) {
   const t = useTranslations("Inquiry");
   const locale = useLocale();
@@ -151,7 +154,17 @@ export function InquiryForm({
         </div>
       </FieldGroup>
 
-      <p className="max-w-prose text-sm text-muted-foreground">{t("privacy")}</p>
+      <p className="max-w-prose text-sm text-muted-foreground">
+        {t("privacy")}
+        {privacyHref && (
+          <>
+            {" "}
+            <a href={privacyHref} className="font-medium text-brand-text underline underline-offset-4">
+              {t("privacyLink")}
+            </a>
+          </>
+        )}
+      </p>
 
       <div className="flex flex-col gap-2">
         <TurnstileWidget
