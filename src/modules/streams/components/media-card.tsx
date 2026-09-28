@@ -24,7 +24,7 @@ export async function MediaCard({
   const vertical = item.kind === "youtube_short";
 
   return (
-    <article className="flex flex-col gap-2">
+    <article className="reveal flex flex-col gap-2">
       <VideoFacade
         embedSrc={embedUrl(item, parentHost)}
         thumbnailUrl={item.thumbnailUrl}

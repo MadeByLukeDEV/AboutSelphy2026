@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageTransition } from "@/components/motion/page-transition";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { siteUrl } from "@/lib/env";
 import { cn } from "@/lib/utils";
@@ -83,90 +84,92 @@ export default async function SchedulePage({
           }),
         )}
       />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-gutter pt-fluid pb-section">
-        <header className="flex flex-col gap-3">
-          <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("title")}</h1>
-          <p className="max-w-prose text-fluid-lg text-muted-foreground">
-            {t("intro")}
-          </p>
-        </header>
+      <PageTransition>
+        <main data-enter className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-gutter pt-fluid pb-section">
+          <header className="flex flex-col gap-3">
+            <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("title")}</h1>
+            <p className="max-w-prose text-fluid-lg text-muted-foreground">
+              {t("intro")}
+            </p>
+          </header>
 
-        {streams.length === 0 ? (
-          <section className="flex flex-col items-start gap-4 rounded-2xl border bg-background/60 p-fluid">
-            <p className="text-fluid-lg font-semibold">{t("empty")}</p>
-            <p className="text-muted-foreground">{t("followHint")}</p>
-            <a href={CHANNELS.twitch} className={buttonVariants({ size: "lg" })}>
-              {t("followOnTwitch")}
-            </a>
-          </section>
-        ) : (
-          <ol className="flex flex-col gap-8">
-            {groupByDate(streams).map((day) => (
-              <li key={day[0].key} className="flex flex-col gap-3">
-                <h2 className="text-fluid-lg font-bold">{dayLabel(day[0].start)}</h2>
-                <ul className="flex flex-col divide-y rounded-xl border bg-background/60">
-                  {day.map((stream) => {
-                    const running = !stream.cancelled && stream.start <= now && now < stream.end;
-                    return (
-                      <li
-                        key={stream.key}
-                        className={cn(
-                          "flex items-start gap-4 px-4 py-3",
-                          running && "border-l-4 border-l-red-500",
-                        )}
-                      >
-                        <GameCover
-                          name={stream.gameName ?? stream.title ?? ""}
-                          src={stream.gameCoverUrl}
-                          muted={stream.cancelled}
-                          className="w-12"
-                          sizes="3rem"
-                        />
-                        <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
-                          <p
-                            className={cn(
-                              "shrink-0 font-semibold tabular-nums sm:w-44",
-                              stream.cancelled && "text-muted-foreground line-through",
-                            )}
-                          >
-                            <StreamTime start={stream.start.toISOString()} end={stream.end.toISOString()} locale={locale} />
-                          </p>
-                          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                            <p className={cn(stream.cancelled && "text-muted-foreground line-through")}>
-                              {stream.gameName && (
-                                <span className="font-semibold">{stream.gameName}</span>
+          {streams.length === 0 ? (
+            <section className="flex flex-col items-start gap-4 rounded-2xl border bg-background/60 p-fluid">
+              <p className="text-fluid-lg font-semibold">{t("empty")}</p>
+              <p className="text-muted-foreground">{t("followHint")}</p>
+              <a href={CHANNELS.twitch} className={buttonVariants({ size: "lg" })}>
+                {t("followOnTwitch")}
+              </a>
+            </section>
+          ) : (
+            <ol className="flex flex-col gap-8">
+              {groupByDate(streams).map((day) => (
+                <li key={day[0].key} className="reveal flex flex-col gap-3">
+                  <h2 className="text-fluid-lg font-bold">{dayLabel(day[0].start)}</h2>
+                  <ul className="flex flex-col divide-y rounded-xl border bg-background/60">
+                    {day.map((stream) => {
+                      const running = !stream.cancelled && stream.start <= now && now < stream.end;
+                      return (
+                        <li
+                          key={stream.key}
+                          className={cn(
+                            "flex items-start gap-4 px-4 py-3",
+                            running && "border-l-4 border-l-red-500",
+                          )}
+                        >
+                          <GameCover
+                            name={stream.gameName ?? stream.title ?? ""}
+                            src={stream.gameCoverUrl}
+                            muted={stream.cancelled}
+                            className="w-12"
+                            sizes="3rem"
+                          />
+                          <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
+                            <p
+                              className={cn(
+                                "shrink-0 font-semibold tabular-nums sm:w-44",
+                                stream.cancelled && "text-muted-foreground line-through",
                               )}
-                              {stream.gameName && stream.title && " – "}
-                              {stream.title ? <WithMentions text={stream.title} /> : !stream.gameName && t("defaultTitle")}
+                            >
+                              <StreamTime start={stream.start.toISOString()} end={stream.end.toISOString()} locale={locale} />
                             </p>
-                            {stream.note && (
-                              <p className="text-sm text-muted-foreground">
-                                <WithMentions text={stream.note} />
+                            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                              <p className={cn(stream.cancelled && "text-muted-foreground line-through")}>
+                                {stream.gameName && (
+                                  <span className="font-semibold">{stream.gameName}</span>
+                                )}
+                                {stream.gameName && stream.title && " – "}
+                                {stream.title ? <WithMentions text={stream.title} /> : !stream.gameName && t("defaultTitle")}
+                              </p>
+                              {stream.note && (
+                                <p className="text-sm text-muted-foreground">
+                                  <WithMentions text={stream.note} />
+                                </p>
+                              )}
+                            </div>
+                            {(running || stream.cancelled || stream.extra) && (
+                              <p
+                                className={cn(
+                                  "shrink-0 text-sm font-medium",
+                                  running && "text-red-600 dark:text-red-400",
+                                  stream.cancelled && "text-destructive",
+                                  stream.extra && !stream.cancelled && "text-brand-text",
+                                )}
+                              >
+                                {running ? t("inProgress") : stream.cancelled ? t("cancelled") : t("extra")}
                               </p>
                             )}
                           </div>
-                          {(running || stream.cancelled || stream.extra) && (
-                            <p
-                              className={cn(
-                                "shrink-0 text-sm font-medium",
-                                running && "text-red-600 dark:text-red-400",
-                                stream.cancelled && "text-destructive",
-                                stream.extra && !stream.cancelled && "text-brand-text",
-                              )}
-                            >
-                              {running ? t("inProgress") : stream.cancelled ? t("cancelled") : t("extra")}
-                            </p>
-                          )}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            ))}
-          </ol>
-        )}
-      </main>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          )}
+        </main>
+      </PageTransition>
     </>
   );
 }

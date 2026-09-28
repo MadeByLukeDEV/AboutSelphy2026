@@ -55,7 +55,7 @@ type Row = { label: string; value: string | null; asOf: Date | null; note?: stri
 
 function PlatformCard({ heading, rows, footnote }: { heading: string; rows: Row[]; footnote?: string }) {
   return (
-    <section aria-label={heading} className="flex flex-col gap-3 rounded-2xl border bg-background/60 p-fluid">
+    <section aria-label={heading} className="reveal flex flex-col gap-3 rounded-2xl border bg-background/60 p-fluid">
       <h3 className="text-fluid-xl font-bold">{heading}</h3>
       <dl className="flex flex-col divide-y">
         {rows.map((row) => (

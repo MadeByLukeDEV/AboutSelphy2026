@@ -20,7 +20,7 @@ export async function GamesList({ games }: { games: HomeContent["games"] }) {
           <li
             key={game.slug}
             className={cn(
-              "flex gap-4 py-5",
+              "reveal flex gap-4 py-5",
               game.status === "main" && "border-l-4 border-l-primary pl-4",
               game.status === "former" && "text-muted-foreground",
             )}

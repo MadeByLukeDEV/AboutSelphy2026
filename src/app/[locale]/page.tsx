@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageTransition } from "@/components/motion/page-transition";
 import { setRequestLocale } from "next-intl/server";
 import { siteUrl } from "@/lib/env";
 import { localeAlternates, type Locale } from "@/modules/i18n";
@@ -58,18 +59,20 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           }),
         ]}
       />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
-        <HomeHero
-          displayName={content.displayName}
-          tagline={content.tagline}
-          live={liveStatus.live ? liveStatus : null}
-          nextStream={nextStream}
-        />
-        <div className="grid gap-section lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
-          <AboutSection bio={content.bio} />
-          <GamesList games={content.games} />
-        </div>
-      </main>
+      <PageTransition>
+        <main data-enter className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
+          <HomeHero
+            displayName={content.displayName}
+            tagline={content.tagline}
+            live={liveStatus.live ? liveStatus : null}
+            nextStream={nextStream}
+          />
+          <div className="grid gap-section lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+            <AboutSection bio={content.bio} />
+            <GamesList games={content.games} />
+          </div>
+        </main>
+      </PageTransition>
     </>
   );
 }

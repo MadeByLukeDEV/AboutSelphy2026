@@ -23,7 +23,7 @@ export async function PartnersSection({ partners }: { partners: MediaKit["partne
       </div>
       <ul className="grid gap-4 md:grid-cols-2">
         {partners.map((partner) => (
-          <li key={partner.id} className="flex flex-col gap-4 rounded-2xl border bg-background/60 p-fluid">
+          <li key={partner.id} className="reveal flex flex-col gap-4 rounded-2xl border bg-background/60 p-fluid">
             <div className="flex min-h-12 items-center gap-4">
               {partner.logoUrl ? (
                 // Logos keep their own shape; the box only caps the size.
@@ -80,7 +80,7 @@ export async function PackagesSection({ packages }: { packages: MediaKit["packag
       </div>
       <ul className="flex flex-col divide-y border-y">
         {packages.map((pkg) => (
-          <li key={pkg.id} className="flex flex-col gap-2 py-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
+          <li key={pkg.id} className="reveal flex flex-col gap-2 py-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
             <div className="flex max-w-prose flex-col gap-1">
               <h3 className="text-fluid-lg font-bold">{pkg.title}</h3>
               <p className="whitespace-pre-line text-muted-foreground">{pkg.description}</p>

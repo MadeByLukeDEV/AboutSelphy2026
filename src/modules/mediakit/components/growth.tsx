@@ -32,7 +32,7 @@ export async function GrowthSection({ growth }: { growth: GrowthSeries }) {
             <section
               key={key}
               aria-label={label}
-              className="flex flex-col gap-3 rounded-2xl border bg-background/60 p-fluid"
+              className="reveal flex flex-col gap-3 rounded-2xl border bg-background/60 p-fluid"
             >
               <div className="flex flex-col gap-0.5">
                 <h3 className="font-semibold">{label}</h3>

@@ -16,7 +16,7 @@ export async function MediaKitGames({ games }: { games: MediaKit["games"] }) {
       </h2>
       <ul className="grid gap-3 sm:grid-cols-2">
         {games.map((game) => (
-          <li key={game.slug} className="flex items-center gap-3">
+          <li key={game.slug} className="reveal flex items-center gap-3">
             <GameCover name={game.name} src={game.coverUrl} className="w-12" sizes="3rem" />
             <div className="flex min-w-0 flex-col">
               <span className="truncate font-semibold">{game.name}</span>

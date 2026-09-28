@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageTransition } from "@/components/motion/page-transition";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { env, siteUrl } from "@/lib/env";
 import { localeAlternates, type Locale } from "@/modules/i18n";
@@ -65,69 +66,71 @@ export default async function StreamsPage({
           }),
         )}
       />
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
-        <header className="flex flex-col gap-3">
-          <h1 className="text-fluid-4xl font-extrabold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="max-w-prose text-fluid-lg text-muted-foreground">
-            {t("intro")}
-          </p>
-        </header>
+      <PageTransition>
+        <main data-enter className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
+          <header className="flex flex-col gap-3">
+            <h1 className="text-fluid-4xl font-extrabold tracking-tight">
+              {t("title")}
+            </h1>
+            <p className="max-w-prose text-fluid-lg text-muted-foreground">
+              {t("intro")}
+            </p>
+          </header>
 
-        <LiveSection
-          live={live}
-          parentHost={parentHost}
-          channel={channel}
-          nextStream={nextStream}
-        />
+          <LiveSection
+            live={live}
+            parentHost={parentHost}
+            channel={channel}
+            nextStream={nextStream}
+          />
 
-        <MediaSection
-          id="vods-heading"
-          title={t("vodsHeading")}
-          note={t("vodsNote")}
-          items={media.vods}
-          parentHost={parentHost}
-          moreHref={`${CHANNELS.twitch}/videos?filter=archives`}
-          platform="Twitch"
-        />
+          <MediaSection
+            id="vods-heading"
+            title={t("vodsHeading")}
+            note={t("vodsNote")}
+            items={media.vods}
+            parentHost={parentHost}
+            moreHref={`${CHANNELS.twitch}/videos?filter=archives`}
+            platform="Twitch"
+          />
 
-        <MediaSection
-          id="clips-heading"
-          title={t("clipsHeading")}
-          items={media.clips}
-          parentHost={parentHost}
-          moreHref={`${CHANNELS.twitch}/clips?range=all`}
-          platform="Twitch"
-        />
+          <MediaSection
+            id="clips-heading"
+            title={t("clipsHeading")}
+            items={media.clips}
+            parentHost={parentHost}
+            moreHref={`${CHANNELS.twitch}/clips?range=all`}
+            platform="Twitch"
+          />
 
-        {(media.videos.length > 0 || media.shorts.length > 0) && (
-          <section aria-labelledby="youtube-heading" className="flex flex-col gap-8">
-            <h2 id="youtube-heading" className="text-fluid-2xl font-bold tracking-tight">
-              {t("youtubeHeading")}
-            </h2>
-            <MediaSection
-              id="videos-heading"
-              title={t("videosHeading")}
-              headingLevel={3}
-              items={media.videos}
-              parentHost={parentHost}
-              moreHref={`${youtubeChannel}/videos`}
-              platform="YouTube"
-            />
-            <MediaSection
-              id="shorts-heading"
-              title={t("shortsHeading")}
-              headingLevel={3}
-              items={media.shorts}
-              parentHost={parentHost}
-              moreHref={`${youtubeChannel}/shorts`}
-              platform="YouTube"
-              vertical
-            />
-          </section>
-        )}
-      </main>
+          {(media.videos.length > 0 || media.shorts.length > 0) && (
+            <section aria-labelledby="youtube-heading" className="flex flex-col gap-8">
+              <h2 id="youtube-heading" className="text-fluid-2xl font-bold tracking-tight">
+                {t("youtubeHeading")}
+              </h2>
+              <MediaSection
+                id="videos-heading"
+                title={t("videosHeading")}
+                headingLevel={3}
+                items={media.videos}
+                parentHost={parentHost}
+                moreHref={`${youtubeChannel}/videos`}
+                platform="YouTube"
+              />
+              <MediaSection
+                id="shorts-heading"
+                title={t("shortsHeading")}
+                headingLevel={3}
+                items={media.shorts}
+                parentHost={parentHost}
+                moreHref={`${youtubeChannel}/shorts`}
+                platform="YouTube"
+                vertical
+              />
+            </section>
+          )}
+        </main>
+      </PageTransition>
     </>
   );
 }

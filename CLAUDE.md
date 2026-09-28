@@ -224,6 +224,24 @@ brand.
   state through `onSuccess`.
 - Give every dnd-kit `DndContext` an `id={useId()}` to avoid hydration
   mismatches.
+- **Motion system** (2026-09-28, the user asked for more in/out animation;
+  CSS only, no JS needed, all off for `prefers-reduced-motion`, CSS in
+  the "motion" section of `globals.css`):
+  - `<main data-enter>`: direct children rise in, staggered. The first
+    child only moves, never fades (the home banner is the LCP image).
+  - `.reveal` on repeated items (game rows, schedule days, media cards,
+    media kit cards): fade up on scroll via `animation-timeline: view()`
+    inside `@supports`; unsupported browsers just show them.
+  - Page transitions: `PageTransition` (`src/components/motion/`, React
+    `<ViewTransition>`) wraps each public page's `<main>` (not the
+    layout: layouts persist, so enter/exit never fire). The root crossfade
+    is off, so only the page region fades; the header's active pill is a
+    named transition (`nav-pill`) that glides between items.
+  - **No directional slides**: `Link` `transitionTypes` rarely survive
+    in production here (dynamic pages commit in a later transition
+    without the types; checked on a prod build), so direction was random.
+  - New public pages: wrap `<main data-enter>` in `<PageTransition>`;
+    give repeated items `reveal`.
 - Motion: respect `prefers-reduced-motion` (`useReducedMotion`). Don't put a
   continuously active transform prop (`whileHover={{ scale }}`) on elements
   that dnd-kit also transforms.

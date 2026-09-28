@@ -187,3 +187,90 @@
     scroll-behavior: auto !important;
   }
 }
+/* ─── motion ──────────────────────────────────────────────────────────────
+   All CSS, so nothing waits for JavaScript and content is visible without
+   it. Everything here is skipped for prefers-reduced-motion.
+
+   - [data-enter]: the page's direct children rise in, staggered, on load.
+     The first child only moves (no fade): on the home page it holds the
+     banner, the LCP image, which must paint at once.
+   - .reveal: fades up as it scrolls into view (scroll-driven animation).
+     Browsers without animation-timeline simply show it.
+   - Page transitions: see src/components/motion/page-transition.tsx. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-enter] > * {
+    animation: enter-rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  [data-enter] > :first-child {
+    animation-name: enter-move;
+  }
+  [data-enter] > :nth-child(2) { animation-delay: 70ms; }
+  [data-enter] > :nth-child(3) { animation-delay: 140ms; }
+  [data-enter] > :nth-child(4) { animation-delay: 210ms; }
+  [data-enter] > :nth-child(n + 5) { animation-delay: 280ms; }
+
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
+
+  /* The page region animates; the rest of the document (header,
+     background) stays put instead of the default whole-page crossfade. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  ::view-transition-old(.page) {
+    animation: 150ms ease-in both vt-fade reverse;
+  }
+  ::view-transition-new(.page) {
+    animation:
+      220ms ease-out 120ms both vt-fade,
+      400ms cubic-bezier(0.2, 0.7, 0.2, 1) both vt-rise;
+  }
+  /* The header's active-page pill glides to the new item. */
+  ::view-transition-group(nav-pill) {
+    animation-duration: 350ms;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes enter-rise {
+  from {
+    opacity: 0;
+    translate: 0 1.25rem;
+  }
+}
+@keyframes enter-move {
+  from {
+    translate: 0 0.75rem;
+  }
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 1.5rem;
+    scale: 0.98;
+  }
+}
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vt-rise {
+  from {
+    translate: 0 1rem;
+  }
+}
