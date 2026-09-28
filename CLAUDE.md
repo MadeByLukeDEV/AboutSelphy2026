@@ -403,7 +403,8 @@ checks before it's considered done.
   - Use `next/image` with explicit sizes, and a `priority` hero image.
   - Load fonts through `next/font`.
   - Load Motion and embeds lazily (Twitch/YouTube players as click-to-load
-    facades, not iframes on first paint).
+    facades, not iframes on first paint). Motion is only in the lazily
+    loaded cursor; keep it out of anything every page renders.
   - Keep the hero readable without JS.
 - **Content structure**: one `<h1>` per page, a logical heading order,
   semantic HTML, descriptive link text and alt text, and internal links
@@ -1062,8 +1063,50 @@ SEO and security are built into every phase, not saved for the end.
   - **Dev data cache** lives in `.next/dev/cache/fetch-cache` (Next 16 dev
     builds into `.next/dev`). A direct DB edit doesn't clear a tag, so
     delete that folder and restart the dev server to see it.
-- [ ] Phase 7: SEO and security audit: Lighthouse, Rich Results,
-      securityheaders.com, `security-review` over the whole app
+- [x] Phase 7 (2026-09-29): SEO and security audit
+  - **Lighthouse mobile** (prod build, 2 runs each), before -> after:
+    performance 61-89 -> 87-93, accessibility 96-100, best practices
+    96-100 -> 100, SEO 92 -> 100, CLS 0 everywhere. Locally the observed
+    LCP is ~0.9 s; the simulated 3.0-3.4 s is Lighthouse's slow-4G model,
+    where the remaining cost is React's own hydration (~570 ms throttled
+    CPU). Performance stays just under the 95 target; re-measure on the
+    live site (Cloudflare, brotli) after deploy.
+  - What moved the numbers: Motion + effects out of the public bundle
+    (CSS-only background, cursor code only for fine pointers), no sonner
+    on public pages, one font subset, `fetchPriority` on the banner, the
+    inquiry form and Turnstile loaded only near the form, and a static
+    (not counting) media kit headline, which is its LCP element.
+  - **Measuring locally**: build and start with
+    `NEXT_PUBLIC_SITE_URL=http://localhost:3005`, or the SEO "canonical"
+    audit fails (canonical from the env, hreflang Link header from the
+    request host). Chromium from Playwright via `CHROME_PATH`, then
+    `npx -y lighthouse@13.5.0 ... --output=json`.
+  - Streams accessibility 96: axe measures `.reveal` cards that are
+    mid-fade at the bottom edge. Real visitors see them opaque in view.
+  - **Structured data**: `BreadcrumbList` added (`PageBreadcrumbs`, before
+    `<main data-enter>`, never inside). Every JSON-LD block on the public
+    pages parses and has Google's required fields (checked by script).
+    Google's Rich Results Test itself needs the live URL: run it by hand.
+  - **Security headers**: production sends CSP (nonce), HSTS (preload),
+    X-Frame-Options, X-Content-Type-Options, Referrer-Policy and
+    Permissions-Policy, which securityheaders.com rates A+ (it blocks
+    automated requests; check by hand). Expected warning: style-src
+    'unsafe-inline' (see Security).
+  - **Whole-app security review**: nothing critical or high. Fixed:
+    image optimizer bounded (prefixes, `qualities`, 200 MB cache),
+    share card + PDF rendered once per data change (shared in-flight
+    promise, cache headers), rate-limit expiry self-heals, `errorInfo()`
+    logging (`src/lib/log.ts`), FormData check on the cover upload.
+    **Open**: (L2) the origin should only accept Cloudflare (firewall
+    allowlist / Authenticated Origin Pulls / Tunnel), otherwise
+    `CF-Connecting-IP` can be spoofed past the rate limit (Turnstile
+    still applies); (L4) the 5 MB server-action body limit also applies
+    to the public inquiry action, fix by moving admin uploads to route
+    handlers if it ever matters; `auth/session.ts` logs whole errors
+    (fix in the auth repo's consumer file first).
+  - Build gotcha: stopping the dev server mid-write can truncate
+    `.next/dev/types`, and `next build` then fails type-checking those
+    files. Delete `.next/dev/types` and rebuild.
 - [ ] Phase 8: YouTube Analytics demographics (owner OAuth connect in
       `/admin`, encrypted token, demographics section in the media kit)
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
