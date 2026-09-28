@@ -76,6 +76,8 @@ RUN pnpm install --prod --frozen-lockfile \
 COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src/generated ./src/generated
+# Brand fonts: read at request time by the share cards and the PDF.
+COPY --from=builder /app/src/assets ./src/assets
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma7.config.ts /app/next.config.ts ./
 
