@@ -266,6 +266,30 @@ model Package {
   @@index([visible, sortOrder])
 }
 
+// ─── legal ──────────────────────────────────────────────────────────────
+// Impressum (built from the operator fields) and privacy policy (Markdown
+// per locale), edited in /admin/legal. Nothing is public until published.
+
+/// Singleton (id = 1, CHECK in the migration).
+model LegalSettings {
+  id           Int      @id @default(1)
+  operatorName String   @default("") @db.VarChar(120)
+  street       String   @default("") @db.VarChar(120)
+  postalCode   String   @default("") @db.VarChar(20)
+  city         String   @default("") @db.VarChar(80)
+  country      String   @default("") @db.VarChar(80)
+  email        String   @default("") @db.VarChar(254)
+  phone        String   @default("") @db.VarChar(40)
+  /// Extra Impressum text (Markdown), e.g. the MedienG "Blattlinie".
+  imprintExtraEn String @default("") @db.VarChar(4000)
+  imprintExtraDe String @default("") @db.VarChar(4000)
+  /// Privacy policy (Markdown, no HTML).
+  privacyEn    String   @default("") @db.VarChar(30000)
+  privacyDe    String   @default("") @db.VarChar(30000)
+  published    Boolean  @default(false)
+  updatedAt    DateTime @updatedAt
+}
+
 // ─── inquiries ───────────────────────────────────────────────────────────
 // Sponsor inquiries from the media kit form, managed in /admin/inquiries.
 // Personal data (GDPR): only what's needed to answer, no IP address; done

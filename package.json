@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "db:setup-roles": "tsx scripts/setup-db-roles.ts",
-    "db:seed": "node --conditions=react-server --import tsx scripts/seed-profile.mts"
+    "db:seed": "node --conditions=react-server --import tsx scripts/seed-profile.mts",
+    "db:seed-legal": "node --conditions=react-server --import tsx scripts/seed-legal.mts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -31,6 +32,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-hook-form": "^7.89.0",
+    "react-markdown": "10.1.0",
     "server-only": "^0.0.1",
     "sharp": "0.35.4",
     "sonner": "^2.0.8",
