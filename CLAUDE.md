@@ -240,6 +240,13 @@ brand.
   - **No directional slides**: `Link` `transitionTypes` rarely survive
     in production here (dynamic pages commit in a later transition
     without the types; checked on a prod build), so direction was random.
+  - `CountUp` (`src/components/motion/count-up.tsx`, media kit numbers):
+    the server renders the final formatted value (HTML, crawlers, link
+    previews and screen readers get the real number); in the browser it
+    counts from 0 when scrolled into view, width locked first (no layout
+    shift), whole numbers stay whole. CSS hides it only under
+    `@media (scripting: enabled)` until the count starts, with a 2.5 s
+    fallback; no-JS and reduced motion show the value at once (tested).
   - New public pages: wrap `<main data-enter>` in `<PageTransition>`;
     give repeated items `reveal`.
 - Motion: respect `prefers-reduced-motion` (`useReducedMotion`). Don't put a

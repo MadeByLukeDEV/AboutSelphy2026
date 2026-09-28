@@ -492,7 +492,7 @@
     "twitchChannel": "Twitch channel",
     "youtubeChannel": "YouTube channel",
     "audienceHeading": "Audience",
-    "summary": "<num>{followers}</num> people follow on Twitch, <num>{subscribers}</num> subscribe on YouTube, and recent uploads average <num>{views}</num> views.",
+    "summary": "<followersTag>{followers}</followersTag> people follow on Twitch, <subscribersTag>{subscribers}</subscribersTag> subscribe on YouTube, and recent uploads average <viewsTag>{views}</viewsTag> views.",
     "summarySource": "Straight from the Twitch and YouTube APIs, updated automatically. Last update: {date}.",
     "gamesHeading": "What the streams are about",
     "platforms": {

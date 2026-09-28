@@ -492,7 +492,7 @@
     "twitchChannel": "Twitch-Kanal",
     "youtubeChannel": "YouTube-Kanal",
     "audienceHeading": "Reichweite",
-    "summary": "<num>{followers}</num> Menschen folgen auf Twitch, <num>{subscribers}</num> haben auf YouTube abonniert, und die letzten Uploads kommen im Schnitt auf <num>{views}</num> Aufrufe.",
+    "summary": "<followersTag>{followers}</followersTag> Menschen folgen auf Twitch, <subscribersTag>{subscribers}</subscribersTag> haben auf YouTube abonniert, und die letzten Uploads kommen im Schnitt auf <viewsTag>{views}</viewsTag> Aufrufe.",
     "summarySource": "Direkt aus den Schnittstellen von Twitch und YouTube, automatisch aktualisiert. Letzte Aktualisierung: {date}.",
     "gamesHeading": "Worum es in den Streams geht",
     "platforms": {

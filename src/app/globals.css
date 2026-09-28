@@ -238,6 +238,25 @@
   }
 }
 
+/* CountUp (src/components/motion/count-up.tsx): inline-block so its width
+   can be locked; hidden only while scripting is on and before the count
+   starts, so the final value never flashes first. If the script never
+   runs, the fallback animation shows it after 2.5 s. */
+[data-count] {
+  display: inline-block;
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-count]:not([data-count-started]) {
+    visibility: hidden;
+    animation: count-fallback 0s 2.5s forwards;
+  }
+}
+@keyframes count-fallback {
+  to {
+    visibility: visible;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),

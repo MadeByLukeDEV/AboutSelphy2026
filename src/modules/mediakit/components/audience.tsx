@@ -1,17 +1,25 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { CountUp } from "@/components/motion/count-up";
 import type { StatsOverview } from "@/modules/stats";
 
 // The audience part of the media kit. Every number comes from the stats
 // sync's latest snapshot and carries its own "as of" time; nothing here is
 // typed in by hand. A figure that hasn't been measured says so instead of
-// showing 0.
+// showing 0. Numbers count up when they scroll into view (CountUp); the
+// HTML always holds the real value.
 
 type Format = Awaited<ReturnType<typeof getFormatter>>;
 
-function count(format: Format, value: number) {
+/** A number ready for CountUp: the value, its options and the final text. */
+type FigureOptions = { notation?: "compact"; maximumFractionDigits?: number };
+type Figure = { value: number; options: FigureOptions; text: string };
+
+function figure(format: Format, value: number, options?: FigureOptions): Figure {
   // Exact below 10,000 (small numbers read as more honest in full), compact
   // above ("86K" / "86.095" would be noise for a sponsor skimming).
-  return format.number(value, value >= 10_000 ? { notation: "compact", maximumFractionDigits: 1 } : {});
+  const resolved: FigureOptions =
+    options ?? (value >= 10_000 ? { notation: "compact", maximumFractionDigits: 1 } : {});
+  return { value, options: resolved, text: format.number(value, resolved) };
 }
 
 function asOf(format: Format, date: Date) {
@@ -25,6 +33,7 @@ function asOf(format: Format, date: Date) {
 export async function AudienceSummary({ stats }: { stats: StatsOverview }) {
   const t = await getTranslations("MediaKit");
   const format = await getFormatter();
+  const locale = await getLocale();
   const followers = stats.latest["twitch/followers"];
   const subscribers = stats.latest["youtube/subscribers"];
   const views = stats.latest["youtube/recentAverageViews"];
@@ -34,14 +43,25 @@ export async function AudienceSummary({ stats }: { stats: StatsOverview }) {
     a.capturedAt < b.capturedAt ? a : b,
   ).capturedAt;
 
+  const num = (f: Figure) => (
+    <strong className="font-extrabold text-foreground">
+      <CountUp value={f.value} text={f.text} locale={locale} options={f.options} />
+    </strong>
+  );
+  const f = figure(format, followers.value);
+  const s = figure(format, subscribers.value);
+  const v = figure(format, Math.round(views.value));
+
   return (
     <div className="flex flex-col gap-3">
       <p className="max-w-[34ch] text-fluid-3xl leading-tight font-medium tracking-tight text-muted-foreground">
         {t.rich("summary", {
-          followers: count(format, followers.value),
-          subscribers: count(format, subscribers.value),
-          views: count(format, Math.round(views.value)),
-          num: (chunks) => <strong className="font-extrabold text-foreground">{chunks}</strong>,
+          followers: f.text,
+          subscribers: s.text,
+          views: v.text,
+          followersTag: () => num(f),
+          subscribersTag: () => num(s),
+          viewsTag: () => num(v),
         })}
       </p>
       <p className="text-sm text-muted-foreground">
@@ -51,9 +71,19 @@ export async function AudienceSummary({ stats }: { stats: StatsOverview }) {
   );
 }
 
-type Row = { label: string; value: string | null; asOf: Date | null; note?: string };
+type Row = { label: string; value: Figure | null; asOf: Date | null; note?: string };
 
-function PlatformCard({ heading, rows, footnote }: { heading: string; rows: Row[]; footnote?: string }) {
+function PlatformCard({
+  heading,
+  rows,
+  footnote,
+  locale,
+}: {
+  heading: string;
+  rows: Row[];
+  footnote?: string;
+  locale: string;
+}) {
   return (
     <section aria-label={heading} className="reveal flex flex-col gap-3 rounded-2xl border bg-background/60 p-fluid">
       <h3 className="text-fluid-xl font-bold">{heading}</h3>
@@ -64,8 +94,12 @@ function PlatformCard({ heading, rows, footnote }: { heading: string; rows: Row[
               <span>{row.label}</span>
               {row.asOf && <span className="text-xs text-muted-foreground">{row.note}</span>}
             </dt>
-            <dd className={row.value ? "text-fluid-xl font-bold" : "shrink-0 text-right text-sm text-muted-foreground"}>
-              {row.value ?? row.note}
+            <dd className={row.value ? "text-right text-fluid-xl font-bold" : "shrink-0 text-right text-sm text-muted-foreground"}>
+              {row.value ? (
+                <CountUp value={row.value.value} text={row.value.text} locale={locale} options={row.value.options} />
+              ) : (
+                row.note
+              )}
             </dd>
           </div>
         ))}
@@ -79,15 +113,12 @@ function PlatformCard({ heading, rows, footnote }: { heading: string; rows: Row[
 export async function PlatformStats({ stats }: { stats: StatsOverview }) {
   const t = await getTranslations("MediaKit.platforms");
   const format = await getFormatter();
-  const latest = (key: string, round = false): Row["value"] => {
-    const metric = stats.latest[key];
-    return metric ? count(format, round ? Math.round(metric.value) : metric.value) : null;
-  };
+  const locale = await getLocale();
   const row = (label: string, key: string, round = false): Row => {
     const metric = stats.latest[key];
     return {
       label,
-      value: latest(key, round),
+      value: metric ? figure(format, round ? Math.round(metric.value) : metric.value) : null,
       asOf: metric?.capturedAt ?? null,
       note: metric ? t("asOf", { date: asOf(format, metric.capturedAt) }) : t("notYet"),
     };
@@ -97,7 +128,7 @@ export async function PlatformStats({ stats }: { stats: StatsOverview }) {
   const measured = twitch.streams > 0;
   const liveRow = (label: string, value: number | null): Row => ({
     label,
-    value: measured && value !== null ? format.number(value, { maximumFractionDigits: 1 }) : null,
+    value: measured && value !== null ? figure(format, value, { maximumFractionDigits: 1 }) : null,
     asOf: null,
     note: t("notMeasured"),
   });
@@ -106,6 +137,7 @@ export async function PlatformStats({ stats }: { stats: StatsOverview }) {
     <div className="grid gap-4 md:grid-cols-2">
       <PlatformCard
         heading="Twitch"
+        locale={locale}
         rows={[
           row(t("followers"), "twitch/followers"),
           liveRow(t("averageViewers"), twitch.averageViewers),
@@ -120,6 +152,7 @@ export async function PlatformStats({ stats }: { stats: StatsOverview }) {
       />
       <PlatformCard
         heading="YouTube"
+        locale={locale}
         rows={[
           row(t("subscribers"), "youtube/subscribers"),
           row(t("recentAverageViews"), "youtube/recentAverageViews", true),
