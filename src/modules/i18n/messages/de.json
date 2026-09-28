@@ -10,7 +10,9 @@
     "gameStatus": {
       "main": "Hauptspiel",
       "regular": "Spiele ich auch",
+      "occasional": "Ab und zu",
       "new": "Neu",
+      "planned": "Demnächst",
       "former": "Früher gespielt"
     },
     "links": {
@@ -157,7 +159,9 @@
       "statuses": {
         "main": "Hauptspiel",
         "regular": "Spiele ich auch",
+        "occasional": "Ab und zu",
         "new": "Neu",
+        "planned": "Demnächst",
         "former": "Früher gespielt"
       },
       "blurb": "Kurzbeschreibung",
@@ -195,7 +199,11 @@
       "uploading": "Lädt hoch…",
       "coverUpdated": "Cover aktualisiert.",
       "coverHint": "JPEG, PNG, WebP, AVIF oder GIF, bis 4 MB. Wird auf 3:4 zugeschnitten.",
-      "ownCover": "Eigenes Cover"
+      "ownCover": "Eigenes Cover",
+      "showOnHome": "Auf der Startseite zeigen",
+      "hiddenBadge": "· nicht auf der Startseite",
+      "shownOnHome": "{name} wird auf der Startseite gezeigt",
+      "hiddenFromHome": "{name} ist auf der Startseite ausgeblendet"
     },
     "schedule": {
       "intro": "Der Wochenplan wiederholt sich automatisch. Mit Änderungen sagst du einzelne Streams ab oder fügst Extra-Streams hinzu. Zeiten in Wiener Zeit.",

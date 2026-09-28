@@ -32,7 +32,9 @@ model Profile {
 enum GameStatus {
   main // what most streams are about
   regular // played often
+  occasional // played now and then
   new // recently started
+  planned // coming soon, not streamed yet
   former // no longer played, kept for context
 }
 
@@ -43,6 +45,9 @@ model Game {
   name      String     @db.VarChar(80)
   status    GameStatus
   sortOrder Int        @default(0)
+  /// Listed under "What I play" on the home page. Hidden games stay
+  /// available for the schedule and admin.
+  showOnHome Boolean   @default(true)
   blurbDe   String     @db.VarChar(400)
   blurbEn   String     @db.VarChar(400)
   /// Short labels (mostly proper nouns like "Hourglass PvP"), not translated.

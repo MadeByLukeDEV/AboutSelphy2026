@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSelect } from "@/components/form/form-select";
 import { GameCover } from "./game-cover";
@@ -59,6 +60,7 @@ const EMPTY: FormValues = {
   blurbDe: "",
   tags: "",
   twitchCategory: "",
+  showOnHome: true,
 };
 
 // Lists the games with reorder/edit/delete and an add button. State is seeded
@@ -92,6 +94,24 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
     startTransition(async () => {
       apply(await uploadGameCoverAction(body), t("coverUpdated"));
       setUploadingId(null);
+    });
+  }
+
+  function setShownOnHome(game: AdminGame, showOnHome: boolean) {
+    const { name, status, blurbEn, blurbDe, tags, twitchCategory } = game;
+    startTransition(async () => {
+      apply(
+        await editGameAction(game.id, {
+          name,
+          status,
+          blurbEn,
+          blurbDe,
+          tags,
+          twitchCategory,
+          showOnHome,
+        }),
+        showOnHome ? t("shownOnHome", { name }) : t("hiddenFromHome", { name }),
+      );
     });
   }
 
@@ -159,6 +179,9 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
                     {game.name}
                   </p>
                   <p className="text-sm text-muted-foreground">{t(`statuses.${game.status}`)}</p>
+                  {!game.showOnHome && (
+                    <p className="text-sm font-medium text-muted-foreground">{t("hiddenBadge")}</p>
+                  )}
                 </div>
                 <p className="line-clamp-2 text-sm text-muted-foreground">{game.blurbEn}</p>
                 {game.hasCustomCover ? (
@@ -168,6 +191,14 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
                     <p className="text-xs text-muted-foreground">{t("noCover")}</p>
                   )
                 )}
+                <label className="flex w-fit cursor-pointer items-center gap-2 pt-1 text-sm">
+                  <Switch
+                    checked={game.showOnHome}
+                    disabled={isPending}
+                    onCheckedChange={(checked) => setShownOnHome(game, checked)}
+                  />
+                  {t("showOnHome")}
+                </label>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <label
                     className={cn(
@@ -290,6 +321,7 @@ function GameForm({
           blurbEn: game.blurbEn,
           blurbDe: game.blurbDe,
           twitchCategory: game.twitchCategory,
+          showOnHome: game.showOnHome,
           tags: game.tags.join(", "),
         }
       : EMPTY,
@@ -356,6 +388,22 @@ function GameForm({
             />
           </Field>
         </div>
+
+        <Field orientation="horizontal">
+          <Controller
+            control={form.control}
+            name="showOnHome"
+            render={({ field }) => (
+              <Switch
+                id="showOnHome"
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            )}
+          />
+          <FieldLabel htmlFor="showOnHome">{t("showOnHome")}</FieldLabel>
+        </Field>
 
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium">{t("blurb")}</p>

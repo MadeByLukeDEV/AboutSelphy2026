@@ -26,13 +26,17 @@ export const profileInputSchema = z.object({
 
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
-export const GAME_STATUSES = ["main", "regular", "new", "former"] as const;
+export const GAME_STATUSES = ["main", "regular", "occasional", "new", "planned", "former"] as const;
+
+export type GameStatus = (typeof GAME_STATUSES)[number];
 
 export const GAME_LIMITS = { name: 80, blurb: 400, tag: 30, tags: 6, twitchCategory: 80 } as const;
 
 export const gameInputSchema = z.object({
   name: text(GAME_LIMITS.name),
   status: z.enum(GAME_STATUSES, { message: "required" }),
+  /** Listed on the home page ("What I play"). */
+  showOnHome: z.boolean(),
   blurbEn: text(GAME_LIMITS.blurb),
   blurbDe: text(GAME_LIMITS.blurb),
   tags: z

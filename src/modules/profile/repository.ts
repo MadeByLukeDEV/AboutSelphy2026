@@ -38,6 +38,7 @@ export async function createGame(data: {
   blurbDe: string;
   tags: string[];
   twitchCategory: string;
+  showOnHome: boolean;
 }) {
   const last = await prisma.game.aggregate({ _max: { sortOrder: true } });
   return prisma.game.create({
@@ -54,6 +55,7 @@ export function updateGame(
     blurbDe: string;
     tags: string[];
     twitchCategory: string;
+    showOnHome: boolean;
   },
 ) {
   return prisma.game.update({ where: { id }, data });

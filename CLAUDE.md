@@ -778,6 +778,15 @@ SEO and security are built into every phase, not saved for the end.
     comma-separated, max 6 × 30 chars), and delete with confirmation.
   - Slugs are generated from the name and made unique with a -2/-3
     suffix.
+  - Categories (2026-09-28): main, regular ("Also playing"), occasional
+    ("Sometimes"), new, planned ("Coming soon"), former. Separately, a
+    **"Show on home page"** switch per game (`showOnHome`, default on;
+    toggle directly in the list or in the dialog). Hidden games stay
+    available to the schedule. `GameStatus` is derived from
+    `GAME_STATUSES` in `schema.ts`.
+  - `src/components/ui/switch.tsx` came from `shadcn add switch` with a
+    broken `import { cn } from "cn"` and px sizes; fixed to `@/lib/utils`
+    and rem. Check that import after adding any shadcn component.
   - Actions check **auth before validation**, return the fresh list for
     client state, and clear the `profile` cache tag.
   - Status uses `FormSelect` (see Frontend conventions).

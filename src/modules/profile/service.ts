@@ -21,7 +21,8 @@ const loadContent = unstable_cache(
   { tags: [PROFILE_CACHE_TAG], revalidate: 600 },
 );
 
-export type GameStatus = "main" | "regular" | "new" | "former";
+export type { GameStatus } from "./schema";
+import type { GameStatus } from "./schema";
 
 export type HomeContent = {
   displayName: string;
@@ -60,7 +61,9 @@ export async function getHomeContent(locale: Locale): Promise<HomeContent> {
     displayName: profile?.displayName ?? "AboutSelphy",
     tagline: profile ? (de ? profile.taglineDe : profile.taglineEn) : "",
     bio: profile ? paragraphs(de ? profile.bioDe : profile.bioEn) : [],
-    games: games.map((game) => ({
+    games: games
+      .filter((game) => game.showOnHome)
+      .map((game) => ({
       slug: game.slug,
       name: game.name,
       status: game.status,

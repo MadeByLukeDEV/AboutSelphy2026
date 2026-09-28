@@ -67,10 +67,12 @@ function toAdminGame(game: {
   blurbDe: string;
   tags: string[];
   twitchCategory: string;
+  showOnHome: boolean;
   boxArtUrl: string | null;
   customCoverId: string | null;
 }): AdminGame {
-  const { id, slug, name, status, blurbEn, blurbDe, tags, twitchCategory, boxArtUrl } = game;
+  const { id, slug, name, status, blurbEn, blurbDe, tags, twitchCategory, showOnHome, boxArtUrl } =
+    game;
   return {
     id,
     slug,
@@ -80,6 +82,7 @@ function toAdminGame(game: {
     blurbDe,
     tags,
     twitchCategory,
+    showOnHome,
     boxArtUrl,
     coverUrl: game.customCoverId ? assetUrl(game.customCoverId) : boxArtUrl,
     hasCustomCover: Boolean(game.customCoverId),
