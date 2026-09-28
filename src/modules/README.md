@@ -33,6 +33,7 @@ Modules are added here as they are built.
 | `streams` | Streams page UI: click-to-load `VideoFacade`, media cards/sections, live section, embed URL builders | `stats` (media, live), `profile` (channels, banner) |
 | `schedule` | `ScheduleSlot`, `ScheduleException`; Vienna time helpers; occurrence computation (`getUpcomingStreams`, `getNextStream`); admin schedule editor (staff) | `auth` (guards), `profile` (games via relation) |
 | `assets` | `Asset` table; validated, re-encoded image uploads (`storeImage`); served by `/api/media/[id]` | — |
+| `mediakit` | the media kit page: audience sentence, per-platform figures with "as of", growth charts (≥ 7 daily points), current games; composes other modules, owns no tables yet | `stats` (read side only), `profile` |
 | `inquiries` | `Inquiry` table; public submit action (honeypot, zod, Redis rate limit, Turnstile siteverify); Turnstile widget + form; staff inbox; GDPR purge | `auth` (guards), `i18n` (routing), `lib/redis` |
 | `seo` | public page list for the sitemap, JSON-LD component + schema.org builders (Person, WebSite, ProfilePage) | `i18n` (alternates) |
 | `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |

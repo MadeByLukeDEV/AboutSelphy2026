@@ -386,7 +386,37 @@
     "metaTitle": "Media kit",
     "metaDescription": "Work with AboutSelphy: audience numbers from Twitch and YouTube, past partners and packages – and a form to send a sponsorship inquiry.",
     "title": "Media kit",
-    "intro": "Everything brands need to know about working with me. The full media kit with live audience numbers is coming soon – you can already send an inquiry."
+    "intro": "Who watches, how many, and how to work together. The numbers below come straight from Twitch and YouTube and update on their own.",
+    "inquiryCta": "Send an inquiry",
+    "twitchChannel": "Twitch channel",
+    "youtubeChannel": "YouTube channel",
+    "audienceHeading": "Audience",
+    "summary": "<num>{followers}</num> people follow on Twitch, <num>{subscribers}</num> subscribe on YouTube, and recent uploads average <num>{views}</num> views.",
+    "summarySource": "Straight from the Twitch and YouTube APIs, updated automatically. Last update: {date}.",
+    "gamesHeading": "What the streams are about",
+    "platforms": {
+      "followers": "Followers",
+      "averageViewers": "Average viewers, last 30 days",
+      "peakViewers": "Peak viewers, last 30 days",
+      "hoursStreamed": "Hours streamed, last 30 days",
+      "subscribers": "Subscribers",
+      "recentAverageViews": "Average views, last 10 uploads",
+      "totalViews": "Total views",
+      "videos": "Videos",
+      "asOf": "as of {date}",
+      "notYet": "Not available yet",
+      "notMeasured": "Not measured yet",
+      "twitchNote": "Viewer numbers come from samples taken every 5 minutes while live, since {date}.",
+      "twitchNoteEmpty": "Viewer numbers are sampled every 5 minutes while live. The first figures appear after the next stream."
+    },
+    "growth": {
+      "heading": "Growth",
+      "twitchFollowers": "Twitch followers",
+      "youtubeSubscribers": "YouTube subscribers",
+      "change": "{change} since {date}",
+      "showTable": "Show as table",
+      "date": "Date"
+    }
   },
   "Countdown": {
     "in": "in {time}",

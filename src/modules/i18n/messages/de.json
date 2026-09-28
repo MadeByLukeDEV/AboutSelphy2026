@@ -386,7 +386,37 @@
     "metaTitle": "Mediakit",
     "metaDescription": "Mit AboutSelphy zusammenarbeiten: Reichweite auf Twitch und YouTube, bisherige Partner und Pakete – und ein Formular für deine Sponsoring-Anfrage.",
     "title": "Mediakit",
-    "intro": "Alles, was Marken über eine Zusammenarbeit mit mir wissen müssen. Das vollständige Mediakit mit Live-Zahlen kommt bald – eine Anfrage kannst du schon jetzt senden."
+    "intro": "Wer zuschaut, wie viele, und wie eine Zusammenarbeit aussehen kann. Die Zahlen unten kommen direkt von Twitch und YouTube und aktualisieren sich selbst.",
+    "inquiryCta": "Anfrage senden",
+    "twitchChannel": "Twitch-Kanal",
+    "youtubeChannel": "YouTube-Kanal",
+    "audienceHeading": "Reichweite",
+    "summary": "<num>{followers}</num> Menschen folgen auf Twitch, <num>{subscribers}</num> haben auf YouTube abonniert, und die letzten Uploads kommen im Schnitt auf <num>{views}</num> Aufrufe.",
+    "summarySource": "Direkt aus den Schnittstellen von Twitch und YouTube, automatisch aktualisiert. Letzte Aktualisierung: {date}.",
+    "gamesHeading": "Worum es in den Streams geht",
+    "platforms": {
+      "followers": "Follower",
+      "averageViewers": "Durchschnittliche Zuschauer, letzte 30 Tage",
+      "peakViewers": "Höchste Zuschauerzahl, letzte 30 Tage",
+      "hoursStreamed": "Gestreamte Stunden, letzte 30 Tage",
+      "subscribers": "Abonnenten",
+      "recentAverageViews": "Durchschnittliche Aufrufe, letzte 10 Uploads",
+      "totalViews": "Aufrufe gesamt",
+      "videos": "Videos",
+      "asOf": "Stand {date}",
+      "notYet": "Noch nicht verfügbar",
+      "notMeasured": "Noch nicht gemessen",
+      "twitchNote": "Die Zuschauerzahlen stammen aus Messungen alle 5 Minuten während des Streams, seit {date}.",
+      "twitchNoteEmpty": "Die Zuschauerzahlen werden alle 5 Minuten während des Streams gemessen. Die ersten Werte gibt es nach dem nächsten Stream."
+    },
+    "growth": {
+      "heading": "Wachstum",
+      "twitchFollowers": "Twitch-Follower",
+      "youtubeSubscribers": "YouTube-Abonnenten",
+      "change": "{change} seit {date}",
+      "showTable": "Als Tabelle anzeigen",
+      "date": "Datum"
+    }
   },
   "Countdown": {
     "in": "in {time}",

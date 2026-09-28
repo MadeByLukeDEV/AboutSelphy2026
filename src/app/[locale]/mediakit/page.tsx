@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { env } from "@/lib/env";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { localeAlternates, type Locale } from "@/modules/i18n";
 import { clientMessages } from "@/modules/i18n/client-messages";
 import { isTurnstileConfigured, TURNSTILE_ACTION } from "@/modules/inquiries";
 import { InquiryForm } from "@/modules/inquiries/components/inquiry-form";
+import { AudienceSummary, getMediaKit, GrowthSection, MediaKitGames, PlatformStats } from "@/modules/mediakit";
+import { CHANNELS, PROFILE_IMAGES } from "@/modules/profile";
 
 export async function generateMetadata({
   params,
@@ -17,8 +22,8 @@ export async function generateMetadata({
     title: t("metaTitle"),
     description: t("metaDescription"),
     alternates: localeAlternates(locale, "/mediakit"),
-    // Not indexed (and not in the sitemap or nav) until the full media kit
-    // -- numbers, partners, packages -- is built. Only the form exists yet.
+    // Not indexed (and not in the sitemap or nav) until partners, packages,
+    // the PDF and the share card are in place.
     robots: { index: false, follow: true },
   };
 }
@@ -30,15 +35,54 @@ export default async function MediaKitPage({
   setRequestLocale(locale);
   const t = await getTranslations("MediaKit");
   const ti = await getTranslations("Inquiry");
+  const kit = await getMediaKit(locale);
   const siteKey = env().TURNSTILE_SITE_KEY;
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const { avatar } = PROFILE_IMAGES;
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
-      <header className="flex flex-col gap-3">
-        <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("title")}</h1>
+    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
+      <header className="flex flex-col gap-5">
+        <div className="flex items-center gap-4">
+          <Image
+            src={avatar.src}
+            alt=""
+            width={avatar.width}
+            height={avatar.height}
+            sizes="4rem"
+            className="size-16 shrink-0 rounded-full object-cover ring-2 ring-border"
+          />
+          <div className="flex min-w-0 flex-col">
+            <p className="font-bold">{kit.displayName}</p>
+            {kit.tagline && <p className="text-sm text-muted-foreground">{kit.tagline}</p>}
+          </div>
+        </div>
+        <h1 className="text-fluid-5xl font-extrabold tracking-[-0.04em]">{t("title")}</h1>
         <p className="max-w-prose text-fluid-lg text-muted-foreground">{t("intro")}</p>
+        <div className="flex flex-wrap gap-2">
+          <a href="#inquiry" className={buttonVariants({ size: "lg" })}>
+            {t("inquiryCta")}
+          </a>
+          <a href={CHANNELS.twitch} className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
+            {t("twitchChannel")}
+          </a>
+          <a href={CHANNELS.youtube} className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
+            {t("youtubeChannel")}
+          </a>
+        </div>
       </header>
+
+      <section aria-labelledby="audience-heading" className="flex flex-col gap-6">
+        <h2 id="audience-heading" className="text-fluid-2xl font-bold tracking-tight">
+          {t("audienceHeading")}
+        </h2>
+        <AudienceSummary stats={kit.stats} />
+        <PlatformStats stats={kit.stats} />
+      </section>
+
+      <GrowthSection growth={kit.growth} />
+
+      <MediaKitGames games={kit.games} />
 
       <section id="inquiry" aria-labelledby="inquiry-heading" className="flex flex-col gap-6 scroll-mt-8">
         <div className="flex flex-col gap-2">

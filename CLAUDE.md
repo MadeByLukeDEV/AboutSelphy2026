@@ -882,6 +882,32 @@ SEO and security are built into every phase, not saved for the end.
     - Starts empty: the user enters the real plan.
 - [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
       PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`
+  - [x] Page, step 1 (2026-09-28, `modules/mediakit`): audience + growth.
+    - Opens with a **sentence built from the live numbers** (Twitch
+      followers, YouTube subscribers, average views of the last 10
+      uploads) instead of big-number tiles; left out if one is missing.
+    - Twitch and YouTube cards list each figure with its own "as of" time.
+      Twitch 30-day viewer figures say "Not measured yet" until a stream
+      has been sampled (never 0). Counts are exact below 10,000, compact
+      above (German CLDR has no short thousands form, so de shows 86.095).
+    - Growth: `getGrowthSeries()` in `stats` (raw SQL, last value per
+      Vienna day, 90 days, cached under `stats`). One chart per metric
+      (Twitch followers, YouTube subscribers), shown only from 7 daily
+      points (`MIN_GROWTH_DAYS`). `GrowthChart` is a small SVG client
+      component: crosshair tooltip on hover and arrow keys, "Show as
+      table", colour token `--chart-line` (#007a50 light, #00b07a dark,
+      both validated with the dataviz script; the pure brand green fails
+      its dark lightness band). Date labels are HTML, not SVG text, which
+      would shrink with the chart on phones.
+    - Current games (main/regular/occasional/new, home-page switch on).
+    - Still `noindex`, not in nav/sitemap until partners, packages, PDF
+      and the OG card exist (steps 2 and 3).
+  - **Shared DB + migrations**: `migrate deploy` from a dev machine changes
+    the production database before production runs the new code. Adding
+    enum values broke reads in any process with an older Prisma client
+    (`P2023 Value occasional not found in enum`), including a dev server
+    started before `prisma generate`. Deploy right after merging a
+    migration, and restart the dev server after `generate`.
   - [x] Inquiry form + inbox (2026-09-28, `modules/inquiries`):
     - Budget ranges are small-creator sized (under €100, €100–250,
       €250–500, over €500, product or game key only, unsure; changed

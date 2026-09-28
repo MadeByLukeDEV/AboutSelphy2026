@@ -10,7 +10,7 @@ export function WithMentions({ text }: { text: string }) {
         href={part.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-semibold text-brand-text underline-offset-4 hover:underline"
+        className="font-semibold text-brand-text underline-offset-4 hover:underline uppercase"
       >
         {part.text}
       </a>

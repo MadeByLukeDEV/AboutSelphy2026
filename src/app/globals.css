@@ -47,6 +47,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --color-brand-text: var(--brand-text);
+  --color-chart-line: var(--chart-line);
 }
 
 /* Fluid type + spacing scale (rem-only clamp bounds, see CLAUDE.md). Use
@@ -86,6 +87,9 @@
      green (~5.4:1 on white, WCAG AA) for brand-colored text/links on light
      backgrounds; dark mode uses the real brand color (>11:1). */
   --brand-text: #007a50;
+  /* Single-series chart line/area. Checked with the dataviz validator
+     (lightness band + 3:1 against the surface) in each mode. */
+  --chart-line: #007a50;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -122,6 +126,7 @@
   --primary: #00ffa8;
   --primary-foreground: oklch(0.145 0 0);
   --brand-text: #00ffa8;
+  --chart-line: #00b07a;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
