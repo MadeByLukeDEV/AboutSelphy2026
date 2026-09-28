@@ -51,6 +51,18 @@ const schema = z.object({
     .string()
     .regex(/^[a-f0-9]{32,}$/, "plain lowercase hex, at least 32 chars")
     .optional(),
+
+  // Cloudflare Turnstile for the inquiry form (src/modules/inquiries). The
+  // site key is public (rendered into the page by the server); the secret
+  // is only used for siteverify. Without them the form refuses submissions.
+  TURNSTILE_SITE_KEY: z.string().min(1).optional(),
+  TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
+  // Hostnames siteverify may report, comma-separated. Default: the host of
+  // NEXT_PUBLIC_SITE_URL. Never list localhost in production.
+  TURNSTILE_HOSTNAMES: z.string().optional(),
+
+  // Shared Redis, optional (rate limiting; every use fails soft).
+  REDIS_URL: z.url({ protocol: /^rediss?$/ }).optional(),
 });
 
 const siteUrlSchema = schema.shape.NEXT_PUBLIC_SITE_URL;

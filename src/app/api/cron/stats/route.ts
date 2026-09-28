@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "@/lib/env";
 import { runSync } from "@/modules/stats";
+import { purgeOldInquiries } from "@/modules/inquiries";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,14 @@ export async function POST(request: Request) {
   }
 
   const result = await runSync("cron");
+  // GDPR retention for sponsor inquiries rides along with the cron (cheap,
+  // idempotent). A failure here never fails the stats sync.
+  result.steps.push(
+    await purgeOldInquiries().catch((error) => {
+      console.error("[cron/stats] inquiry purge failed", error);
+      return "inquiries: purge failed";
+    }),
+  );
   console.log(
     `[cron/stats] ${result.skipped ?? (result.ok ? "ok" : "partial failure")}: ${result.steps.join("; ")}`,
   );

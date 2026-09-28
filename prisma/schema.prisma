@@ -218,3 +218,39 @@ model Asset {
 
   gameCover Game?
 }
+
+// ─── inquiries ───────────────────────────────────────────────────────────
+// Sponsor inquiries from the media kit form, managed in /admin/inquiries.
+// Personal data (GDPR): only what's needed to answer, no IP address; done
+// and spam inquiries are deleted after 12 months (purgeOldInquiries).
+
+enum InquiryStatus {
+  new
+  in_progress
+  done
+  spam
+}
+
+enum InquiryBudget {
+  under_500
+  from_500_to_2000
+  from_2000_to_5000
+  over_5000
+  unsure
+}
+
+model Inquiry {
+  id          String        @id @default(cuid())
+  company     String        @db.VarChar(120)
+  contactName String        @db.VarChar(100)
+  email       String        @db.VarChar(254)
+  budget      InquiryBudget
+  message     String        @db.VarChar(3000)
+  /// Language the form was sent in (de/en), to answer in it.
+  locale      String        @db.VarChar(2)
+  status      InquiryStatus @default(new)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, createdAt])
+}
