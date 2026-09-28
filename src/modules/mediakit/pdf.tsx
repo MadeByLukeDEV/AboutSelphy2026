@@ -259,8 +259,10 @@ function MediaKitDocument({
   );
 }
 
-// Memo per locale: the PDF only changes when the data does.
-const memo = new Map<Locale, { key: string; pdf: Buffer }>();
+// Memo per locale: the PDF only changes when the data does. It holds the
+// render *promise*, so requests arriving while one is running share it
+// instead of each starting their own (security review, 2026-09-29).
+const memo = new Map<Locale, { key: string; pdf: Promise<Buffer> }>();
 
 /** The media kit as a PDF in one language. */
 export async function renderMediaKitPdf(locale: Locale): Promise<Buffer> {
@@ -269,6 +271,14 @@ export async function renderMediaKitPdf(locale: Locale): Promise<Buffer> {
   const cached = memo.get(locale);
   if (cached?.key === key) return cached.pdf;
 
+  const pdf = render(kit, locale);
+  memo.set(locale, { key, pdf });
+  // A failed render must not stay cached.
+  pdf.catch(() => memo.delete(locale));
+  return pdf;
+}
+
+async function render(kit: MediaKit, locale: Locale): Promise<Buffer> {
   const [texts, avatarFile] = await Promise.all([
     loadTexts(locale),
     readFile(join(process.cwd(), "public/profile/avatar.png")),
@@ -282,9 +292,7 @@ export async function renderMediaKitPdf(locale: Locale): Promise<Buffer> {
     if (asset) logos.set(partner.logoId, await pngOf(asset.data, 280));
   }
 
-  const pdf = await renderToBuffer(
+  return renderToBuffer(
     <MediaKitDocument kit={kit} texts={texts} avatar={avatar} logos={logos} locale={locale} />,
   );
-  memo.set(locale, { key, pdf });
-  return pdf;
 }
