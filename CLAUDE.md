@@ -863,6 +863,10 @@ SEO and security are built into every phase, not saved for the end.
       renders nothing on the server (it depends on the current second) and
       appears after hydration; its texts are the `Countdown` namespace in
       the public `clientMessages`.
+    - **@mentions** in titles and notes (`mentions.ts`, pure): `@name`
+      (4–25 of `[A-Za-z0-9_]`, not after a word char or `@`, so e-mails
+      are skipped) links to `twitch.tv/name` via `WithMentions` (React
+      text + anchors, never HTML). The admin title hint explains it.
     - `/[locale]/schedule`: days with Today/Tomorrow, "On now", "Cancelled"
       (struck through, with note) and "Extra stream".
     - `Event` JSON-LD per stream (`EventCancelled` for cancelled ones,

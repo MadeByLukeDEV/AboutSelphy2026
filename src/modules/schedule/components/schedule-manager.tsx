@@ -545,6 +545,7 @@ function ExtraForm({
           <Input id="extra-titleDe" lang="de" {...form.register("titleDe")} />
         </Field>
       </div>
+      <FieldDescription>{t("titleHint")}</FieldDescription>
       <NoteFields register={form.register} errors={errors} />
     </FormShell>
   );

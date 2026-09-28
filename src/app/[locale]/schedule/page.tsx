@@ -7,6 +7,7 @@ import { localeAlternates, type Locale } from "@/modules/i18n";
 import { CHANNELS, GameCover, PROFILE_IMAGES } from "@/modules/profile";
 import { getUpcomingStreams, type StreamOccurrence } from "@/modules/schedule";
 import { StreamTime } from "@/modules/schedule/components/stream-time";
+import { WithMentions } from "@/modules/schedule/components/with-mentions";
 import { JsonLd, streamEventSchema } from "@/modules/seo";
 
 export async function generateMetadata({
@@ -136,10 +137,12 @@ export default async function SchedulePage({
                                 <span className="font-semibold">{stream.gameName}</span>
                               )}
                               {stream.gameName && stream.title && " – "}
-                              {stream.title || (!stream.gameName && t("defaultTitle"))}
+                              {stream.title ? <WithMentions text={stream.title} /> : !stream.gameName && t("defaultTitle")}
                             </p>
                             {stream.note && (
-                              <p className="text-sm text-muted-foreground">{stream.note}</p>
+                              <p className="text-sm text-muted-foreground">
+                                <WithMentions text={stream.note} />
+                              </p>
                             )}
                           </div>
                           {(running || stream.cancelled || stream.extra) && (

@@ -1,0 +1,19 @@
+import { splitMentions } from "../mentions";
+
+// Renders text with every "@name" as a link to twitch.tv/name. Plain React
+// text nodes and anchors, never HTML.
+export function WithMentions({ text }: { text: string }) {
+  return splitMentions(text).map((part, index) =>
+    "url" in part ? (
+      <a
+        key={index}
+        href={part.url}
+        className="font-semibold text-brand-text underline-offset-4 hover:underline"
+      >
+        {part.text}
+      </a>
+    ) : (
+      part.text
+    ),
+  );
+}
