@@ -181,11 +181,21 @@
         "tooManyTags": "At most 6 tags.",
         "forbidden": "Only admins can change the games.",
         "invalid": "Some fields aren't valid.",
-        "failed": "Couldn't save. Try again in a moment."
+        "failed": "Couldn't save. Try again in a moment.",
+        "noFile": "Choose an image file.",
+        "tooLarge": "The image is larger than 4 MB.",
+        "notAnImage": "That file isn't a supported image (JPEG, PNG, WebP, AVIF or GIF)."
       },
       "twitchCategory": "Twitch category",
       "twitchCategoryHint": "The cover image comes from Twitch. Leave empty if the game has the same name on Twitch; otherwise enter its exact Twitch name (e.g. “Hunt: Showdown 1896”).",
-      "noCover": "No cover found on Twitch – check the Twitch category name."
+      "noCover": "No cover found on Twitch – check the Twitch category name.",
+      "uploadCover": "Upload cover",
+      "replaceCover": "Replace cover",
+      "useTwitchCover": "Use Twitch cover",
+      "uploading": "Uploading…",
+      "coverUpdated": "Cover updated.",
+      "coverHint": "JPEG, PNG, WebP, AVIF or GIF, up to 4 MB. Cropped to 3:4.",
+      "ownCover": "Own cover"
     },
     "schedule": {
       "intro": "The weekly plan repeats automatically. Use changes to cancel a single stream or add an extra one. Times are Vienna time.",

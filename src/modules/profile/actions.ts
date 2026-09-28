@@ -2,12 +2,15 @@
 
 import { z } from "zod";
 import { AuthorizationError, requireAdmin } from "@/modules/auth";
+import { UploadError } from "@/modules/assets";
 import {
   addGame,
   editGame,
+  removeCover,
   removeGame,
   reorderGame,
   saveProfile,
+  uploadCover,
   type AdminGame,
 } from "./admin-service";
 import { gameInputSchema, profileInputSchema, type ProfileInput } from "./schema";
@@ -48,7 +51,10 @@ export async function saveProfileAction(
 
 export type GamesResult =
   | { ok: true; games: AdminGame[] }
-  | { ok: false; error: "forbidden" | "invalid" | "failed" };
+  | {
+      ok: false;
+      error: "forbidden" | "invalid" | "failed" | "noFile" | "tooLarge" | "notAnImage";
+    };
 
 const idSchema = z.string().min(1).max(40);
 
@@ -67,6 +73,7 @@ async function asAdmin(
   try {
     return { ok: true, games: await run() };
   } catch (error) {
+    if (error instanceof UploadError) return { ok: false, error: error.code };
     console.error("[profile] game change failed", error);
     return { ok: false, error: "failed" };
   }
@@ -105,5 +112,20 @@ export async function moveGameAction(id: unknown, direction: unknown): Promise<G
     return parsedId.success && parsedDirection.success
       ? () => reorderGame(parsedId.data, parsedDirection.data)
       : INVALID;
+  });
+}
+
+/** Upload a custom cover: FormData with "gameId" and "file" (admin only). */
+export async function uploadGameCoverAction(formData: FormData): Promise<GamesResult> {
+  return asAdmin(() => {
+    const parsedId = idSchema.safeParse(formData.get("gameId"));
+    return parsedId.success ? () => uploadCover(parsedId.data, formData.get("file")) : INVALID;
+  });
+}
+
+export async function removeGameCoverAction(id: unknown): Promise<GamesResult> {
+  return asAdmin(() => {
+    const parsedId = idSchema.safeParse(id);
+    return parsedId.success ? () => removeCover(parsedId.data) : INVALID;
   });
 }

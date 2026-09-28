@@ -786,7 +786,30 @@ SEO and security are built into every phase, not saved for the end.
       name lookup still matched all four games.
     - A failed lookup never blocks the save. The sync's "game covers" step
       fills missing ones hourly.
-    - `GameCover` shows the art at 3:4, or initials without it.
+    - **Custom upload** (2026-09-28) takes priority over the Twitch art:
+      "Upload cover" / "Replace cover" / "Use Twitch cover" per game in
+      `/admin/games` (admin only).
+    - All covers are **one size** (`w-16`, 3:4). The main game is marked
+      only by the brand rule.
+    - `GameCover` gets `src` (the uploaded cover, else the Twitch art),
+      and shows initials when there's neither.
+  - **Uploads** (`modules/assets`, reused for partner logos later):
+    - Stored as `Asset` rows in the DB (bytea; the container has no
+      persistent disk) and served by `/api/media/[id]` (immutable cache,
+      `nosniff`, cuid-checked id).
+    - `storeImage()` rejects anything over 4 MB or not decodable as
+      JPEG/PNG/WebP/AVIF/GIF. The format is detected from the bytes, so SVG
+      and disguised files are rejected; `limitInputPixels` guards against
+      decompression bombs.
+    - It re-encodes to WebP (EXIF stripped, 300x400 for covers). Replaced
+      or removed covers delete their asset.
+    - `experimental.serverActions.bodySizeLimit: "5mb"`, and
+      `/api/media/**` is in `images.localPatterns`.
+    - `sharp` is a direct dependency (0.35.4, prebuilt, no install
+      script). **pnpm glitch**: it wrote the project entry as `0.35.4`
+      although only the `0.35.4(@types/node@…)` snapshot exists (optional
+      peer), so `node_modules/sharp` pointed nowhere. Fixed by hand in
+      `pnpm-lock.yaml`; check `require("sharp")` after touching it.
   - Platform clients live in **`src/lib/platforms/`** (moved from
     `modules/stats`), so `profile` and `stats` can both use them without a
     module cycle. `stats` depends on `profile` only for

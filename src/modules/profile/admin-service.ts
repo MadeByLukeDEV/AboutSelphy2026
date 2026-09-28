@@ -1,6 +1,7 @@
 import "server-only";
 import { revalidateTag } from "next/cache";
 import { findTwitchGame, isTwitchConfigured } from "@/lib/platforms/twitch";
+import { assetUrl, COVER_PRESET, deleteAsset, storeImage } from "@/modules/assets";
 import {
   createGame,
   deleteGame,
@@ -10,6 +11,7 @@ import {
   findGamesWithoutArt,
   findProfile,
   moveGame,
+  setCustomCover,
   setGameArt,
   updateGame,
   upsertProfile,
@@ -51,6 +53,9 @@ export type AdminGame = GameInput & {
   id: string;
   slug: string;
   boxArtUrl: string | null;
+  /** What the site shows: the uploaded cover, else the Twitch art. */
+  coverUrl: string | null;
+  hasCustomCover: boolean;
 };
 
 function toAdminGame(game: {
@@ -63,9 +68,22 @@ function toAdminGame(game: {
   tags: string[];
   twitchCategory: string;
   boxArtUrl: string | null;
+  customCoverId: string | null;
 }): AdminGame {
   const { id, slug, name, status, blurbEn, blurbDe, tags, twitchCategory, boxArtUrl } = game;
-  return { id, slug, name, status, blurbEn, blurbDe, tags, twitchCategory, boxArtUrl };
+  return {
+    id,
+    slug,
+    name,
+    status,
+    blurbEn,
+    blurbDe,
+    tags,
+    twitchCategory,
+    boxArtUrl,
+    coverUrl: game.customCoverId ? assetUrl(game.customCoverId) : boxArtUrl,
+    hasCustomCover: Boolean(game.customCoverId),
+  };
 }
 
 export async function getGamesForEdit(): Promise<AdminGame[]> {
@@ -131,7 +149,29 @@ export async function editGame(id: string, input: GameInput): Promise<AdminGame[
 }
 
 export async function removeGame(id: string): Promise<AdminGame[]> {
+  const game = await findGame(id);
   await deleteGame(id);
+  if (game?.customCoverId) await deleteAsset(game.customCoverId);
+  return changedGames();
+}
+
+/** Stores an uploaded cover (validated + re-encoded) and drops the old one. */
+export async function uploadCover(id: string, file: unknown): Promise<AdminGame[]> {
+  const game = await findGame(id);
+  if (!game) throw new Error("game not found");
+  const asset = await storeImage(file, COVER_PRESET);
+  await setCustomCover(id, asset.id);
+  if (game.customCoverId) await deleteAsset(game.customCoverId);
+  return changedGames();
+}
+
+/** Back to the Twitch box art. */
+export async function removeCover(id: string): Promise<AdminGame[]> {
+  const game = await findGame(id);
+  if (game?.customCoverId) {
+    await setCustomCover(id, null);
+    await deleteAsset(game.customCoverId);
+  }
   return changedGames();
 }
 

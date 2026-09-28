@@ -181,11 +181,21 @@
         "tooManyTags": "Höchstens 6 Tags.",
         "forbidden": "Nur Admins können die Spiele ändern.",
         "invalid": "Einige Felder sind ungültig.",
-        "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal."
+        "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal.",
+        "noFile": "Wähl eine Bilddatei aus.",
+        "tooLarge": "Das Bild ist größer als 4 MB.",
+        "notAnImage": "Diese Datei ist kein unterstütztes Bild (JPEG, PNG, WebP, AVIF oder GIF)."
       },
       "twitchCategory": "Twitch-Kategorie",
       "twitchCategoryHint": "Das Cover kommt von Twitch. Leer lassen, wenn das Spiel auf Twitch gleich heißt; sonst den exakten Twitch-Namen eintragen (z. B. „Hunt: Showdown 1896“).",
-      "noCover": "Kein Cover auf Twitch gefunden – prüf den Namen der Twitch-Kategorie."
+      "noCover": "Kein Cover auf Twitch gefunden – prüf den Namen der Twitch-Kategorie.",
+      "uploadCover": "Cover hochladen",
+      "replaceCover": "Cover ersetzen",
+      "useTwitchCover": "Twitch-Cover verwenden",
+      "uploading": "Lädt hoch…",
+      "coverUpdated": "Cover aktualisiert.",
+      "coverHint": "JPEG, PNG, WebP, AVIF oder GIF, bis 4 MB. Wird auf 3:4 zugeschnitten.",
+      "ownCover": "Eigenes Cover"
     },
     "schedule": {
       "intro": "Der Wochenplan wiederholt sich automatisch. Mit Änderungen sagst du einzelne Streams ab oder fügst Extra-Streams hinzu. Zeiten in Wiener Zeit.",

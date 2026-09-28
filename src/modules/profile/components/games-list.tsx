@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 import type { HomeContent } from "../service";
 import { GameCover } from "./game-cover";
 
-// One row per game with its Twitch cover, not a card grid. The main game
-// gets the only brand accent (a left rule) and a larger cover; former games
-// are muted.
+// One row per game with its cover (uploaded or Twitch box art), not a card
+// grid. All covers share one size; the main game's only accent is the
+// brand rule, and former games are muted.
 export async function GamesList({ games }: { games: HomeContent["games"] }) {
   const t = await getTranslations("Home");
   if (games.length === 0) return null;
@@ -27,10 +27,10 @@ export async function GamesList({ games }: { games: HomeContent["games"] }) {
           >
             <GameCover
               name={game.name}
-              boxArtUrl={game.boxArtUrl}
+              src={game.coverUrl}
               muted={game.status === "former"}
-              className={game.status === "main" ? "w-18" : "w-14"}
-              sizes={game.status === "main" ? "4.5rem" : "3.5rem"}
+              className="w-16"
+              sizes="4rem"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

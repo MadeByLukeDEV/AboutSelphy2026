@@ -5,9 +5,9 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ImageUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,8 @@ import {
   deleteGameAction,
   editGameAction,
   moveGameAction,
+  removeGameCoverAction,
+  uploadGameCoverAction,
   type GamesResult,
 } from "../actions";
 import { GAME_LIMITS, GAME_STATUSES, gameInputSchema } from "../schema";
@@ -77,6 +79,20 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
     }
     toast.error(t(`errors.${result.error}`));
     return false;
+  }
+
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+
+  function upload(game: AdminGame, file: File) {
+    // Checked again on the server (type by content, size, re-encoding).
+    const body = new FormData();
+    body.set("gameId", game.id);
+    body.set("file", file);
+    setUploadingId(game.id);
+    startTransition(async () => {
+      apply(await uploadGameCoverAction(body), t("coverUpdated"));
+      setUploadingId(null);
+    });
   }
 
   function move(game: AdminGame, direction: "up" | "down") {
@@ -132,7 +148,7 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
               </div>
               <GameCover
                 name={game.name}
-                boxArtUrl={game.boxArtUrl}
+                src={game.coverUrl}
                 muted={game.status === "former"}
                 className="w-12"
                 sizes="3rem"
@@ -145,9 +161,56 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
                   <p className="text-sm text-muted-foreground">{t(`statuses.${game.status}`)}</p>
                 </div>
                 <p className="line-clamp-2 text-sm text-muted-foreground">{game.blurbEn}</p>
-                {!game.boxArtUrl && (
-                  <p className="text-xs text-muted-foreground">{t("noCover")}</p>
+                {game.hasCustomCover ? (
+                  <p className="text-xs text-muted-foreground">{t("ownCover")}</p>
+                ) : (
+                  !game.boxArtUrl && (
+                    <p className="text-xs text-muted-foreground">{t("noCover")}</p>
+                  )
                 )}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <label
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "cursor-pointer has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+                      uploadingId === game.id && "pointer-events-none opacity-60",
+                    )}
+                  >
+                    <ImageUp aria-hidden />
+                    {uploadingId === game.id
+                      ? t("uploading")
+                      : game.hasCustomCover
+                        ? t("replaceCover")
+                        : t("uploadCover")}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+                      className="sr-only"
+                      disabled={uploadingId !== null}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        if (file) upload(game, file);
+                      }}
+                    />
+                  </label>
+                  {game.hasCustomCover && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={isPending}
+                      onClick={() =>
+                        startTransition(async () => {
+                          apply(await removeGameCoverAction(game.id), t("coverUpdated"));
+                        })
+                      }
+                    >
+                      {t("useTwitchCover")}
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">{t("coverHint")}</p>
                 {game.tags.length > 0 && (
                   <p className="flex flex-wrap gap-1.5">
                     {game.tags.map((tag) => (

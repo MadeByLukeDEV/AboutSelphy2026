@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import type { Locale } from "@/modules/i18n";
+import { assetUrl } from "@/modules/assets";
 import { findGames, findProfile } from "./repository";
 
 // Every page renders per request (CSP nonce), so the content is cached
@@ -33,7 +34,8 @@ export type HomeContent = {
     status: GameStatus;
     blurb: string;
     tags: string[];
-    boxArtUrl: string | null;
+    /** Uploaded cover, else Twitch box art, else null. */
+    coverUrl: string | null;
   }>;
   updatedAt: Date | null;
 };
@@ -64,7 +66,7 @@ export async function getHomeContent(locale: Locale): Promise<HomeContent> {
       status: game.status,
       blurb: de ? game.blurbDe : game.blurbEn,
       tags: game.tags,
-      boxArtUrl: game.boxArtUrl,
+      coverUrl: game.customCoverId ? assetUrl(game.customCoverId) : game.boxArtUrl,
     })),
     // unstable_cache serializes to JSON, so dates come back as strings.
     updatedAt: profile ? new Date(profile.updatedAt) : null,

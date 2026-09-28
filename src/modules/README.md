@@ -32,5 +32,6 @@ Modules are added here as they are built.
 | `stats` | `StatSnapshot`, `StreamSession`, `SyncRun`, `MediaItem`; Twitch/YouTube clients; sync job (`runSync`, cron + "Sync now"); cached read side (`getLiveStatus`, `getStatsOverview`, `getStreamsMedia`); admin status | `auth` (guards), `profile` (`fillMissingGameArt`), `lib/platforms` |
 | `streams` | Streams page UI: click-to-load `VideoFacade`, media cards/sections, live section, embed URL builders | `stats` (media, live), `profile` (channels, banner) |
 | `schedule` | `ScheduleSlot`, `ScheduleException`; Vienna time helpers; occurrence computation (`getUpcomingStreams`, `getNextStream`); admin schedule editor (staff) | `auth` (guards), `profile` (games via relation) |
+| `assets` | `Asset` table; validated, re-encoded image uploads (`storeImage`); served by `/api/media/[id]` | — |
 | `seo` | public page list for the sitemap, JSON-LD component + schema.org builders (Person, WebSite, ProfilePage) | `i18n` (alternates) |
 | `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |

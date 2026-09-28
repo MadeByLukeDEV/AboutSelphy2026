@@ -70,8 +70,13 @@ export function setGameArt(
   return prisma.game.update({ where: { id }, data: art });
 }
 
+/** Games with neither Twitch art nor an uploaded cover. */
 export function findGamesWithoutArt(take: number) {
-  return prisma.game.findMany({ where: { boxArtUrl: null }, take });
+  return prisma.game.findMany({ where: { boxArtUrl: null, customCoverId: null }, take });
+}
+
+export function setCustomCover(id: string, customCoverId: string | null) {
+  return prisma.game.update({ where: { id }, data: { customCoverId } });
 }
 
 export function deleteGame(id: string) {
