@@ -38,6 +38,7 @@ export async function HomeHero({
           alt=""
           fill
           preload
+          fetchPriority="high"
           sizes="(min-width: 72rem) 72rem, 100vw"
           className="object-cover object-[50%_30%]"
         />
