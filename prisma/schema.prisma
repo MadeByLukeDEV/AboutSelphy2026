@@ -40,30 +40,30 @@ enum GameStatus {
 
 /// A game AboutSelphy plays (or played), shown on the home page.
 model Game {
-  id        String     @id @default(cuid())
-  slug      String     @unique @db.VarChar(60)
-  name      String     @db.VarChar(80)
-  status    GameStatus
-  sortOrder Int        @default(0)
+  id             String     @id @default(cuid())
+  slug           String     @unique @db.VarChar(60)
+  name           String     @db.VarChar(80)
+  status         GameStatus
+  sortOrder      Int        @default(0)
   /// Listed under "What I play" on the home page. Hidden games stay
   /// available for the schedule and admin.
-  showOnHome Boolean   @default(true)
-  blurbDe   String     @db.VarChar(400)
-  blurbEn   String     @db.VarChar(400)
+  showOnHome     Boolean    @default(true)
+  blurbDe        String     @db.VarChar(400)
+  blurbEn        String     @db.VarChar(400)
   /// Short labels (mostly proper nouns like "Hourglass PvP"), not translated.
-  tags      String[]
+  tags           String[]
   /// Twitch category name to look up when it differs from `name`
   /// (e.g. "Hunt: Showdown 1896"). Empty = use `name`.
-  twitchCategory String  @default("") @db.VarChar(80)
+  twitchCategory String     @default("") @db.VarChar(80)
   /// Resolved Twitch category id and 285x380 box art (static-cdn.jtvnw.net),
   /// filled on save and by the sync if missing. null = no cover found.
-  twitchGameId   String? @db.VarChar(20)
-  boxArtUrl      String? @db.VarChar(300)
+  twitchGameId   String?    @db.VarChar(20)
+  boxArtUrl      String?    @db.VarChar(300)
   /// Uploaded cover (Asset). Takes priority over the Twitch box art.
-  customCoverId  String?  @unique
-  customCover    Asset?   @relation(fields: [customCoverId], references: [id], onDelete: SetNull)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  customCoverId  String?    @unique
+  customCover    Asset?     @relation(fields: [customCoverId], references: [id], onDelete: SetNull)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   scheduleSlots      ScheduleSlot[]
   scheduleExceptions ScheduleException[]
@@ -221,7 +221,49 @@ model Asset {
   bytes     Int
   createdAt DateTime @default(now())
 
-  gameCover Game?
+  gameCover   Game?
+  partnerLogo Partner?
+}
+
+// ─── mediakit ────────────────────────────────────────────────────────────
+// Partners and packages shown on /mediakit, edited in /admin/partners.
+
+/// A brand AboutSelphy works (or worked) with, e.g. a referral deal.
+model Partner {
+  id            String   @id @default(cuid())
+  name          String   @db.VarChar(80)
+  /// https only (checked by zod). Referral links included.
+  url           String   @db.VarChar(300)
+  /// Referral or discount code; empty = none.
+  code          String   @default("") @db.VarChar(40)
+  descriptionEn String   @db.VarChar(300)
+  descriptionDe String   @db.VarChar(300)
+  logoId        String?  @unique
+  logo          Asset?   @relation(fields: [logoId], references: [id], onDelete: SetNull)
+  /// Hidden partners can be prepared (e.g. while still testing a product).
+  visible       Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([visible, sortOrder])
+}
+
+/// A sponsorship offer ("Dedicated stream", "Sponsored segment", ...).
+model Package {
+  id            String   @id @default(cuid())
+  titleEn       String   @db.VarChar(80)
+  titleDe       String   @db.VarChar(80)
+  descriptionEn String   @db.VarChar(600)
+  descriptionDe String   @db.VarChar(600)
+  /// Starting price in whole euros; null = "price on request".
+  priceFrom     Int?
+  visible       Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([visible, sortOrder])
 }
 
 // ─── inquiries ───────────────────────────────────────────────────────────
