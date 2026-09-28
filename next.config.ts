@@ -57,10 +57,21 @@ const nextConfig: NextConfig = {
     // Video thumbnails for the Streams page. Loaded through our optimizer,
     // so the browser only ever fetches images from our own origin and the
     // CSP img-src can stay 'self'.
+    // Only the path prefixes the sync actually stores (checked 2026-09-29):
+    // VOD thumbnails, clip thumbnails, box art. A wildcard let anyone make
+    // the server fetch and re-encode arbitrary Twitch CDN images. If Twitch
+    // moves its thumbnails, the images 400 -- add the new prefix here.
     remotePatterns: [
-      { protocol: "https", hostname: "static-cdn.jtvnw.net", pathname: "/**" },
+      { protocol: "https", hostname: "static-cdn.jtvnw.net", pathname: "/cf_vods/**" },
+      { protocol: "https", hostname: "static-cdn.jtvnw.net", pathname: "/twitch-video-assets/**" },
+      { protocol: "https", hostname: "static-cdn.jtvnw.net", pathname: "/ttv-boxart/**" },
       { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
     ],
+    // Bounded work per image: one quality (every <Image> uses the default)
+    // and a capped disk cache. The default cache is half the free disk, and
+    // the Dokploy host also runs the shared Postgres.
+    qualities: [75],
+    maximumDiskCacheSize: 200_000_000,
   },
   experimental: {
     // Image uploads in /admin (covers are capped at 4 MB in
