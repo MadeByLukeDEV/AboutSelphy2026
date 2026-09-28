@@ -235,7 +235,7 @@
       "game": "Game",
       "titleEn": "Title (English)",
       "titleDe": "Title (German)",
-      "titleHint": "Optional. Shown next to the game. Write @name to link a Twitch channel, e.g. @t00nyFPS.",
+      "titleHint": "Optional. Shown next to the game. Write @name to link a Twitch channel.",
       "active": "Active",
       "activeHint": "Paused streams stay saved but don't appear on the site.",
       "date": "Date",

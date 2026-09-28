@@ -235,7 +235,7 @@
       "game": "Spiel",
       "titleEn": "Titel (Englisch)",
       "titleDe": "Titel (Deutsch)",
-      "titleHint": "Optional. Wird neben dem Spiel angezeigt. Mit @name verlinkst du einen Twitch-Kanal, z. B. @t00nyFPS.",
+      "titleHint": "Optional. Wird neben dem Spiel angezeigt. Mit @name verlinkst du einen Twitch-Kanal.",
       "active": "Aktiv",
       "activeHint": "Pausierte Streams bleiben gespeichert, erscheinen aber nicht auf der Seite.",
       "date": "Datum",
