@@ -22,7 +22,9 @@ export function SiteNav({
 
   return (
     <nav aria-label={label}>
-      <ul className="flex items-center gap-1">
+      {/* Never wraps; scrolls sideways as a last resort on very narrow
+          screens (the padding keeps focus rings from being clipped). */}
+      <ul className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 py-1">
         {items.map((item, index) => {
           const active = index === current;
           return (
@@ -31,7 +33,7 @@ export function SiteNav({
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative isolate block rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                  "relative isolate block rounded-lg px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors sm:px-3",
                   active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >

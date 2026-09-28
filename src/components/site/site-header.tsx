@@ -9,11 +9,17 @@ export async function SiteHeader() {
   const t = await getTranslations("Nav");
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-gutter py-4">
-      <div className="flex items-center gap-4">
-        <Link href="/" className="font-extrabold tracking-tight">
-          AboutSelphy
-        </Link>
+    // Phones: name and controls on the first row, the nav on its own row
+    // below (four items don't fit next to the name). md+: one row.
+    <header className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 px-gutter py-4">
+      <Link href="/" className="order-1 font-extrabold tracking-tight">
+        AboutSelphy
+      </Link>
+      <div className="order-2 flex items-center gap-2 md:order-3">
+        <LocaleSwitcher />
+        <ThemeToggle />
+      </div>
+      <div className="order-3 w-full md:order-2 md:w-auto md:flex-1">
         <SiteNav
           label={t("label")}
           items={[
@@ -23,10 +29,6 @@ export async function SiteHeader() {
             { href: "/mediakit", label: t("mediakit") },
           ]}
         />
-      </div>
-      <div className="flex items-center gap-2">
-        <LocaleSwitcher />
-        <ThemeToggle />
       </div>
     </header>
   );

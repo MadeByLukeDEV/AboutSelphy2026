@@ -18,8 +18,8 @@ export function CopyCode({
   const [copied, setCopied] = useState(false);
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-lg border bg-background/60 py-1 pr-1 pl-3">
-      <code className="font-sans font-bold tracking-wide select-all">{code}</code>
+    <span className="inline-flex max-w-full min-w-0 items-center gap-1 rounded-lg border bg-background/60 py-1 pr-1 pl-3">
+      <code className="min-w-0 font-sans font-bold tracking-wide break-all select-all">{code}</code>
       <button
         type="button"
         className={cn(

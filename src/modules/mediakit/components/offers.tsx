@@ -21,7 +21,7 @@ export async function PartnersSection({ partners }: { partners: MediaKit["partne
         </h2>
         <p className="max-w-prose text-muted-foreground">{t("intro")}</p>
       </div>
-      <ul className="grid gap-4 md:grid-cols-2">
+      <ul className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-2">
         {partners.map((partner) => (
           <li key={partner.id} className="reveal flex flex-col gap-4 rounded-2xl border bg-background/60 p-fluid">
             <div className="flex min-h-12 items-center gap-4">
