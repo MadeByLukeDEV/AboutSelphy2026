@@ -55,7 +55,8 @@ export async function submitInquiryAction(
     });
     return { ok: true };
   } catch (error) {
-    console.error("[inquiries] storing an inquiry failed", error);
+    // Name/code only: Prisma errors can echo the submitted personal data.
+    console.error("[inquiries] storing an inquiry failed", errorSummary(error));
     return { ok: false, error: "failed" };
   }
 }
@@ -82,7 +83,7 @@ async function asStaff(
   try {
     return { ok: true, data: await run() };
   } catch (error) {
-    console.error("[inquiries] admin change failed", error);
+    console.error("[inquiries] admin change failed", errorSummary(error));
     return { ok: false, error: "failed" };
   }
 }
@@ -108,4 +109,12 @@ export async function deleteInquiryAction(id: unknown) {
 
 export async function refreshInquiriesAction() {
   return asStaff(() => () => getInquiriesForAdmin());
+}
+
+function errorSummary(error: unknown) {
+  if (error instanceof Error) {
+    const code = (error as { code?: unknown }).code;
+    return { name: error.name, code: typeof code === "string" ? code : undefined };
+  }
+  return { name: typeof error };
 }
