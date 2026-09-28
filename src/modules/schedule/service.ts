@@ -9,7 +9,7 @@ import { addDays, dateKey, fromDbDate, parseDateKey, toDbDate, viennaToday } fro
 export const SCHEDULE_CACHE_TAG = "schedule";
 
 /** How far ahead the public schedule and JSON-LD look. */
-export const SCHEDULE_DAYS = 14;
+export const SCHEDULE_DAYS = 7;
 
 // Same rule as the profile module: an uploaded cover wins over Twitch art.
 function coverUrl(game: { boxArtUrl: string | null; customCoverId: string | null } | null) {

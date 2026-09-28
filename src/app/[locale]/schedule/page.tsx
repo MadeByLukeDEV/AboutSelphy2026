@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { localeAlternates, type Locale } from "@/modules/i18n";
 import { CHANNELS, GameCover, PROFILE_IMAGES } from "@/modules/profile";
 import { getUpcomingStreams, type StreamOccurrence } from "@/modules/schedule";
+import { StreamTime } from "@/modules/schedule/components/stream-time";
 import { JsonLd, streamEventSchema } from "@/modules/seo";
 
 export async function generateMetadata({
@@ -37,8 +38,9 @@ function groupByDate(streams: StreamOccurrence[]) {
   return [...groups.values()];
 }
 
-// The next 14 days, from the weekly plan + changes (schedule module). Times
-// are formatted in Europe/Vienna (next-intl's timeZone, src/modules/i18n).
+// The next 7 days, from the weekly plan + changes (schedule module). Day
+// headings are Vienna dates (next-intl's timeZone); the times themselves
+// switch to the visitor's own zone in the browser (StreamTime).
 export default async function SchedulePage({
   params,
 }: PageProps<"/[locale]/schedule">) {
@@ -61,7 +63,6 @@ export default async function SchedulePage({
     if (key === tomorrowKey) return `${t("tomorrow")}, ${date}`;
     return date;
   };
-  const time = (date: Date) => format.dateTime(date, { hour: "2-digit", minute: "2-digit" });
   const name = (stream: StreamOccurrence) =>
     [stream.gameName, stream.title].filter(Boolean).join(": ") || t("defaultTitle");
 
@@ -85,7 +86,7 @@ export default async function SchedulePage({
         <header className="flex flex-col gap-3">
           <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("title")}</h1>
           <p className="max-w-prose text-fluid-lg text-muted-foreground">
-            {t("intro", { zone: locale === "de" ? "MEZ/MESZ" : "CET/CEST" })}
+            {t("intro")}
           </p>
         </header>
 
@@ -123,13 +124,11 @@ export default async function SchedulePage({
                         <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
                           <p
                             className={cn(
-                              "shrink-0 font-semibold tabular-nums sm:w-32",
+                              "shrink-0 font-semibold tabular-nums sm:w-44",
                               stream.cancelled && "text-muted-foreground line-through",
                             )}
                           >
-                            <time dateTime={stream.start.toISOString()}>{time(stream.start)}</time>
-                            {"–"}
-                            <time dateTime={stream.end.toISOString()}>{time(stream.end)}</time>
+                            <StreamTime start={stream.start.toISOString()} end={stream.end.toISOString()} locale={locale} />
                           </p>
                           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                             <p className={cn(stream.cancelled && "text-muted-foreground line-through")}>
