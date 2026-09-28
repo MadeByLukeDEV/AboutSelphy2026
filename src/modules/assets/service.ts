@@ -12,10 +12,17 @@ export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 /** Formats sharp detects from the file's magic bytes that we accept. */
 const ALLOWED_FORMATS = new Set(["jpeg", "png", "webp", "avif", "gif"]);
 
-export type ImagePreset = { width: number; height: number };
+/**
+ * `cover` crops to exactly width x height; `inside` keeps the aspect ratio
+ * and only shrinks to fit (logos, which must never be cropped).
+ */
+export type ImagePreset = { width: number; height: number; fit?: "cover" | "inside" };
 
-/** Game covers: 3:4 like Twitch box art, 2x the largest display size. */
+/** Game covers: square, 2x the largest display size. */
 export const COVER_PRESET: ImagePreset = { width: 400, height: 400 };
+
+/** Partner logos: any shape, fitted into 400x200, transparency kept. */
+export const LOGO_PRESET: ImagePreset = { width: 400, height: 200, fit: "inside" };
 
 export class UploadError extends Error {
   constructor(readonly code: "noFile" | "tooLarge" | "notAnImage") {
@@ -31,6 +38,7 @@ export async function storeImage(file: unknown, preset: ImagePreset) {
 
   const input = Buffer.from(await file.arrayBuffer());
   let output: Buffer;
+  let size: { width: number; height: number };
   try {
     // limitInputPixels guards against decompression bombs; failOn rejects
     // truncated/corrupt files instead of rendering garbage.
@@ -39,11 +47,17 @@ export async function storeImage(file: unknown, preset: ImagePreset) {
     if (!meta.format || !ALLOWED_FORMATS.has(meta.format)) {
       throw new UploadError("notAnImage");
     }
-    output = await image
+    const fit = preset.fit ?? "cover";
+    const { data, info } = await image
       .rotate() // apply EXIF orientation before metadata is dropped
-      .resize(preset.width, preset.height, { fit: "cover", position: "attention" })
-      .webp({ quality: 85 })
-      .toBuffer();
+      .resize(preset.width, preset.height, {
+        fit,
+        ...(fit === "cover" ? { position: "attention" } : { withoutEnlargement: true }),
+      })
+      .webp({ quality: 85, alphaQuality: 100 })
+      .toBuffer({ resolveWithObject: true });
+    output = data;
+    size = { width: info.width, height: info.height };
   } catch (error) {
     if (error instanceof UploadError) throw error;
     // sharp throws for anything it can't decode (text files, SVG-as-png...).
@@ -54,8 +68,8 @@ export async function storeImage(file: unknown, preset: ImagePreset) {
     data: {
       data: new Uint8Array(output),
       mimeType: "image/webp",
-      width: preset.width,
-      height: preset.height,
+      width: size.width,
+      height: size.height,
       bytes: output.length,
     },
     select: { id: true },
