@@ -261,6 +261,34 @@
         "unknownSlot": "That stream no longer exists.",
         "pastDate": "Pick today or a later date."
       }
+    },
+    "inquiries": {
+      "intro": "Sponsor inquiries sent through the media kit form. Personal data: done and spam inquiries are deleted automatically 12 months after their last change.",
+      "filterLabel": "Filter by status",
+      "all": "All",
+      "statuses": {
+        "new": "New",
+        "in_progress": "In progress",
+        "done": "Done",
+        "spam": "Spam"
+      },
+      "empty": "No inquiries here.",
+      "received": "Received {date}",
+      "language": "Language: {locale}",
+      "budget": "Budget: {budget}",
+      "reply": "Reply by email",
+      "replySubject": "Your inquiry for AboutSelphy",
+      "status": "Status",
+      "delete": "Delete",
+      "confirmDelete": "Delete this inquiry for good?",
+      "cancel": "Cancel",
+      "updated": "Inquiry updated.",
+      "deleted": "Inquiry deleted.",
+      "errors": {
+        "forbidden": "You need to be signed in as staff.",
+        "invalid": "That didn't work.",
+        "failed": "Couldn't save. Try again in a moment."
+      }
     }
   },
   "Streams": {
@@ -306,5 +334,49 @@
     "empty": "No streams planned for the next two weeks yet.",
     "followHint": "Follow on Twitch to get notified when a stream starts.",
     "followOnTwitch": "Follow on Twitch"
+  },
+  "Inquiry": {
+    "heading": "Work with me",
+    "intro": "Tell me about your brand and what you have in mind. I read every inquiry and answer by email, usually within a few days.",
+    "company": "Company or brand",
+    "contactName": "Your name",
+    "email": "Email",
+    "budget": "Budget",
+    "budgetPlaceholder": "Choose a range",
+    "budgets": {
+      "under_500": "Under €500",
+      "from_500_to_2000": "€500–2,000",
+      "from_2000_to_5000": "€2,000–5,000",
+      "over_5000": "Over €5,000",
+      "unsure": "Not sure yet"
+    },
+    "message": "Your message",
+    "messageHint": "What would you like to do together? Timeframe, product, format.",
+    "count": "{count} / {max}",
+    "privacy": "I only use your details to answer this inquiry. They're stored for at most 12 months after it's closed and never shared. Write to me any time to have them deleted.",
+    "send": "Send inquiry",
+    "sending": "Sending…",
+    "successTitle": "Thanks – your inquiry is in.",
+    "successText": "I'll get back to you by email soon.",
+    "sendAnother": "Send another inquiry",
+    "errors": {
+      "required": "Required.",
+      "tooShort": "Please write a little more (at least 20 characters).",
+      "tooLong": "Too long.",
+      "invalidEmail": "Enter a valid email address.",
+      "invalid": "Some fields aren't valid. Check the marked fields.",
+      "rateLimited": "Too many inquiries from your connection. Please try again in an hour.",
+      "captcha": "The human check failed or expired. Please try again.",
+      "unavailable": "The form is temporarily unavailable. Please try again later.",
+      "failed": "Couldn't send. Please try again in a moment.",
+      "widget": "The human check couldn't load. Disable content blockers for this page and reload."
+    },
+    "retry": "Try again"
+  },
+  "MediaKit": {
+    "metaTitle": "Media kit",
+    "metaDescription": "Work with AboutSelphy: audience numbers from Twitch and YouTube, past partners and packages – and a form to send a sponsorship inquiry.",
+    "title": "Media kit",
+    "intro": "Everything brands need to know about working with me. The full media kit with live audience numbers is coming soon – you can already send an inquiry."
   }
 }

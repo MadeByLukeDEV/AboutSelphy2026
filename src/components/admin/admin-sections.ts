@@ -18,7 +18,7 @@ export const ADMIN_SECTIONS = [
   { key: "games", href: "/admin/games", icon: Gamepad2, built: true },
   { key: "schedule", href: "/admin/schedule", icon: CalendarDays, built: true },
   { key: "partners", href: "/admin/partners", icon: Handshake, built: false },
-  { key: "inquiries", href: "/admin/inquiries", icon: Inbox, built: false },
+  { key: "inquiries", href: "/admin/inquiries", icon: Inbox, built: true },
   { key: "stats", href: "/admin/stats", icon: ChartNoAxesColumn, built: true },
 ] as const satisfies ReadonlyArray<{
   key: string;

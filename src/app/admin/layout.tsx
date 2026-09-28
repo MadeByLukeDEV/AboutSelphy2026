@@ -43,7 +43,7 @@ export default async function AdminLayout({
       <body className="min-h-full bg-muted/40">
         {/* Client components in /admin: nav, forms, sync button, theme. */}
         <NextIntlClientProvider
-          messages={await clientMessages(["Admin", "ThemeToggle"])}
+          messages={await clientMessages(["Admin", "Inquiry", "ThemeToggle"])}
         >
           <ThemeProvider nonce={nonce}>
             <div className="flex min-h-dvh flex-col md:flex-row">

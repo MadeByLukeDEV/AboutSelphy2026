@@ -261,6 +261,34 @@
         "unknownSlot": "Diesen Stream gibt es nicht mehr.",
         "pastDate": "Wähle heute oder ein späteres Datum."
       }
+    },
+    "inquiries": {
+      "intro": "Sponsoring-Anfragen aus dem Mediakit-Formular. Personenbezogene Daten: Erledigte und Spam-Anfragen werden 12 Monate nach der letzten Änderung automatisch gelöscht.",
+      "filterLabel": "Nach Status filtern",
+      "all": "Alle",
+      "statuses": {
+        "new": "Neu",
+        "in_progress": "In Bearbeitung",
+        "done": "Erledigt",
+        "spam": "Spam"
+      },
+      "empty": "Keine Anfragen hier.",
+      "received": "Eingegangen {date}",
+      "language": "Sprache: {locale}",
+      "budget": "Budget: {budget}",
+      "reply": "Per E-Mail antworten",
+      "replySubject": "Deine Anfrage an AboutSelphy",
+      "status": "Status",
+      "delete": "Löschen",
+      "confirmDelete": "Diese Anfrage endgültig löschen?",
+      "cancel": "Abbrechen",
+      "updated": "Anfrage aktualisiert.",
+      "deleted": "Anfrage gelöscht.",
+      "errors": {
+        "forbidden": "Du musst als Staff angemeldet sein.",
+        "invalid": "Das hat nicht geklappt.",
+        "failed": "Speichern fehlgeschlagen. Versuch es gleich noch einmal."
+      }
     }
   },
   "Streams": {
@@ -306,5 +334,49 @@
     "empty": "Für die nächsten zwei Wochen sind noch keine Streams geplant.",
     "followHint": "Folge auf Twitch, um benachrichtigt zu werden, wenn ein Stream startet.",
     "followOnTwitch": "Auf Twitch folgen"
+  },
+  "Inquiry": {
+    "heading": "Zusammenarbeiten",
+    "intro": "Erzähl mir von deiner Marke und was du vorhast. Ich lese jede Anfrage und antworte per E-Mail, meist innerhalb weniger Tage.",
+    "company": "Firma oder Marke",
+    "contactName": "Dein Name",
+    "email": "E-Mail",
+    "budget": "Budget",
+    "budgetPlaceholder": "Bereich auswählen",
+    "budgets": {
+      "under_500": "Unter 500 €",
+      "from_500_to_2000": "500–2.000 €",
+      "from_2000_to_5000": "2.000–5.000 €",
+      "over_5000": "Über 5.000 €",
+      "unsure": "Noch unklar"
+    },
+    "message": "Deine Nachricht",
+    "messageHint": "Was möchtest du gemeinsam machen? Zeitraum, Produkt, Format.",
+    "count": "{count} / {max}",
+    "privacy": "Ich verwende deine Angaben nur, um diese Anfrage zu beantworten. Sie werden höchstens 12 Monate nach Abschluss gespeichert und nie weitergegeben. Schreib mir jederzeit, um sie löschen zu lassen.",
+    "send": "Anfrage senden",
+    "sending": "Wird gesendet…",
+    "successTitle": "Danke – deine Anfrage ist angekommen.",
+    "successText": "Ich melde mich bald per E-Mail bei dir.",
+    "sendAnother": "Weitere Anfrage senden",
+    "errors": {
+      "required": "Pflichtfeld.",
+      "tooShort": "Bitte schreib etwas mehr (mindestens 20 Zeichen).",
+      "tooLong": "Zu lang.",
+      "invalidEmail": "Gib eine gültige E-Mail-Adresse ein.",
+      "invalid": "Einige Felder sind ungültig. Prüf die markierten Felder.",
+      "rateLimited": "Zu viele Anfragen von deiner Verbindung. Bitte versuch es in einer Stunde wieder.",
+      "captcha": "Die Prüfung ist fehlgeschlagen oder abgelaufen. Bitte versuch es noch einmal.",
+      "unavailable": "Das Formular ist gerade nicht verfügbar. Bitte versuch es später noch einmal.",
+      "failed": "Senden fehlgeschlagen. Versuch es gleich noch einmal.",
+      "widget": "Die Prüfung konnte nicht geladen werden. Deaktiviere Content-Blocker für diese Seite und lade neu."
+    },
+    "retry": "Erneut versuchen"
+  },
+  "MediaKit": {
+    "metaTitle": "Mediakit",
+    "metaDescription": "Mit AboutSelphy zusammenarbeiten: Reichweite auf Twitch und YouTube, bisherige Partner und Pakete – und ein Formular für deine Sponsoring-Anfrage.",
+    "title": "Mediakit",
+    "intro": "Alles, was Marken über eine Zusammenarbeit mit mir wissen müssen. Das vollständige Mediakit mit Live-Zahlen kommt bald – eine Anfrage kannst du schon jetzt senden."
   }
 }

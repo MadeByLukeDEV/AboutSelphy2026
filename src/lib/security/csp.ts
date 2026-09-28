@@ -27,6 +27,10 @@ export function buildCsp(
       "'self'",
       `'nonce-${nonce}'`,
       "'strict-dynamic'",
+      // Turnstile on the inquiry form. CSP3 browsers ignore host entries
+      // next to 'strict-dynamic' (our nonced code inserts the script);
+      // older ones need the host.
+      "https://challenges.cloudflare.com",
       ...(isDev ? ["'unsafe-eval'"] : []),
     ],
     // Inline styles stay allowed: React/Motion render `style` attributes and
@@ -43,6 +47,8 @@ export function buildCsp(
       "https://player.twitch.tv",
       "https://clips.twitch.tv",
       "https://www.youtube-nocookie.com",
+      // Turnstile's challenge frame (inquiry form).
+      "https://challenges.cloudflare.com",
     ],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],
