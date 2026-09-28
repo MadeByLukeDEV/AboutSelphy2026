@@ -29,7 +29,7 @@ export async function GamesList({ games }: { games: HomeContent["games"] }) {
               name={game.name}
               src={game.coverUrl}
               muted={game.status === "former"}
-              className="w-20"
+              className="w-20 self-center"
               sizes="5rem"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
