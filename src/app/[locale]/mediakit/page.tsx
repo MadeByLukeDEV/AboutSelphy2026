@@ -4,6 +4,7 @@ import Image from "next/image";
 import { headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { FileDown } from "lucide-react";
 import { env } from "@/lib/env";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -31,9 +32,16 @@ export async function generateMetadata({
     title: t("metaTitle"),
     description: t("metaDescription"),
     alternates: localeAlternates(locale, "/mediakit"),
-    // Not indexed (and not in the sitemap or nav) until the PDF and the
-    // share card are in place.
-    robots: { index: false, follow: true },
+    // Metadata doesn't deep-merge openGraph: repeat every field. The image
+    // comes from ./opengraph-image.tsx (live numbers).
+    openGraph: {
+      title: `${t("metaTitle")} — AboutSelphy`,
+      description: t("metaDescription"),
+      siteName: "AboutSelphy",
+      type: "website",
+      locale: locale === "de" ? "de_DE" : "en_US",
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -78,6 +86,15 @@ export default async function MediaKitPage({
             </a>
             <a href={CHANNELS.youtube} className={cn(buttonVariants({ size: "lg", variant: "outline" }))}>
               {t("youtubeChannel")}
+            </a>
+            {/* A plain link: the PDF is a route handler, not a page. */}
+            <a
+              href={`/${locale}/mediakit/pdf`}
+              download
+              className={cn(buttonVariants({ size: "lg", variant: "ghost" }))}
+            >
+              <FileDown aria-hidden />
+              {t("downloadPdf")}
             </a>
           </div>
         </header>

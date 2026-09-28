@@ -20,6 +20,7 @@ export async function SiteHeader() {
             { href: "/", label: t("home") },
             { href: "/streams", label: t("streams") },
             { href: "/schedule", label: t("schedule") },
+            { href: "/mediakit", label: t("mediakit") },
           ]}
         />
       </div>

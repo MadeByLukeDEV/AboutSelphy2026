@@ -14,7 +14,7 @@ export function SiteNav({
   items,
 }: {
   label: string;
-  items: Array<{ href: "/" | "/streams" | "/schedule"; label: string }>;
+  items: Array<{ href: "/" | "/streams" | "/schedule" | "/mediakit"; label: string }>;
 }) {
   const pathname = usePathname();
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));

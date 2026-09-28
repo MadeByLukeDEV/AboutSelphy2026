@@ -395,9 +395,9 @@ checks before it's considered done.
   - **Brand font for `next/og`**:
     `src/assets/fonts/PlusJakartaSans-ExtraBold.ttf` (static TTF, OFL) is
     committed and loaded by `loadBrandFont()` in `src/lib/og-font.ts`, so
-    builds never fetch Google Fonts. Icons render at build time. An image
-    that renders at **request** time (dynamic OG cards) needs
-    `COPY src/assets` in the Dockerfile runner first.
+    builds never fetch Google Fonts. Icons render at build time; the
+    request-time media kit card and the PDF read the fonts at runtime,
+    which is why the Dockerfile runner has `COPY src/assets`.
 - **Core Web Vitals targets**: LCP < 2.5 s, CLS < 0.1, INP < 200 ms, and
   Lighthouse SEO/Performance/Accessibility/Best Practices ≥ 95 on mobile.
   - Use `next/image` with explicit sizes, and a `priority` hero image.
@@ -905,8 +905,9 @@ SEO and security are built into every phase, not saved for the end.
       offered. The server rechecks the weekday and rejects past dates.
     - Extra-stream dialog, and a list of upcoming changes with delete.
     - Starts empty: the user enters the real plan.
-- [ ] Phase 6: Media kit (API stats, growth charts, partners, packages,
-      PDF, OG card) + inquiry form (Turnstile) with `/admin/inquiries`
+- [x] Phase 6 (done 2026-09-28): Media kit (API stats, growth charts,
+      partners, packages, PDF, OG card) + inquiry form (Turnstile) with
+      `/admin/inquiries`
   - [x] Page, step 1 (2026-09-28, `modules/mediakit`): audience + growth.
     - Opens with a **sentence built from the live numbers** (Twitch
       followers, YouTube subscribers, average views of the last 10
@@ -950,6 +951,34 @@ SEO and security are built into every phase, not saved for the end.
       form). Each section is left out while it has nothing visible.
     - Security review: nothing significant; its two hardening notes
       (credentials in URLs, orphaned logo) are applied.
+  - [x] Step 3 (2026-09-28): count-up, share cards, PDF, going public.
+    - Numbers count up (`CountUp`, see Frontend conventions).
+    - Share cards (next/og, Plus Jakarta Sans 400/700/800 via
+      `loadBrandFonts()`):
+      - `[locale]/opengraph-image.tsx`: default card for every public page
+        (banner, avatar, name, site description). Only committed files, so
+        `generateStaticParams` prerenders it per locale at build (it's
+        ~850 KB; pages themselves still have no generateStaticParams).
+      - `[locale]/mediakit/opengraph-image.tsx`: live headline numbers
+        and "as of", `force-dynamic` (reads the DB, never at build).
+    - PDF: `GET /{locale}/mediakit/pdf` (`modules/mediakit/pdf.tsx`,
+      `@react-pdf/renderer` 4.9.0 pinned; chosen over pdf-lib for flexbox
+      layout). A4, one page with the current data in both languages;
+      contact links sit in the dark header band. WebP logos and the avatar
+      are re-encoded to PNG with sharp (react-pdf can't read WebP).
+      Memoized per locale until the data changes; `attachment`
+      download, `X-Robots-Tag: noindex` (the page is canonical), generic
+      503 on failure. The page has a "Download PDF" button (plain `<a
+      download>`, not a Link).
+    - Fonts: static Regular and Bold TTFs added next to ExtraBold (from
+      tokotype/PlusJakartaSans, OFL). The Dockerfile runner now has
+      `COPY src/assets` (request-time cards and the PDF read them).
+    - Public: `noindex` removed, "Media kit" in the nav, `/mediakit` in
+      `PUBLIC_PAGES`, full `openGraph` in its metadata, 159/160-char
+      descriptions. Verified on a prod build: robots/og tags, sitemap,
+      both cards, both PDFs, download, no console/CSP errors.
+    - Checking PDFs locally: `python -m pip install --user pypdfium2`,
+      render pages to raw pixels and encode with sharp (no Pillow here).
   - **Shared DB + migrations**: `migrate deploy` from a dev machine changes
     the production database before production runs the new code. Adding
     enum values broke reads in any process with an older Prisma client

@@ -427,7 +427,8 @@
     "label": "Hauptmenü",
     "home": "Start",
     "streams": "Streams",
-    "schedule": "Streamplan"
+    "schedule": "Streamplan",
+    "mediakit": "Mediakit"
   },
   "Schedule": {
     "metaTitle": "Streamplan",
@@ -485,7 +486,7 @@
   },
   "MediaKit": {
     "metaTitle": "Mediakit",
-    "metaDescription": "Mit AboutSelphy zusammenarbeiten: Reichweite auf Twitch und YouTube, bisherige Partner und Pakete – und ein Formular für deine Sponsoring-Anfrage.",
+    "metaDescription": "Mit AboutSelphy zusammenarbeiten: Live-Zahlen von Twitch und YouTube, Wachstum, Partner, Pakete, eine PDF-Version und ein Formular für deine Sponsoring-Anfrage.",
     "title": "Mediakit",
     "intro": "Wer zuschaut, wie viele, und wie eine Zusammenarbeit aussehen kann. Die Zahlen unten kommen direkt von Twitch und YouTube und aktualisieren sich selbst.",
     "inquiryCta": "Anfrage senden",
@@ -533,7 +534,28 @@
       "onRequest": "Preis auf Anfrage",
       "from": "ab {price}",
       "ask": "Nach einem Paket fragen"
-    }
+    },
+    "card": {
+      "title": "Mediakit",
+      "twitchFollowers": "Twitch-Follower",
+      "youtubeSubscribers": "YouTube-Abonnenten",
+      "averageViews": "Aufrufe pro Upload im Schnitt",
+      "asOf": "Live-Zahlen, Stand {date}"
+    },
+    "pdf": {
+      "title": "Mediakit",
+      "asOf": "Stand {date}",
+      "audience": "Reichweite",
+      "source": "Alle Zahlen kommen direkt aus den Schnittstellen von Twitch und YouTube und werden automatisch aktualisiert. Aktuelle Version und Anfrageformular: aboutselphy.com/mediakit",
+      "games": "Worum es in den Streams geht",
+      "partners": "Partner",
+      "packages": "Pakete",
+      "code": "Code",
+      "page": "Seite {page} von {total}",
+      "inquiryLink": "Anfrage senden",
+      "youtube": "YouTube-Kanal"
+    },
+    "downloadPdf": "PDF herunterladen"
   },
   "Countdown": {
     "in": "in {time}",

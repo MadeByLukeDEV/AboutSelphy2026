@@ -427,7 +427,8 @@
     "label": "Main",
     "home": "Home",
     "streams": "Streams",
-    "schedule": "Schedule"
+    "schedule": "Schedule",
+    "mediakit": "Media kit"
   },
   "Schedule": {
     "metaTitle": "Stream schedule",
@@ -485,7 +486,7 @@
   },
   "MediaKit": {
     "metaTitle": "Media kit",
-    "metaDescription": "Work with AboutSelphy: audience numbers from Twitch and YouTube, past partners and packages – and a form to send a sponsorship inquiry.",
+    "metaDescription": "Work with AboutSelphy: live audience numbers from Twitch and YouTube, growth over time, partners, packages, a PDF version and a form for sponsorship inquiries.",
     "title": "Media kit",
     "intro": "Who watches, how many, and how to work together. The numbers below come straight from Twitch and YouTube and update on their own.",
     "inquiryCta": "Send an inquiry",
@@ -533,7 +534,28 @@
       "onRequest": "Price on request",
       "from": "from {price}",
       "ask": "Ask about a package"
-    }
+    },
+    "card": {
+      "title": "Media kit",
+      "twitchFollowers": "Twitch followers",
+      "youtubeSubscribers": "YouTube subscribers",
+      "averageViews": "average views per upload",
+      "asOf": "Live numbers as of {date}"
+    },
+    "pdf": {
+      "title": "Media kit",
+      "asOf": "As of {date}",
+      "audience": "Audience",
+      "source": "All numbers come straight from the Twitch and YouTube APIs and are updated automatically. Current version and inquiry form: aboutselphy.com/mediakit",
+      "games": "What the streams are about",
+      "partners": "Partners",
+      "packages": "Packages",
+      "code": "Code",
+      "page": "Page {page} of {total}",
+      "inquiryLink": "Send an inquiry",
+      "youtube": "YouTube channel"
+    },
+    "downloadPdf": "Download PDF"
   },
   "Countdown": {
     "in": "in {time}",
