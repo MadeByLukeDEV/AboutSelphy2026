@@ -6,4 +6,6 @@ export {
   profilePageSchema,
   videoSchema,
   streamEventSchema,
+  breadcrumbSchema,
 } from "./schemas";
+export { PageBreadcrumbs } from "./page-breadcrumbs";

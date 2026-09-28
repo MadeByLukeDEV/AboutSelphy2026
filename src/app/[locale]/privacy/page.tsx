@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageBreadcrumbs } from "@/modules/seo";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { PageTransition } from "@/components/motion/page-transition";
@@ -37,6 +38,7 @@ export default async function PrivacyPage({ params }: PageProps<"/[locale]/priva
 
   return (
     <PageTransition>
+      <PageBreadcrumbs locale={locale} path="/privacy" name={t("privacyTitle")} />
       <main data-enter className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-gutter pt-fluid pb-section">
         <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("privacyTitle")}</h1>
         <section aria-labelledby="controller" className="flex flex-col gap-2 rounded-2xl border bg-background/60 p-fluid">

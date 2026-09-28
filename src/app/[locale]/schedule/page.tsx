@@ -9,7 +9,7 @@ import { CHANNELS, GameCover, PROFILE_IMAGES } from "@/modules/profile";
 import { getUpcomingStreams, type StreamOccurrence } from "@/modules/schedule";
 import { StreamTime } from "@/modules/schedule/components/stream-time";
 import { WithMentions } from "@/modules/schedule/components/with-mentions";
-import { JsonLd, streamEventSchema } from "@/modules/seo";
+import { JsonLd, streamEventSchema, PageBreadcrumbs } from "@/modules/seo";
 
 export async function generateMetadata({
   params,
@@ -85,6 +85,7 @@ export default async function SchedulePage({
         )}
       />
       <PageTransition>
+        <PageBreadcrumbs locale={locale} path="/schedule" name={t("title")} />
         <main data-enter className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-10 px-gutter pt-fluid pb-section">
           <header className="flex flex-col gap-3">
             <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("title")}</h1>

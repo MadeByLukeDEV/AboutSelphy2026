@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageBreadcrumbs } from "@/modules/seo";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { PageTransition } from "@/components/motion/page-transition";
@@ -37,6 +38,7 @@ export default async function ImprintPage({ params }: PageProps<"/[locale]/impri
 
   return (
     <PageTransition>
+      <PageBreadcrumbs locale={locale} path="/imprint" name={t("imprintTitle")} />
       <main data-enter className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-gutter pt-fluid pb-section">
         <h1 className="text-fluid-4xl font-extrabold tracking-tight">{t("imprintTitle")}</h1>
         <section aria-labelledby="statutory" className="flex flex-col gap-3">

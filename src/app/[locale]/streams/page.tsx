@@ -9,7 +9,7 @@ import { CHANNELS } from "@/modules/profile";
 import { LiveSection } from "@/modules/streams/components/live-section";
 import { MediaSection } from "@/modules/streams/components/media-section";
 import { embedUrl } from "@/modules/streams/embeds";
-import { JsonLd, videoSchema } from "@/modules/seo";
+import { JsonLd, videoSchema, PageBreadcrumbs } from "@/modules/seo";
 
 export async function generateMetadata({
   params,
@@ -67,6 +67,7 @@ export default async function StreamsPage({
         )}
       />
       <PageTransition>
+        <PageBreadcrumbs locale={locale} path="/streams" name={t("title")} />
         <main data-enter className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
           <header className="flex flex-col gap-3">
             <h1 className="text-fluid-4xl font-extrabold tracking-tight">
