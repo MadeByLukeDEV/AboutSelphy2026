@@ -17,6 +17,7 @@ import {
 import { env } from "@/lib/env";
 import { fillMissingGameArt } from "@/modules/profile";
 import * as repo from "./repository";
+import { errorInfo } from "@/lib/log";
 
 // The sync job behind POST /api/cron/stats (Dokploy schedule, every 5
 // minutes) and the "Sync now" button in /admin/stats. Each step fails on its
@@ -135,7 +136,7 @@ async function step(name: string, run: () => Promise<string>, steps: string[]) {
     if (error instanceof PlatformError) {
       steps.push(`${name} failed: ${error.message}`);
     } else {
-      console.error(`[stats] ${name} failed`, error);
+      console.error(`[stats] ${name} failed`, errorInfo(error, { message: true }));
       steps.push(`${name} failed: unexpected error (see server log)`);
     }
     return false;

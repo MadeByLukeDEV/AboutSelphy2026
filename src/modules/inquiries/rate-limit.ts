@@ -26,10 +26,14 @@ export async function allowInquiry(ip: string | null): Promise<boolean> {
   const key = `${REDIS_PREFIX}rl:inquiry:${hash}`;
   try {
     const count = await client.incr(key);
-    if (count === 1) await client.expire(key, WINDOW_SECONDS);
+    // Set the window on the first attempt, and again once over the limit:
+    // if that first EXPIRE ever failed (e.g. a transient NOPERM), the key
+    // would otherwise never expire and block the IP for good. Only
+    // INCR/EXPIRE, which the ACL user is known to have.
+    if (count === 1 || count > LIMIT) await client.expire(key, WINDOW_SECONDS);
     return count <= LIMIT;
   } catch (error) {
-    console.error("[inquiries] rate limit check failed (allowing)", error);
+    console.error("[inquiries] rate limit check failed (allowing)", error instanceof Error ? error.name : typeof error);
     return true;
   }
 }

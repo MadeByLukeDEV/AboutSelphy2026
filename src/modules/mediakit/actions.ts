@@ -18,6 +18,7 @@ import {
   type AdminPartner,
 } from "./admin-service";
 import { packageInputSchema, partnerInputSchema } from "./schema";
+import { errorInfo } from "@/lib/log";
 
 // Server Actions are public POST endpoints: every one checks the admin role
 // first, then validates its own arguments. Errors are codes only.
@@ -44,11 +45,7 @@ async function asAdmin<T>(
     return { ok: true, value: await run() };
   } catch (error) {
     if (error instanceof UploadError) return { ok: false, error: error.code };
-    const code = (error as { code?: unknown })?.code;
-    console.error("[mediakit] admin change failed", {
-      name: error instanceof Error ? error.name : typeof error,
-      code: typeof code === "string" ? code : undefined,
-    });
+    console.error("[mediakit] admin change failed", errorInfo(error));
     return { ok: false, error: "failed" };
   }
 }

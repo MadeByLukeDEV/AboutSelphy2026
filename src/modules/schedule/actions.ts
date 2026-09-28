@@ -16,6 +16,7 @@ import {
   extraInputSchema,
   slotInputSchema,
 } from "./schema";
+import { errorInfo } from "@/lib/log";
 
 // Staff (admins and moderators) may edit the schedule. Auth first, then
 // validation, then the change; results carry the fresh schedule for the
@@ -52,7 +53,7 @@ async function asStaff(
     return { ok: true, schedule: await run() };
   } catch (error) {
     if (error instanceof ScheduleRuleError) return { ok: false, error: error.code };
-    console.error("[schedule] change failed", error);
+    console.error("[schedule] change failed", errorInfo(error));
     return { ok: false, error: "failed" };
   }
 }

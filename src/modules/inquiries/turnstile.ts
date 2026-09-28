@@ -1,5 +1,6 @@
 import "server-only";
 import { env, siteUrl } from "@/lib/env";
+import { errorInfo } from "@/lib/log";
 
 // Server-side Turnstile check (Cloudflare's canonical siteverify). Tokens are
 // single-use; the widget is reset after every attempt. Requires success, the
@@ -62,7 +63,7 @@ export async function verifyTurnstile(token: unknown, remoteIp: string | null) {
     }
     return ok;
   } catch (error) {
-    console.error("[turnstile] siteverify failed", error);
+    console.error("[turnstile] siteverify failed", errorInfo(error));
     return false;
   }
 }

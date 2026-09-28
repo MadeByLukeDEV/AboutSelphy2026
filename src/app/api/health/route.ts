@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { errorInfo } from "@/lib/log";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export async function GET() {
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    console.error("[health] database check failed:", error);
+    console.error("[health] database check failed:", errorInfo(error));
     return Response.json(
       { status: "error" },
       { status: 503, headers: { "Cache-Control": "no-store" } },
