@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageBreadcrumbs } from "@/modules/seo";
 import { PageTransition } from "@/components/motion/page-transition";
 import Image from "next/image";
 import { headers } from "next/headers";
@@ -12,7 +13,7 @@ import { localeAlternates, type Locale } from "@/modules/i18n";
 import { clientMessages } from "@/modules/i18n/client-messages";
 import { isTurnstileConfigured, TURNSTILE_ACTION } from "@/modules/inquiries";
 import { isLegalPublished } from "@/modules/legal";
-import { InquiryForm } from "@/modules/inquiries/components/inquiry-form";
+import { LazyInquiryForm } from "@/modules/inquiries/components/lazy-inquiry-form";
 import {
   AudienceSummary,
   getMediaKit,
@@ -60,6 +61,7 @@ export default async function MediaKitPage({
 
   return (
     <PageTransition>
+      <PageBreadcrumbs locale={locale} path="/mediakit" name={t("title")} />
       <main data-enter className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-section px-gutter pt-fluid pb-section">
         <header className="flex flex-col gap-5">
           <div className="flex items-center gap-4">
@@ -126,7 +128,7 @@ export default async function MediaKitPage({
           {siteKey && isTurnstileConfigured() ? (
             // Only this page ships the form's texts to the browser.
             <NextIntlClientProvider messages={await clientMessages(["Inquiry"])}>
-              <InquiryForm
+              <LazyInquiryForm
                 siteKey={siteKey}
                 action={TURNSTILE_ACTION}
                 nonce={nonce}

@@ -86,27 +86,43 @@ export const TurnstileWidget = forwardRef<
 
   useEffect(() => {
     let cancelled = false;
-    loadScript(nonce)
-      .then(() => {
-        if (cancelled || !container.current || !window.turnstile) return;
-        widgetId.current = window.turnstile.render(container.current, {
-          sitekey: siteKey,
-          action,
-          theme: "auto",
-          language,
-          callback: (token) => callbacks.current.onToken(token),
-          "expired-callback": () => callbacks.current.onToken(null),
-          "error-callback": () => {
-            callbacks.current.onToken(null);
-            callbacks.current.onChallengeError();
-          },
+    const render = () =>
+      loadScript(nonce)
+        .then(() => {
+          if (cancelled || !container.current || !window.turnstile) return;
+          widgetId.current = window.turnstile.render(container.current, {
+            sitekey: siteKey,
+            action,
+            theme: "auto",
+            language,
+            callback: (token) => callbacks.current.onToken(token),
+            "expired-callback": () => callbacks.current.onToken(null),
+            "error-callback": () => {
+              callbacks.current.onToken(null);
+              callbacks.current.onChallengeError();
+            },
+          });
+        })
+        .catch(() => {
+          if (!cancelled) callbacks.current.onLoadError();
         });
-      })
-      .catch(() => {
-        if (!cancelled) callbacks.current.onLoadError();
-      });
+
+    // Load Turnstile (~1 MB with its challenge frame) only once the form is
+    // about a screen away: most visitors read the media kit and never reach
+    // the form (Lighthouse, 2026-09-29).
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        observer.disconnect();
+        render();
+      },
+      { rootMargin: "100% 0px" },
+    );
+    if (container.current) observer.observe(container.current);
+
     return () => {
       cancelled = true;
+      observer.disconnect();
       if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current);
       widgetId.current = null;
     };

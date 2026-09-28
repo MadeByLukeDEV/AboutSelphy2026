@@ -33,7 +33,6 @@ function asOf(format: Format, date: Date) {
 export async function AudienceSummary({ stats }: { stats: StatsOverview }) {
   const t = await getTranslations("MediaKit");
   const format = await getFormatter();
-  const locale = await getLocale();
   const followers = stats.latest["twitch/followers"];
   const subscribers = stats.latest["youtube/subscribers"];
   const views = stats.latest["youtube/recentAverageViews"];
@@ -43,11 +42,10 @@ export async function AudienceSummary({ stats }: { stats: StatsOverview }) {
     a.capturedAt < b.capturedAt ? a : b,
   ).capturedAt;
 
-  const num = (f: Figure) => (
-    <strong className="font-extrabold text-foreground">
-      <CountUp value={f.value} text={f.text} locale={locale} options={f.options} />
-    </strong>
-  );
+  // Static on purpose: this sentence is the page's largest paint (LCP).
+  // Counting it up meant hiding its numbers until JavaScript ran, which
+  // delayed the first paint on phones; the cards below still count up.
+  const num = (f: Figure) => <strong className="font-extrabold text-foreground">{f.text}</strong>;
   const f = figure(format, followers.value);
   const s = figure(format, subscribers.value);
   const v = figure(format, Math.round(views.value));
