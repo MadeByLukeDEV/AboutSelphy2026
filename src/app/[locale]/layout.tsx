@@ -3,9 +3,8 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Toaster } from "@/components/ui/sonner";
 import { AnimatedBackground } from "@/components/effects/animated-background";
-import { CustomCursor } from "@/components/effects/custom-cursor";
+import { CustomCursorLoader } from "@/components/effects/custom-cursor-loader";
 import { ThemeProvider } from "@/modules/theme";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
@@ -71,11 +70,10 @@ export default async function LocaleLayout({
         >
           <ThemeProvider nonce={nonce}>
             <AnimatedBackground />
-            <CustomCursor />
+            <CustomCursorLoader />
             <SiteHeader />
             {children}
             <SiteFooter />
-            <Toaster />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

@@ -293,3 +293,35 @@
     translate: 0 1rem;
   }
 }
+
+/* AnimatedBackground orbs (src/components/effects/animated-background.tsx):
+   the same drift paths the Motion version had, as plain CSS. The third orb
+   is centred on its top/left point, so its keyframes include -50%. The
+   global reduced-motion rule above freezes them. */
+@keyframes orb-drift-1 {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 25% 20%;
+  }
+}
+@keyframes orb-drift-2 {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: -20% -15%;
+  }
+}
+@keyframes orb-drift-3 {
+  0%,
+  100% {
+    translate: -50% -50%;
+  }
+  50% {
+    translate: -30% -65%;
+  }
+}
