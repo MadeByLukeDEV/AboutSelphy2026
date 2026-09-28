@@ -1,6 +1,8 @@
 export {
   getLiveStatus,
+  getGrowthSeries,
   getStatsOverview,
+  type GrowthSeries,
   getStreamsMedia,
   type LiveStatus,
   type MediaEntry,

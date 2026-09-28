@@ -171,3 +171,35 @@ export async function getStreamsMedia() {
     shorts: revive(media.shorts),
   };
 }
+
+/** Metrics with a growth chart (cumulative audience counts). */
+const GROWTH_METRICS = [
+  { platform: "twitch", metric: "followers" },
+  { platform: "youtube", metric: "subscribers" },
+] as const;
+
+export type GrowthKey = `${(typeof GROWTH_METRICS)[number]["platform"]}/${(typeof GROWTH_METRICS)[number]["metric"]}`;
+
+/** Daily points ("YYYY-MM-DD" in Vienna, last value of that day). */
+export type GrowthSeries = Record<GrowthKey, Array<{ day: string; value: number }>>;
+
+const loadGrowth = unstable_cache(
+  async (days: number) => {
+    const since = new Date(Date.now() - days * 24 * 60 * 60_000);
+    const rows = await repo.dailyValues([...GROWTH_METRICS], since);
+    return rows.map((r) => ({ key: `${r.platform}/${r.metric}`, day: r.day, value: r.value }));
+  },
+  ["stats-growth"],
+  { tags: [STATS_CACHE_TAG], revalidate: CACHE_SECONDS },
+);
+
+/** Growth over the last `days` days, one point per day, oldest first. */
+export async function getGrowthSeries(days = 90): Promise<GrowthSeries> {
+  const series = Object.fromEntries(
+    GROWTH_METRICS.map((m) => [`${m.platform}/${m.metric}`, []]),
+  ) as unknown as GrowthSeries;
+  for (const row of await loadGrowth(days)) {
+    series[row.key as GrowthKey]?.push({ day: row.day, value: row.value });
+  }
+  return series;
+}

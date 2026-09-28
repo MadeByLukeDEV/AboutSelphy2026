@@ -1,6 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import type { MediaKind, StatPlatform } from "@/generated/prisma/client";
+import { Prisma, type MediaKind, type StatPlatform } from "@/generated/prisma/client";
 
 // Prisma-only and private to the stats module.
 
@@ -158,4 +158,23 @@ export function mediaByKind(kind: MediaKind, take: number) {
         : { publishedAt: "desc" },
     take,
   });
+}
+
+/**
+ * The last value of each day (Europe/Vienna) per metric since `since`, for
+ * growth charts. Snapshots are hourly, so this keeps the query result small.
+ */
+export function dailyValues(keys: Array<{ platform: StatPlatform; metric: string }>, since: Date) {
+  const pairs = Prisma.join(
+    keys.map((k) => Prisma.sql`(${k.platform}::"StatPlatform", ${k.metric})`),
+  );
+  return prisma.$queryRaw<Array<{ platform: StatPlatform; metric: string; day: string; value: number }>>`
+    SELECT DISTINCT ON (platform, metric, (("capturedAt" AT TIME ZONE 'Europe/Vienna')::date))
+      platform, metric,
+      (("capturedAt" AT TIME ZONE 'Europe/Vienna')::date)::text AS day,
+      value
+    FROM "StatSnapshot"
+    WHERE (platform, metric) IN (${pairs}) AND "capturedAt" >= ${since}
+    ORDER BY platform, metric, (("capturedAt" AT TIME ZONE 'Europe/Vienna')::date), "capturedAt" DESC
+  `;
 }
