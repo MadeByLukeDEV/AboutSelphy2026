@@ -221,6 +221,12 @@ brand.
   its option list is drawn by the OS and ignores the dark theme (white popup,
   pale text). Options are `{ value: string; label }`, and `""` works as a
   "none" value. Numbers come back as strings, so schemas use `z.coerce`.
+- **next-themes script** (2026-09-29): `ThemeProvider` passes
+  `scriptProps.type` = `text/javascript` on the server and
+  `application/json` in the browser. The server copy runs (with the nonce);
+  a client-created copy never runs anyway, and the data type stops React 19's
+  "Encountered a script tag while rendering React component" error (seen
+  after a render error remounted the admin layout). Don't remove it.
 - Use `useSyncExternalStore` for client-only and mounted checks, not
   `useEffect(() => setMounted(true))`, which the React Compiler lint rule
   flags.
