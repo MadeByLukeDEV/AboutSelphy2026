@@ -1180,5 +1180,10 @@ SEO and security are built into every phase, not saved for the end.
   - The dev server logs the callback URL with Google's code (Next's request
     log). The code is single-use, already spent and bound to PKCE;
     `next start` doesn't log requests.
-  - Not in the PDF yet (its memo key would need `kit.audience` too).
+  - **PDF** (2026-09-29): a "Who watches" block after the audience cards
+    (four columns, thin bars in `BRAND_TEXT`, `wrap={false}`), countries cut
+    to the top 5 + other so it stays one page; `kit.audience` is part of the
+    memo key. Labels and percent text come from `audienceLabeller(locale)` /
+    `shareText()` in `stats/demographic-labels.ts`, shared with the page.
+    Checked: en and de both render as one page.
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
