@@ -725,7 +725,7 @@ SEO and security are built into every phase, not saved for the end.
 - [x] Phase 1 (done 2026-09-27): central auth (`modules/auth`, proxy gate +
       `requireStaffPage`/`requireStaff`/`requireAdmin`), `/admin` shell
       (full width, sidebar, overview), sign-out via the auth service
-- [ ] Phase 2: Home / About
+- [x] Phase 2 (done 2026-09-28): Home / About
   - [x] `profile` module: `Profile` (singleton, de/en tagline + bio) and
         `Game` (status main/regular/new/former, de/en blurb, tags) tables,
         seeded; `getHomeContent(locale)` cached with `unstable_cache`, tag
@@ -754,7 +754,7 @@ SEO and security are built into every phase, not saved for the end.
         returns error codes only, and clears the cache via
         `revalidateTag(PROFILE_CACHE_TAG, { expire: 0 })`. Moderators see the
         page read-only.
-  - [ ] Games editing in admin (or with Phase 4)
+  - [x] Games editing in admin (`/admin/games`, see below)
 - [x] Phase 3 (done 2026-09-27): `stats` module
   - Tables: `StatSnapshot` (platform/metric/value/capturedAt),
     `StreamSession` (one Twitch broadcast with running viewer aggregates:
