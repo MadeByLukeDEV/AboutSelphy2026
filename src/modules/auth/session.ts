@@ -73,8 +73,13 @@ function verifySignedToken(raw: string | undefined): string | null {
 }
 
 async function lookupSession(token: string): Promise<StaffSession | null> {
+  // The *session's* role: the auth service only grants staff roles to Discord
+  // sign-ins, so a Twitch/YouTube session of a mod is still just a viewer
+  // here. Sessions from before per-session roles existed (all Discord
+  // sign-ins) fall back to the user's Discord-derived role.
   const { rows } = await pool().query(
-    `select s.id as "sessionId", s."expiresAt", u.id, u.name, u.email, u.image, u.role
+    `select s.id as "sessionId", s."expiresAt", u.id, u.name, u.email, u.image,
+            coalesce(s.role, u.role) as role
        from "session" s
        join "user" u on u.id = s."userId"
       where s.token = $1
