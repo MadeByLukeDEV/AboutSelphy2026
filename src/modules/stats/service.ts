@@ -1,7 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import * as repo from "./repository";
-import { STATS_CACHE_TAG } from "./sync";
+import { STATS_CACHE_TAG } from "./cache";
 
 // Read side for pages. Cached under the "stats" tag, which every sync run
 // clears -- so the data is at most one sync (5 min) old. "Now"-relative
@@ -202,4 +202,58 @@ export async function getGrowthSeries(days = 90): Promise<GrowthSeries> {
     series[row.key as GrowthKey]?.push({ day: row.day, value: row.value });
   }
   return series;
+}
+
+export type AudienceShare = { key: string; share: number };
+
+export type Audience = {
+  /** The admin's "Show in media kit" switch (and still connected). */
+  showInMediaKit: boolean;
+  capturedAt: Date;
+  periodStart: Date;
+  periodEnd: Date;
+  age: AudienceShare[];
+  gender: AudienceShare[];
+  country: AudienceShare[];
+  device: AudienceShare[];
+};
+
+const loadAudience = unstable_cache(
+  async () => {
+    const [connection, rows] = await Promise.all([
+      repo.findYoutubeConnection(),
+      repo.latestAudienceSet(),
+    ]);
+    if (!connection || rows.length === 0) return null;
+    const pick = (dimension: string) =>
+      rows.filter((r) => r.dimension === dimension).map((r) => ({ key: r.key, share: r.share }));
+    // Plain JSON only: unstable_cache serializes (no BigInt, dates as strings).
+    return {
+      showInMediaKit: connection.showInMediaKit,
+      capturedAt: rows[0].capturedAt.toISOString(),
+      periodStart: rows[0].periodStart.toISOString(),
+      periodEnd: rows[0].periodEnd.toISOString(),
+      age: pick("age"),
+      gender: pick("gender"),
+      country: pick("country"),
+      device: pick("device"),
+    };
+  },
+  ["stats-audience"],
+  { tags: [STATS_CACHE_TAG], revalidate: CACHE_SECONDS },
+);
+
+/**
+ * The latest YouTube audience demographics (null while not connected or
+ * without data). Callers showing it publicly must check `showInMediaKit`.
+ */
+export async function getAudience(): Promise<Audience | null> {
+  const audience = await loadAudience();
+  if (!audience) return null;
+  return {
+    ...audience,
+    capturedAt: new Date(audience.capturedAt),
+    periodStart: new Date(audience.periodStart),
+    periodEnd: new Date(audience.periodEnd),
+  };
 }

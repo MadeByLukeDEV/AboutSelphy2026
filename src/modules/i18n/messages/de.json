@@ -143,7 +143,42 @@
       "notConfigured": "Nicht eingerichtet",
       "cronLabel": "Cron-Secret",
       "twitchLabel": "Twitch-API",
-      "youtubeLabel": "YouTube-API"
+      "youtubeLabel": "YouTube-API",
+      "youtube": {
+        "heading": "YouTube Analytics",
+        "intro": "Publikumsdaten (Alter, Geschlecht, Länder, Geräte) für das Media Kit. Braucht eine einmalige Verbindung durch den Kanalinhaber; die Berechtigung ist nur lesender Zugriff auf Analytics.",
+        "notConfigured": "Nicht eingerichtet: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET und TOKEN_ENCRYPTION_KEY fehlen.",
+        "notConnected": "Nicht verbunden.",
+        "connected": "Verbunden von {name} am {date}.",
+        "channelMismatch": "Mit einem anderen Kanal als YOUTUBE_CHANNEL_ID verbunden. Bitte neu verbinden.",
+        "connect": "YouTube verbinden",
+        "reconnect": "Neu verbinden",
+        "connectHint": "Wähle in Googles Kontoauswahl das Konto oder Brand-Konto, dem der Kanal gehört.",
+        "disconnect": "Trennen",
+        "disconnecting": "Wird getrennt…",
+        "disconnectConfirm": "YouTube Analytics trennen? Die Berechtigung wird bei Google widerrufen und die Publikumsdaten verschwinden aus dem Media Kit.",
+        "disconnected": "YouTube Analytics getrennt.",
+        "showInMediaKit": "Im Media Kit zeigen",
+        "showOn": "Die Publikumsdaten werden im Media Kit gezeigt.",
+        "showOff": "Die Publikumsdaten sind im Media Kit ausgeblendet.",
+        "adminOnly": "Nur Admins können das verbinden oder ändern.",
+        "preview": "Neueste Daten",
+        "noData": "Noch keine Daten. YouTube liefert Publikumsdaten erst ab bestimmten Datenschutz-Schwellen; der Sync versucht es täglich erneut.",
+        "failed": "Das hat nicht geklappt. Bitte erneut versuchen.",
+        "forbiddenAction": "Nur Admins können das.",
+        "outcomes": {
+          "connected": "YouTube Analytics verbunden.",
+          "cancelled": "Das Verbinden wurde bei Google abgebrochen.",
+          "invalidState": "Die Verbindungsanfrage ist abgelaufen oder passte nicht. Bitte neu starten.",
+          "missingScope": "Google hat die Analytics-Berechtigung nicht erteilt. Neu starten und erlauben.",
+          "noRefreshToken": "Google hat keine dauerhafte Berechtigung geliefert. Bitte neu starten.",
+          "notOwner": "Dieses Google-Konto kann die Analytics dieses Kanals nicht lesen. Wähle das Konto, dem der Kanal gehört.",
+          "failed": "Verbinden fehlgeschlagen. Details im Server-Log.",
+          "forbidden": "Nur Admins können YouTube Analytics verbinden.",
+          "notConfigured": "YouTube Analytics ist auf dem Server noch nicht eingerichtet."
+        },
+        "cancel": "Abbrechen"
+      }
     },
     "games": {
       "intro": "Die Spiele unter „Was ich spiele“ auf der Startseite, in dieser Reihenfolge.",
@@ -619,5 +654,31 @@
     "updated": "Stand: {date}",
     "copyright": "© {year} AboutSelphy",
     "footerLabel": "Rechtliches"
+  },
+  "Demographics": {
+    "heading": "Wer zuschaut",
+    "intro": "Das YouTube-Publikum der letzten 90 Tage, direkt aus YouTube Analytics.",
+    "age": "Alter",
+    "gender": "Geschlecht",
+    "country": "Top-Länder",
+    "device": "Geräte",
+    "period": "YouTube Analytics, {start} – {end}. Alter und Geschlecht beziehen sich auf angemeldete Zuschauer:innen; Länder und Geräte sind Anteile an den Aufrufen.",
+    "asOf": "Stand {date}",
+    "otherCountries": "Andere Länder",
+    "ageGroup": "{from}–{to}",
+    "ageOpen": "{from}+",
+    "genders": {
+      "female": "Weiblich",
+      "male": "Männlich",
+      "user_specified": "Divers"
+    },
+    "devices": {
+      "MOBILE": "Smartphone",
+      "DESKTOP": "Computer",
+      "TABLET": "Tablet",
+      "TV": "TV",
+      "GAME_CONSOLE": "Spielkonsole",
+      "UNKNOWN_PLATFORM": "Unbekannt"
+    }
   }
 }

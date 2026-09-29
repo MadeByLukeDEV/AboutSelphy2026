@@ -143,7 +143,42 @@
       "notConfigured": "Not configured",
       "cronLabel": "Cron secret",
       "twitchLabel": "Twitch API",
-      "youtubeLabel": "YouTube API"
+      "youtubeLabel": "YouTube API",
+      "youtube": {
+        "heading": "YouTube Analytics",
+        "intro": "Audience demographics (age, gender, countries, devices) for the media kit. Needs a one-time connection by the channel owner; the permission is read-only analytics.",
+        "notConfigured": "Not set up: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET and TOKEN_ENCRYPTION_KEY are needed.",
+        "notConnected": "Not connected.",
+        "connected": "Connected by {name} on {date}.",
+        "channelMismatch": "Connected to a different channel than YOUTUBE_CHANNEL_ID. Connect again.",
+        "connect": "Connect YouTube",
+        "reconnect": "Connect again",
+        "connectHint": "In Google's account picker, choose the account or brand account that owns the channel.",
+        "disconnect": "Disconnect",
+        "disconnecting": "Disconnecting…",
+        "disconnectConfirm": "Disconnect YouTube Analytics? The permission is revoked at Google and the demographics disappear from the media kit.",
+        "disconnected": "YouTube Analytics disconnected.",
+        "showInMediaKit": "Show in media kit",
+        "showOn": "Demographics are shown in the media kit.",
+        "showOff": "Demographics are hidden from the media kit.",
+        "adminOnly": "Only admins can connect or change this.",
+        "preview": "Latest data",
+        "noData": "No data yet. YouTube only returns demographics above its privacy thresholds; the sync tries again daily.",
+        "failed": "That didn't work. Try again.",
+        "forbiddenAction": "Only admins can do this.",
+        "outcomes": {
+          "connected": "YouTube Analytics connected.",
+          "cancelled": "Connecting was cancelled at Google.",
+          "invalidState": "The connection request expired or didn't match. Start again.",
+          "missingScope": "Google didn't grant the analytics permission. Start again and allow it.",
+          "noRefreshToken": "Google didn't return a lasting authorization. Start again.",
+          "notOwner": "That Google account can't read this channel's analytics. Choose the account that owns the channel.",
+          "failed": "Connecting failed. See the server log.",
+          "forbidden": "Only admins can connect YouTube Analytics.",
+          "notConfigured": "YouTube Analytics isn't set up on the server yet."
+        },
+        "cancel": "Cancel"
+      }
     },
     "games": {
       "intro": "The games shown under “What I play” on the home page, in this order.",
@@ -619,5 +654,31 @@
     "updated": "Last updated: {date}",
     "copyright": "© {year} AboutSelphy",
     "footerLabel": "Legal"
+  },
+  "Demographics": {
+    "heading": "Who watches",
+    "intro": "The YouTube audience over the last 90 days, straight from YouTube Analytics.",
+    "age": "Age",
+    "gender": "Gender",
+    "country": "Top countries",
+    "device": "Devices",
+    "period": "YouTube Analytics, {start} – {end}. Age and gender cover signed-in viewers; countries and devices are shares of views.",
+    "asOf": "As of {date}",
+    "otherCountries": "Other countries",
+    "ageGroup": "{from}–{to}",
+    "ageOpen": "{from}+",
+    "genders": {
+      "female": "Female",
+      "male": "Male",
+      "user_specified": "Other"
+    },
+    "devices": {
+      "MOBILE": "Phone",
+      "DESKTOP": "Computer",
+      "TABLET": "Tablet",
+      "TV": "TV",
+      "GAME_CONSOLE": "Game console",
+      "UNKNOWN_PLATFORM": "Unknown"
+    }
   }
 }

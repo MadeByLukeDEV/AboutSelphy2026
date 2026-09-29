@@ -17,6 +17,8 @@ import {
 import { env } from "@/lib/env";
 import { fillMissingGameArt } from "@/modules/profile";
 import * as repo from "./repository";
+import { STATS_CACHE_TAG } from "./cache";
+import { isYoutubeAnalyticsConnected, syncDemographics } from "./youtube-analytics";
 import { errorInfo } from "@/lib/log";
 
 // The sync job behind POST /api/cron/stats (Dokploy schedule, every 5
@@ -24,7 +26,6 @@ import { errorInfo } from "@/lib/log";
 // own -- one API being down doesn't stop the others -- and the run's outcome
 // is stored in SyncRun for the admin status view.
 
-export const STATS_CACHE_TAG = "stats";
 
 const MINUTE = 60_000;
 /** Snapshots of slow-moving numbers (followers, subscribers) at most hourly. */
@@ -126,6 +127,16 @@ async function syncYoutubeMedia(): Promise<string> {
   return `youtube media: ${videos.length} videos, ${shorts.length} shorts`;
 }
 
+// Audience demographics (YouTube Analytics, owner OAuth), daily. The
+// "demographics" snapshot (value = rows stored) is the "last synced" marker,
+// so a period without data isn't retried every 5 minutes.
+async function syncYoutubeDemographics(): Promise<string> {
+  if (!(await isDue("youtube", "demographics", DAILY))) return "youtube demographics: fresh";
+  const rows = await syncDemographics();
+  await repo.insertSnapshots([{ platform: "youtube", metric: "demographics", value: rows }]);
+  return rows ? `youtube demographics: ${rows} shares` : "youtube demographics: no data";
+}
+
 async function step(name: string, run: () => Promise<string>, steps: string[]) {
   try {
     steps.push(await run());
@@ -169,6 +180,10 @@ export async function runSync(trigger: SyncTrigger): Promise<SyncResult> {
     ok = (await step("youtube media", syncYoutubeMedia, steps)) && ok;
   } else {
     steps.push("youtube: not configured");
+  }
+
+  if (await isYoutubeAnalyticsConnected()) {
+    ok = (await step("youtube demographics", syncYoutubeDemographics, steps)) && ok;
   }
 
   await repo.finishRun(run.id, ok, steps.join("; "));

@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { requireStaffPage } from "@/modules/auth";
+import { isAdmin, requireStaffPage } from "@/modules/auth";
 import {
+  Demographics,
+  getAudience,
   getLiveStatus,
   getStatsOverview,
   getSyncStatus,
+  getYoutubeAnalyticsStatus,
   SyncNowButton,
+  YoutubeAnalyticsControls,
 } from "@/modules/stats";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,15 +27,35 @@ const METRICS = [
   "youtube/recentAverageViews",
 ] as const;
 
-export default async function AdminStatsPage() {
-  await requireStaffPage("/admin/stats");
+/** Outcomes of the connect flow (?youtube=...), set by /api/youtube/*. */
+const OUTCOMES = [
+  "connected",
+  "cancelled",
+  "invalidState",
+  "missingScope",
+  "noRefreshToken",
+  "notOwner",
+  "failed",
+  "forbidden",
+  "notConfigured",
+] as const;
+type Outcome = (typeof OUTCOMES)[number];
+
+export default async function AdminStatsPage({ searchParams }: PageProps<"/admin/stats">) {
+  const session = await requireStaffPage("/admin/stats");
+  const admin = isAdmin(session.user.role);
   const t = await getTranslations("Admin.stats");
+  const ty = await getTranslations("Admin.stats.youtube");
   const format = await getFormatter();
-  const [status, overview, live] = await Promise.all([
+  const [status, overview, live, analytics, audience] = await Promise.all([
     getSyncStatus(),
     getStatsOverview(),
     getLiveStatus(),
+    getYoutubeAnalyticsStatus(),
+    getAudience(),
   ]);
+  const param = (await searchParams).youtube;
+  const outcome = OUTCOMES.find((o): o is Outcome => o === param);
   const when = (date: Date) =>
     format.dateTime(date, { dateStyle: "medium", timeStyle: "short" });
   const number = (value: number) =>
@@ -135,6 +160,84 @@ export default async function AdminStatsPage() {
             )}
           </>
         )}
+      </section>
+
+      <section
+        id="youtube-analytics"
+        aria-labelledby="youtube-analytics-heading"
+        className="flex scroll-mt-8 flex-col gap-4"
+      >
+        <div className="flex flex-col gap-1">
+          <h2 id="youtube-analytics-heading" className="text-lg font-bold">
+            {ty("heading")}
+          </h2>
+          <p className="max-w-prose text-sm text-muted-foreground">{ty("intro")}</p>
+        </div>
+        {outcome && (
+          <p
+            role="status"
+            className={cn(
+              "rounded-xl border p-4 text-sm",
+              outcome === "connected"
+                ? "bg-background"
+                : "border-destructive/40 text-destructive",
+            )}
+          >
+            {ty(`outcomes.${outcome}`)}
+          </p>
+        )}
+        {!analytics.configured ? (
+          <p className="rounded-xl border bg-background p-4 text-sm">{ty("notConfigured")}</p>
+        ) : (
+          <div className="flex flex-col gap-3 rounded-xl border bg-background p-4 text-sm">
+            <p>
+              {analytics.connection
+                ? ty("connected", {
+                    name: analytics.connection.connectedBy,
+                    date: when(analytics.connection.connectedAt),
+                  })
+                : ty("notConnected")}
+            </p>
+            {analytics.connection && !analytics.connection.channelMatches && (
+              <p className="text-destructive">{ty("channelMismatch")}</p>
+            )}
+            {admin ? (
+              <>
+                {analytics.connection && (
+                  <YoutubeAnalyticsControls
+                    showInMediaKit={analytics.connection.showInMediaKit}
+                  />
+                )}
+                <div className="flex flex-col gap-1.5">
+                  {/* A plain link: /api/youtube/connect is a route handler that
+                      redirects to Google, not a page next/link could render. */}
+                  {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                  <a
+                    href="/api/youtube/connect"
+                    className={cn(
+                      buttonVariants({
+                        variant: analytics.connection ? "ghost" : "default",
+                        size: "sm",
+                      }),
+                      "w-fit",
+                    )}
+                  >
+                    {analytics.connection ? ty("reconnect") : ty("connect")}
+                  </a>
+                  <p className="text-muted-foreground">{ty("connectHint")}</p>
+                </div>
+              </>
+            ) : (
+              <p className="text-muted-foreground">{ty("adminOnly")}</p>
+            )}
+          </div>
+        )}
+        {analytics.connection &&
+          (audience ? (
+            <Demographics audience={audience} headingLevel="h3" showIntro={false} />
+          ) : (
+            <p className="rounded-xl border bg-background p-4 text-sm">{ty("noData")}</p>
+          ))}
       </section>
 
       <section aria-labelledby="runs-heading" className="flex flex-col gap-3">

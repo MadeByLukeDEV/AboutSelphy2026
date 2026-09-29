@@ -1,6 +1,11 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
-import { Prisma, type MediaKind, type StatPlatform } from "@/generated/prisma/client";
+import {
+  Prisma,
+  type AudienceDimension,
+  type MediaKind,
+  type StatPlatform,
+} from "@/generated/prisma/client";
 
 // Prisma-only and private to the stats module.
 
@@ -185,4 +190,72 @@ export function dailyValues(keys: Array<{ platform: StatPlatform; metric: string
     WHERE (platform, metric) IN (${pairs}) AND "capturedAt" >= ${since}
     ORDER BY platform, metric, (("capturedAt" AT TIME ZONE 'Europe/Vienna')::date), "capturedAt" DESC
   `;
+}
+
+// ─── YouTube Analytics ───────────────────────────────────────────────────
+
+const CONNECTION_ID = 1;
+
+export function findYoutubeConnection() {
+  return prisma.youtubeConnection.findUnique({ where: { id: CONNECTION_ID } });
+}
+
+export function saveYoutubeConnection(data: {
+  channelId: string;
+  encryptedRefreshToken: string;
+  connectedBy: string;
+}) {
+  // A reconnect replaces the token but keeps the media kit switch.
+  return prisma.youtubeConnection.upsert({
+    where: { id: CONNECTION_ID },
+    create: { id: CONNECTION_ID, ...data },
+    update: { ...data, connectedAt: new Date() },
+  });
+}
+
+export function deleteYoutubeConnection() {
+  return prisma.youtubeConnection.deleteMany({ where: { id: CONNECTION_ID } });
+}
+
+export function setShowInMediaKit(show: boolean) {
+  return prisma.youtubeConnection.update({
+    where: { id: CONNECTION_ID },
+    data: { showInMediaKit: show },
+  });
+}
+
+export function insertAudienceSet(
+  rows: Array<{ dimension: AudienceDimension; key: string; share: number }>,
+  period: { start: Date; end: Date },
+  capturedAt: Date,
+) {
+  return prisma.audienceSnapshot.createMany({
+    data: rows.map((row) => ({
+      ...row,
+      periodStart: period.start,
+      periodEnd: period.end,
+      capturedAt,
+    })),
+  });
+}
+
+/** The newest set (every row of one sync shares its capturedAt). */
+export async function latestAudienceSet() {
+  const newest = await prisma.audienceSnapshot.findFirst({
+    orderBy: { capturedAt: "desc" },
+    select: { capturedAt: true },
+  });
+  if (!newest) return [];
+  return prisma.audienceSnapshot.findMany({
+    where: { capturedAt: newest.capturedAt },
+    select: {
+      dimension: true,
+      key: true,
+      share: true,
+      periodStart: true,
+      periodEnd: true,
+      capturedAt: true,
+    },
+    orderBy: { id: "asc" },
+  });
 }
