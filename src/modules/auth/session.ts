@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { Pool } from "pg";
 import { env } from "@/lib/env";
+import { errorInfo } from "@/lib/log";
 import type { StaffRole } from "./roles";
 
 // Sessions are issued by the central auth service (auth.aboutselphy.com --
@@ -124,7 +125,9 @@ export async function getStaffSession(
   try {
     return await lookupSession(token);
   } catch (error) {
-    console.error("[auth] session lookup against the auth database failed", error);
+    // Name and code only: a whole pg error can carry query details and
+    // connection info.
+    console.error("[auth] session lookup against the auth database failed", errorInfo(error));
     return null;
   }
 }
