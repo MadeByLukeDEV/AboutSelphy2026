@@ -8,3 +8,4 @@ export {
   LOGO_PRESET,
   MAX_UPLOAD_BYTES,
 } from "./service";
+export { readUploadForm, type UploadForm } from "./request";
