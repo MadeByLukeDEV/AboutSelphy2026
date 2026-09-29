@@ -24,6 +24,7 @@ import {
   PlatformStats,
 } from "@/modules/mediakit";
 import { CHANNELS, PROFILE_IMAGES } from "@/modules/profile";
+import { Demographics } from "@/modules/stats";
 
 export async function generateMetadata({
   params,
@@ -109,6 +110,8 @@ export default async function MediaKitPage({
           <AudienceSummary stats={kit.stats} />
           <PlatformStats stats={kit.stats} />
         </section>
+
+        {kit.audience && <Demographics audience={kit.audience} />}
 
         <GrowthSection growth={kit.growth} />
 

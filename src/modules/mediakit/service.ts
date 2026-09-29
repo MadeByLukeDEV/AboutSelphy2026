@@ -4,8 +4,10 @@ import { assetUrl } from "@/modules/assets";
 import type { Locale } from "@/modules/i18n";
 import { getHomeContent } from "@/modules/profile";
 import {
+  getAudience,
   getGrowthSeries,
   getStatsOverview,
+  type Audience,
   type GrowthSeries,
   type StatsOverview,
 } from "@/modules/stats";
@@ -56,6 +58,8 @@ export type MediaKit = {
   tagline: string;
   stats: StatsOverview;
   growth: GrowthSeries;
+  /** YouTube demographics; null unless connected, with data, and switched on in /admin/stats. */
+  audience: Audience | null;
   games: Awaited<ReturnType<typeof getHomeContent>>["games"];
   partners: PublicPartner[];
   packages: PublicPackage[];
@@ -63,10 +67,11 @@ export type MediaKit = {
 
 export async function getMediaKit(locale: Locale): Promise<MediaKit> {
   const de = locale === "de";
-  const [content, stats, growth, offers] = await Promise.all([
+  const [content, stats, growth, audience, offers] = await Promise.all([
     getHomeContent(locale),
     getStatsOverview(),
     getGrowthSeries(90),
+    getAudience(),
     loadOffers(),
   ]);
   return {
@@ -74,6 +79,7 @@ export async function getMediaKit(locale: Locale): Promise<MediaKit> {
     tagline: content.tagline,
     stats,
     growth,
+    audience: audience?.showInMediaKit ? audience : null,
     games: content.games.filter((game) => CURRENT_GAME_STATUSES.has(game.status)),
     partners: offers.partners.map((p) => ({
       id: p.id,
