@@ -865,8 +865,16 @@ SEO and security are built into every phase, not saved for the end.
       decompression bombs.
     - It re-encodes to WebP (EXIF stripped, 400x400 for covers). Replaced
       or removed covers delete their asset.
-    - `experimental.serverActions.bodySizeLimit: "5mb"`, and
-      `/api/media/**` is in `images.localPatterns`.
+    - **Uploads are route handlers, not Server Actions** (since
+      2026-09-29): `POST /api/admin/games/[id]/cover` and
+      `/api/admin/partners/[id]/logo` (`uploadGameCover` /
+      `uploadPartnerLogo`: `requireAdmin()` first, then
+      `readUploadForm()` in `assets/request.ts`: same-origin `Origin`
+      check, since route handlers get no built-in CSRF check; a declared
+      `Content-Length` of at most 4 MB + 64 KB; multipart only). The client
+      posts with `postUpload()` (`src/lib/post-upload.ts`) and gets the same
+      result shape as the actions. Server Actions keep Next's **1 MB**
+      default body limit. `/api/media/**` is in `images.localPatterns`.
     - `sharp` is a direct dependency (0.35.4, prebuilt, no install
       script). **pnpm glitch**: it wrote the project entry as `0.35.4`
       although only the `0.35.4(@types/node@…)` snapshot exists (optional
@@ -1114,10 +1122,10 @@ SEO and security are built into every phase, not saved for the end.
     **Open**: (L2) the origin should only accept Cloudflare (firewall
     allowlist / Authenticated Origin Pulls / Tunnel), otherwise
     `CF-Connecting-IP` can be spoofed past the rate limit (Turnstile
-    still applies); (L4) the 5 MB server-action body limit also applies
-    to the public inquiry action, fix by moving admin uploads to route
-    handlers if it ever matters; `auth/session.ts` logs whole errors
-    (fix in the auth repo's consumer file first).
+    still applies). **Fixed 2026-09-29**: (L4) uploads moved to route
+    handlers, so Server Actions (the public inquiry form included) are
+    back to the 1 MB default; `auth/session.ts` logs only the error's name
+    and code (here and in Social; the auth repo's consumer doesn't log).
   - Build gotcha: stopping the dev server mid-write can truncate
     `.next/dev/types`, and `next build` then fails type-checking those
     files. Delete `.next/dev/types` and rebuild.

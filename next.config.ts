@@ -74,10 +74,11 @@ const nextConfig: NextConfig = {
     maximumDiskCacheSize: 200_000_000,
   },
   experimental: {
-    // Image uploads in /admin (covers are capped at 4 MB in
-    // src/modules/assets; multipart adds a little overhead). Applies to
-    // every Server Action.
-    serverActions: { bodySizeLimit: "5mb" },
+    // No serverActions.bodySizeLimit: Server Actions keep Next's 1 MB
+    // default (it covers the public inquiry form too). Image uploads go
+    // through /api/admin/*/cover|logo route handlers with their own cap
+    // (src/modules/assets/request.ts).
+
     // app/global-not-found.tsx: there is no single root layout (the
     // [locale] segment is the root layout for public pages).
     globalNotFound: true,
