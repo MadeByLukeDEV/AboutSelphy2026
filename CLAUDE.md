@@ -173,6 +173,11 @@ keep it in sync with the auth repo.
   with the shared `BETTER_AUTH_SECRET`). It then reads `session` and `user`
   from the auth schema with a lazily created `pg` Pool. It **fails closed**:
   if the auth DB can't be reached, the user counts as signed out.
+- **Roles are per session** (auth service, 2026-09-29): Twitch/YouTube
+  sign-ins exist for viewers, and only a Discord sign-in gets a staff role.
+  The query checks `coalesce(s.role, u.role)`, never `u.role` alone, or a
+  mod's Twitch session would open `/admin`. The fallback only covers old
+  (all-Discord) sessions without `s.role`.
 - `src/modules/auth/roles.ts` provides `isAdmin` and `canAccessDashboard`.
   Every authorization check goes through these helpers, never an inline role
   string comparison. Enforce them in `proxy.ts` **and** in every Server
