@@ -663,7 +663,7 @@ three variables set):
 | --- | --- |
 | Build-time Arguments | none. `NEXT_PUBLIC_SITE_URL` defaults to `https://aboutselphy.com` in the Dockerfile; set it only for another domain. |
 | Build-time Secrets | none. The build needs no secrets and no database (lazy clients). |
-| Environment (runtime) | `DATABASE_URL` (`aboutselphy_main`, internal host), `AUTH_DATABASE_URL` (`aboutselphy_auth_reader`, internal host), `BETTER_AUTH_SECRET` (same as the auth service). For the stats sync also: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY` (same as the Social app), `CRON_SECRET` (new plain hex) |
+| Environment (runtime) | `DATABASE_URL` (`aboutselphy_main`, internal host), `AUTH_DATABASE_URL` (`aboutselphy_auth_reader`, internal host), `BETTER_AUTH_SECRET` (same as the auth service). For the stats sync also: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `YOUTUBE_API_KEY` (same as the Social app), `CRON_SECRET` (new plain hex). For YouTube Analytics: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `TOKEN_ENCRYPTION_KEY` |
 | Schedules (Dokploy "Schedules" tab, runs inside the container) | every 5 minutes (`*/5 * * * *`): `wget -qO- --post-data="" --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000/api/cron/stats` |
 
 Optional runtime variables that default to production: `DATABASE_SCHEMA`
@@ -683,8 +683,11 @@ Variables planned for later phases:
   `TWITCH_WEBHOOK_SECRET`, `YOUTUBE_API_KEY`, `YOUTUBE_CHANNEL_ID` (the
   media kit's data sources. Features render a placeholder when these are
   unset, as with `isTwitchConfigured()` in Social)
-- Phase 8: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (YouTube Analytics
-  OAuth), `TOKEN_ENCRYPTION_KEY` (32-byte hex)
+- Phase 8 (in `env.ts` since 2026-09-29, all optional): `GOOGLE_CLIENT_ID`,
+  `GOOGLE_CLIENT_SECRET` (YouTube Analytics OAuth, own client, redirect URI
+  `<site>/api/youtube/callback` for prod and localhost:3002),
+  `TOKEN_ENCRYPTION_KEY` (64 hex). The consent screen must be **"In
+  production"**: in "Testing", Google expires refresh tokens after 7 days.
 - `CRON_SECRET` (stats sync)
 - `TURNSTILE_SITE_KEY` (public, rendered by the server) and
   `TURNSTILE_SECRET_KEY` (inquiry form, in use since 2026-09-28). Optional
@@ -1112,6 +1115,61 @@ SEO and security are built into every phase, not saved for the end.
   - Build gotcha: stopping the dev server mid-write can truncate
     `.next/dev/types`, and `next build` then fails type-checking those
     files. Delete `.next/dev/types` and rebuild.
-- [ ] Phase 8: YouTube Analytics demographics (owner OAuth connect in
-      `/admin`, encrypted token, demographics section in the media kit)
+- [ ] Phase 8: YouTube Analytics demographics (built 2026-09-29 on
+      `feature_youtube-analytics`; **waiting on** the migration, the Google
+      OAuth client and a real connect)
+  - Decisions (the user's): its **own OAuth client** ("Web application") in
+    the auth service's Google Cloud project, **90-day** window, and a
+    **"Show in media kit" switch, off by default**.
+  - Tables (stats section): `YoutubeConnection` (singleton, CHECK id = 1:
+    channel id, encrypted refresh token, who connected, `showInMediaKit`)
+    and `AudienceSnapshot` (dimension age/gender/country/device, key, share
+    in percent with a 0-100 CHECK, period, capturedAt; one set per sync).
+  - Connect flow (admin only, both routes call `requireAdmin()` because
+    `/api` is outside the proxy):
+    - `GET /api/youtube/connect` is a **plain link**, not a form: the CSP's
+      `form-action` doesn't allow Google, and a navigation needs no
+      exception. It sets a `yt_oauth` cookie (state + PKCE verifier,
+      httpOnly, SameSite=Lax, path `/api/youtube`, 10 min) and redirects to
+      Google with `access_type=offline`, `prompt=consent select_account`.
+    - `GET /api/youtube/callback` checks the state (constant time), trades
+      the code, requires the `yt-analytics.readonly` scope and a refresh
+      token, and **proves ownership** with an Analytics query on
+      `ids=channel==YOUTUBE_CHANNEL_ID` (403 unless the account owns that
+      channel; `channels.list mine=true` would need a second scope). A
+      failed check revokes the token. The outcome goes back as a code
+      (`/admin/stats?youtube=<code>`), never Google's text.
+    - Disconnect revokes the grant at Google (best effort) and deletes the
+      row; the switch lives on the row, so it resets too.
+  - Token storage: `src/lib/security/token-cipher.ts`, AES-256-GCM,
+    `v1.<iv>.<tag>.<ciphertext>` (base64url), a purpose string as AAD, and
+    `authTagLength: 16` (Node otherwise accepts truncated tags). Key
+    `TOKEN_ENCRYPTION_KEY` (64 hex); a changed key makes the token
+    unreadable and the sync step says "connect again".
+  - Data (`src/lib/platforms/youtube-analytics.ts`, 3 report calls): age
+    and gender from `viewerPercentage` by `ageGroup,gender` (**signed-in
+    viewers only**, said under the charts), country and device as shares
+    of `views`. Top 8 countries, the rest folded into "other". The window
+    ends 3 days ago (Analytics data lags). Small channels can get empty
+    reports (privacy thresholds): "no data", retried daily.
+  - Sync: a daily step in `runSync`, only when configured and connected; the
+    `youtube/demographics` snapshot (value = rows stored) is the "last
+    synced" marker. Connecting also runs it once, so the admin preview
+    fills right away.
+  - UI: `Demographics` (stats component, server-rendered): four bar lists,
+    one hue (`--chart-line`), label and value as text in each row (that's
+    the table view, so no tooltip layer), bars scaled to the list's largest
+    share. Country names via `Intl.DisplayNames`. Texts in the
+    `Demographics` namespace (server only, so not in `clientMessages`).
+    `/admin/stats` has the connect/reconnect link, status, switch,
+    disconnect dialog and a preview; moderators see the status read-only.
+    The media kit shows the section after the audience figures only when
+    connected, with data, and switched on.
+  - Checked with a throwaway script: cipher round trip, wrong purpose,
+    tampered and truncated tags; the 90-day window; parsing and folding
+    with a mocked API; 403 and `invalid_grant` messages (no secret echoed);
+    the authorization URL; every state/cancel branch of the callback.
+    **Not yet checked**: a real connect against Google and the rendered
+    pages (they need the migration).
+  - Not in the PDF yet (its memo key would need `kit.audience` too).
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
