@@ -45,6 +45,19 @@ const schema = z.object({
     .string()
     .regex(/^UC[A-Za-z0-9_-]{22}$/)
     .default("UCROyDUHpZmACVVPGyQjgyjw"),
+  // YouTube Analytics (audience demographics), authorized once by the
+  // channel owner via "Connect YouTube" in /admin/stats. Its own OAuth
+  // client ("Web application") in the auth service's Google Cloud project,
+  // redirect URI <NEXT_PUBLIC_SITE_URL>/api/youtube/callback. All optional:
+  // without them the connect button is hidden and the sync step skipped.
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+  // AES-256-GCM key for the stored refresh token: 32 bytes as 64 hex chars.
+  // Changing it makes the stored token unreadable (connect again).
+  TOKEN_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/, "64 lowercase hex chars (32 bytes)")
+    .optional(),
   // Bearer token for POST /api/cron/stats. Plain hex, >= 32 chars. Without it
   // the cron route refuses every request (fails closed).
   CRON_SECRET: z
