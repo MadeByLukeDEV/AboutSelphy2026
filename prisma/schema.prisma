@@ -113,6 +113,47 @@ model StreamSession {
 }
 
 /// One run of the sync job, for the /admin/stats status view.
+/// The channel owner's YouTube Analytics authorization (singleton, id = 1),
+/// made once with "Connect YouTube" in /admin/stats. Scope
+/// yt-analytics.readonly only. The refresh token is AES-256-GCM encrypted
+/// (TOKEN_ENCRYPTION_KEY) and never leaves the server.
+model YoutubeConnection {
+  id                    Int      @id @default(1)
+  /// The channel the token was verified against (YOUTUBE_CHANNEL_ID at connect time).
+  channelId             String   @db.VarChar(30)
+  encryptedRefreshToken String   @db.VarChar(2000)
+  /// Name of the admin who connected it (from the auth session).
+  connectedBy           String   @db.VarChar(100)
+  connectedAt           DateTime @default(now())
+  /// Admin switch: show the demographics section in the public media kit.
+  showInMediaKit        Boolean  @default(false)
+  updatedAt             DateTime @updatedAt
+}
+
+enum AudienceDimension {
+  age
+  gender
+  country
+  device
+}
+
+/// One share of the YouTube audience over a period, e.g. age/"25-34" = 31.2
+/// (percent of views). Written by the daily sync as a set per dimension; the
+/// media kit shows the latest set.
+model AudienceSnapshot {
+  id          BigInt            @id @default(autoincrement())
+  dimension   AudienceDimension
+  /// Age group ("25-34"), gender ("female"), ISO country ("AT", "other") or device ("MOBILE").
+  key         String            @db.VarChar(40)
+  /// Percent, 0-100.
+  share       Float
+  periodStart DateTime          @db.Date
+  periodEnd   DateTime          @db.Date
+  capturedAt  DateTime
+
+  @@index([dimension, capturedAt])
+}
+
 model SyncRun {
   id         BigInt    @id @default(autoincrement())
   startedAt  DateTime  @default(now())
