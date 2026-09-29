@@ -1,4 +1,6 @@
-import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale } from "next-intl/server";
+import { audienceLabeller, shareText } from "../demographic-labels";
+import type { Locale } from "@/modules/i18n";
 import type { Audience, AudienceShare } from "../service";
 
 // YouTube audience shares as four bar lists (age, gender, top countries,
@@ -7,39 +9,7 @@ import type { Audience, AudienceShare } from "../service";
 // row with its label and value as text, which doubles as the table view.
 // Bars scale to the list's largest share, from a zero baseline.
 
-const DEVICES = ["MOBILE", "DESKTOP", "TABLET", "TV", "GAME_CONSOLE", "UNKNOWN_PLATFORM"] as const;
-const GENDERS = ["female", "male", "user_specified"] as const;
-
 type Row = { key: string; label: string; share: number };
-
-async function labeller() {
-  const t = await getTranslations("Demographics");
-  const regions = new Intl.DisplayNames([await getLocale()], { type: "region" });
-  return {
-    age(key: string) {
-      const [from, to] = key.split("-");
-      return to ? t("ageGroup", { from, to }) : t("ageOpen", { from });
-    },
-    gender(key: string) {
-      return (GENDERS as readonly string[]).includes(key)
-        ? t(`genders.${key as (typeof GENDERS)[number]}`)
-        : key;
-    },
-    country(key: string) {
-      if (key === "other") return t("otherCountries");
-      try {
-        return regions.of(key) ?? key;
-      } catch {
-        return key;
-      }
-    },
-    device(key: string) {
-      return (DEVICES as readonly string[]).includes(key)
-        ? t(`devices.${key as (typeof DEVICES)[number]}`)
-        : key;
-    },
-  };
-}
 
 async function BarList({
   title,
@@ -62,12 +32,7 @@ async function BarList({
             <div className="flex items-baseline justify-between gap-3 text-sm">
               <span className="min-w-0 truncate">{row.label}</span>
               <span className="shrink-0 font-semibold tabular-nums">
-                {row.share > 0 && row.share < 1
-                  ? `<${format.number(0.01, { style: "percent" })}`
-                  : format.number(row.share / 100, {
-                      style: "percent",
-                      maximumFractionDigits: row.share < 10 ? 1 : 0,
-                    })}
+                {shareText(format, row.share)}
               </span>
             </div>
             <div aria-hidden className="h-1.5 rounded-full bg-muted">
@@ -92,9 +57,8 @@ export async function Demographics({
   headingLevel?: "h2" | "h3";
   showIntro?: boolean;
 }) {
-  const t = await getTranslations("Demographics");
+  const { t, label } = await audienceLabeller((await getLocale()) as Locale);
   const format = await getFormatter();
-  const label = await labeller();
   const lists = (["age", "gender", "country", "device"] as const)
     .map((dimension) => ({
       dimension,

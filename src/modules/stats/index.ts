@@ -29,3 +29,4 @@ export {
 export { isYoutubeAnalyticsConfigured } from "@/lib/platforms/youtube-analytics";
 export { Demographics } from "./components/demographics";
 export { YoutubeAnalyticsControls } from "./components/youtube-analytics-controls";
+export { audienceLabeller, shareText } from "./demographic-labels";
