@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { AuthorizationError, requireAdmin } from "@/modules/auth";
-import { UploadError } from "@/modules/assets";
 import {
   addGame,
   editGame,
@@ -10,7 +9,6 @@ import {
   removeGame,
   reorderGame,
   saveProfile,
-  uploadCover,
   type AdminGame,
 } from "./admin-service";
 import { gameInputSchema, profileInputSchema, type ProfileInput } from "./schema";
@@ -74,7 +72,6 @@ async function asAdmin(
   try {
     return { ok: true, games: await run() };
   } catch (error) {
-    if (error instanceof UploadError) return { ok: false, error: error.code };
     console.error("[profile] game change failed", errorInfo(error));
     return { ok: false, error: "failed" };
   }
@@ -113,16 +110,6 @@ export async function moveGameAction(id: unknown, direction: unknown): Promise<G
     return parsedId.success && parsedDirection.success
       ? () => reorderGame(parsedId.data, parsedDirection.data)
       : INVALID;
-  });
-}
-
-/** Upload a custom cover: FormData with "gameId" and "file" (admin only). */
-export async function uploadGameCoverAction(formData: unknown): Promise<GamesResult> {
-  return asAdmin(() => {
-    // A public endpoint: the argument could be anything, not just FormData.
-    if (!(formData instanceof FormData)) return INVALID;
-    const parsedId = idSchema.safeParse(formData.get("gameId"));
-    return parsedId.success ? () => uploadCover(parsedId.data, formData.get("file")) : INVALID;
   });
 }
 

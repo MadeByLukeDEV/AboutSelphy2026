@@ -28,9 +28,9 @@ import {
   editPartnerAction,
   movePartnerAction,
   removePartnerLogoAction,
-  uploadPartnerLogoAction,
   type PartnersResult,
 } from "../actions";
+import { postUpload } from "@/lib/post-upload";
 import { PARTNER_LIMITS, partnerInputSchema, type PartnerInput } from "../schema";
 
 const EMPTY: PartnerInput = {
@@ -71,11 +71,13 @@ export function PartnersManager({ initial }: { initial: AdminPartner[] }) {
   function upload(partner: AdminPartner, file: File) {
     // Checked again on the server (real format, size, re-encoding).
     const body = new FormData();
-    body.set("partnerId", partner.id);
     body.set("file", file);
     setUploadingId(partner.id);
     startTransition(async () => {
-      apply(await uploadPartnerLogoAction(body), t("logoUpdated"));
+      apply(
+        await postUpload<PartnersResult>(`/api/admin/partners/${encodeURIComponent(partner.id)}/logo`, body),
+        t("logoUpdated"),
+      );
       setUploadingId(null);
     });
   }

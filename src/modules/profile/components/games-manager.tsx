@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FormSelect } from "@/components/form/form-select";
 import { GameCover } from "./game-cover";
 import { cn } from "@/lib/utils";
+import { postUpload } from "@/lib/post-upload";
 import type { AdminGame } from "../admin-service";
 import {
   addGameAction,
@@ -36,7 +37,6 @@ import {
   editGameAction,
   moveGameAction,
   removeGameCoverAction,
-  uploadGameCoverAction,
   type GamesResult,
 } from "../actions";
 import { GAME_LIMITS, GAME_STATUSES, gameInputSchema } from "../schema";
@@ -88,11 +88,13 @@ export function GamesManager({ initial }: { initial: AdminGame[] }) {
   function upload(game: AdminGame, file: File) {
     // Checked again on the server (type by content, size, re-encoding).
     const body = new FormData();
-    body.set("gameId", game.id);
     body.set("file", file);
     setUploadingId(game.id);
     startTransition(async () => {
-      apply(await uploadGameCoverAction(body), t("coverUpdated"));
+      apply(
+        await postUpload<GamesResult>(`/api/admin/games/${encodeURIComponent(game.id)}/cover`, body),
+        t("coverUpdated"),
+      );
       setUploadingId(null);
     });
   }

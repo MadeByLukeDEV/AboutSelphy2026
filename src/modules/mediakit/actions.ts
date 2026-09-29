@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { AuthorizationError, requireAdmin } from "@/modules/auth";
-import { UploadError } from "@/modules/assets";
 import {
   addPackage,
   addPartner,
@@ -13,7 +12,6 @@ import {
   removePartner,
   reorderPackage,
   reorderPartner,
-  uploadLogo,
   type AdminPackage,
   type AdminPartner,
 } from "./admin-service";
@@ -44,7 +42,6 @@ async function asAdmin<T>(
   try {
     return { ok: true, value: await run() };
   } catch (error) {
-    if (error instanceof UploadError) return { ok: false, error: error.code };
     console.error("[mediakit] admin change failed", errorInfo(error));
     return { ok: false, error: "failed" };
   }
@@ -91,15 +88,6 @@ export async function movePartnerAction(id: unknown, direction: unknown) {
     const pid = idSchema.safeParse(id);
     const dir = directionSchema.safeParse(direction);
     return pid.success && dir.success ? () => reorderPartner(pid.data, dir.data) : invalid;
-  });
-}
-
-export async function uploadPartnerLogoAction(formData: unknown) {
-  return partners(() => {
-    if (!(formData instanceof FormData)) return invalid;
-    const pid = idSchema.safeParse(formData.get("partnerId"));
-    // The file itself is checked by storeImage (size, real format, re-encode).
-    return pid.success ? () => uploadLogo(pid.data, formData.get("file")) : invalid;
   });
 }
 

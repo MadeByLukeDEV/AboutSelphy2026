@@ -3,3 +3,4 @@ export { CHANNELS } from "./links";
 export { PROFILE_IMAGES } from "./images";
 export { fillMissingGameArt } from "./admin-service";
 export { GameCover } from "./components/game-cover";
+export { uploadGameCover } from "./uploads";
