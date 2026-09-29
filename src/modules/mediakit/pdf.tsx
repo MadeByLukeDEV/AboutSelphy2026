@@ -9,6 +9,7 @@ import { brandFontPath } from "@/lib/og-font";
 import { findAsset } from "@/modules/assets";
 import type { Locale } from "@/modules/i18n";
 import { CHANNELS } from "@/modules/profile";
+import { audienceLabeller, shareText, type AudienceShare } from "@/modules/stats";
 import { getMediaKit, type MediaKit } from "./service";
 
 // The downloadable media kit: the same live data as /mediakit, laid out
@@ -60,19 +61,38 @@ const s = StyleSheet.create({
   text: { color: MUTED, marginTop: 1, lineHeight: 1.35 },
   link: { color: BRAND_TEXT, fontWeight: 700, textDecoration: "none" },
   price: { fontWeight: 700, width: 110, textAlign: "right" },
+  demoCols: { flexDirection: "row", gap: 12 },
+  demoCol: { flex: 1 },
+  demoTitle: { fontSize: 9, fontWeight: 700, marginBottom: 3 },
+  demoRow: { paddingVertical: 2 },
+  demoLine: { flexDirection: "row", justifyContent: "space-between", gap: 4, fontSize: 8 },
+  demoTrack: { height: 2.5, backgroundColor: LINE, borderRadius: 1.25, marginTop: 1.5 },
+  demoBar: { height: 2.5, backgroundColor: BRAND_TEXT, borderRadius: 1.25 },
   footer: { position: "absolute", bottom: 16, left: 32, right: 32, flexDirection: "row", justifyContent: "space-between", fontSize: 8, color: MUTED },
 });
 
 type Texts = Awaited<ReturnType<typeof loadTexts>>;
 
 async function loadTexts(locale: Locale) {
-  const [pdf, platforms, packages, status] = await Promise.all([
+  const [pdf, platforms, packages, status, audience] = await Promise.all([
     getTranslations({ locale, namespace: "MediaKit.pdf" }),
     getTranslations({ locale, namespace: "MediaKit.platforms" }),
     getTranslations({ locale, namespace: "MediaKit.packages" }),
     getTranslations({ locale, namespace: "Home.gameStatus" }),
+    audienceLabeller(locale),
   ]);
-  return { pdf, platforms, packages, status, format: await getFormatter({ locale }) };
+  return { pdf, platforms, packages, status, audience, format: await getFormatter({ locale }) };
+}
+
+/** Countries in the PDF: the top 5, the rest folded into "other" (one page). */
+const PDF_COUNTRIES = 5;
+
+function pdfCountries(shares: AudienceShare[]): AudienceShare[] {
+  const named = shares.filter((s) => s.key !== "other");
+  const rest =
+    named.slice(PDF_COUNTRIES).reduce((sum, s) => sum + s.share, 0) +
+    (shares.find((s) => s.key === "other")?.share ?? 0);
+  return [...named.slice(0, PDF_COUNTRIES), ...(rest > 0 ? [{ key: "other", share: rest }] : [])];
 }
 
 async function pngOf(data: Uint8Array, width: number) {
@@ -92,7 +112,7 @@ function MediaKitDocument({
   logos: Map<string, Buffer>;
   locale: Locale;
 }) {
-  const { pdf, platforms, packages, status, format } = texts;
+  const { pdf, platforms, packages, status, audience, format } = texts;
   const latest = kit.stats.latest;
   const count = (value: number) =>
     format.number(value, value >= 10_000 ? { notation: "compact", maximumFractionDigits: 1 } : {});
@@ -183,6 +203,44 @@ function MediaKitDocument({
             <Text style={[s.note, { marginTop: 6 }]}>{pdf("source")}</Text>
           </View>
 
+          {kit.audience && (
+            <View wrap={false}>
+              <Text style={s.h2}>{audience.t("heading")}</Text>
+              <View style={s.demoCols}>
+                {(["age", "gender", "country", "device"] as const).map((dimension) => {
+                  const shares =
+                    dimension === "country"
+                      ? pdfCountries(kit.audience!.country)
+                      : kit.audience![dimension];
+                  if (shares.length === 0) return null;
+                  const max = Math.max(...shares.map((x) => x.share));
+                  return (
+                    <View key={dimension} style={s.demoCol}>
+                      <Text style={s.demoTitle}>{audience.t(dimension)}</Text>
+                      {shares.map((share) => (
+                        <View key={share.key} style={s.demoRow}>
+                          <View style={s.demoLine}>
+                            <Text style={{ color: MUTED }}>{audience.label[dimension](share.key)}</Text>
+                            <Text style={{ fontWeight: 700 }}>{shareText(format, share.share)}</Text>
+                          </View>
+                          <View style={s.demoTrack}>
+                            <View style={[s.demoBar, { width: `${(share.share / max) * 100}%` }]} />
+                          </View>
+                        </View>
+                      ))}
+                    </View>
+                  );
+                })}
+              </View>
+              <Text style={[s.note, { marginTop: 5 }]}>
+                {audience.t("period", {
+                  start: format.dateTime(kit.audience.periodStart, { dateStyle: "medium", timeZone: "UTC" }),
+                  end: format.dateTime(kit.audience.periodEnd, { dateStyle: "medium", timeZone: "UTC" }),
+                })}
+              </Text>
+            </View>
+          )}
+
           {kit.games.length > 0 && (
             <View>
               <Text style={s.h2}>{pdf("games")}</Text>
@@ -267,7 +325,15 @@ const memo = new Map<Locale, { key: string; pdf: Promise<Buffer> }>();
 /** The media kit as a PDF in one language. */
 export async function renderMediaKitPdf(locale: Locale): Promise<Buffer> {
   const kit = await getMediaKit(locale);
-  const key = JSON.stringify([kit.displayName, kit.tagline, kit.stats, kit.games, kit.partners, kit.packages]);
+  const key = JSON.stringify([
+    kit.displayName,
+    kit.tagline,
+    kit.stats,
+    kit.audience,
+    kit.games,
+    kit.partners,
+    kit.packages,
+  ]);
   const cached = memo.get(locale);
   if (cached?.key === key) return cached.pdf;
 
