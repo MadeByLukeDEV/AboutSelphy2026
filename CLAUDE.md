@@ -1116,8 +1116,8 @@ SEO and security are built into every phase, not saved for the end.
     `.next/dev/types`, and `next build` then fails type-checking those
     files. Delete `.next/dev/types` and rebuild.
 - [ ] Phase 8: YouTube Analytics demographics (built 2026-09-29 on
-      `feature_youtube-analytics`; **waiting on** the migration, the Google
-      OAuth client and a real connect)
+      `feature_youtube-analytics`; migration applied and connected locally
+      2026-09-29; **waiting on** the Dokploy env vars and a live check)
   - Decisions (the user's): its **own OAuth client** ("Web application") in
     the auth service's Google Cloud project, **90-day** window, and a
     **"Show in media kit" switch, off by default**.
@@ -1169,7 +1169,16 @@ SEO and security are built into every phase, not saved for the end.
     tampered and truncated tags; the 90-day window; parsing and folding
     with a mocked API; 403 and `invalid_grant` messages (no secret echoed);
     the authorization URL; every state/cancel branch of the callback.
-    **Not yet checked**: a real connect against Google and the rendered
-    pages (they need the migration).
+    **Real connect** (2026-09-29, local): the owner account passed the
+    channel check, the token was stored as `v1.` ciphertext, and the first
+    sync stored age 5, gender 2, countries 8 + other, devices 4 (each set
+    sums to 100 %). Media kit stays without the section while the switch is
+    off. Google shows only the ages/genders that clear its thresholds.
+  - **Shared DB**: the connection row is shared by dev and production, so
+    production uses the same grant. Dokploy's `TOKEN_ENCRYPTION_KEY` must be
+    the **same value** as locally, or production can't read the token.
+  - The dev server logs the callback URL with Google's code (Next's request
+    log). The code is single-use, already spent and bound to PKCE;
+    `next start` doesn't log requests.
   - Not in the PDF yet (its memo key would need `kit.audience` too).
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
