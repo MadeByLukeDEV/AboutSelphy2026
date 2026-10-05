@@ -29,6 +29,14 @@ import {
 } from "./discord/service";
 import { DiscordError } from "@/lib/platforms/discord";
 import {
+  disconnectTwitch,
+  getTwitchStatus,
+  syncTwitchSchedule,
+  updateTwitchSettings,
+  type TwitchStatus,
+  type TwitchSyncResult,
+} from "./twitch/service";
+import {
   cancelInputSchema,
   categoryInputSchema,
   restoreInputSchema,
@@ -195,6 +203,7 @@ async function discordAction(
   try {
     const outcome = await run(session);
     const status = await getDiscordStatus();
+    if (outcome === "devSkipped") return { ok: true, status, syncError: "devSkipped" };
     if (outcome && typeof outcome === "object") return { ok: true, status, syncError: outcome.error };
     return { ok: true, status, result: outcome ?? undefined };
   } catch (error) {
@@ -228,4 +237,56 @@ export async function saveDiscordSettingsAction(input: unknown) {
 
 export async function syncDiscordAction(newMessage: unknown) {
   return discordAction("staff", () => syncDiscordSchedule({ force: true, newMessage: newMessage === true }));
+}
+
+// ─── Twitch schedule ─────────────────────────────────────────────────────
+// Connecting is the /api/twitch/* routes; settings and disconnect are admin
+// actions, "Sync now" is for all staff.
+
+export type TwitchActionResult =
+  | { ok: true; status: TwitchStatus; syncError?: string; counts?: { created: number; updated: number; deleted: number } }
+  | { ok: false; error: string };
+
+const twitchSettingsSchema = z.object({ enabled: z.boolean(), titleLocale: z.enum(["de", "en"]) });
+
+async function twitchAction(
+  role: "admin" | "staff",
+  run: () => Promise<TwitchSyncResult | "notConnected" | void>,
+): Promise<TwitchActionResult> {
+  try {
+    if (role === "admin") await requireAdmin();
+    else await requireStaff();
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { ok: false, error: "forbidden" };
+    throw error;
+  }
+  try {
+    const outcome = await run();
+    const status = await getTwitchStatus();
+    if (outcome === "devSkipped") return { ok: true, status, syncError: "devSkipped" };
+    if (outcome && typeof outcome === "object") {
+      const { error, ...counts } = outcome;
+      return { ok: true, status, counts, ...(error ? { syncError: error } : {}) };
+    }
+    return { ok: true, status };
+  } catch (error) {
+    console.error("[schedule/twitch] action failed", errorInfo(error));
+    return { ok: false, error: "failed" };
+  }
+}
+
+export async function saveTwitchSettingsAction(input: unknown) {
+  const parsed = twitchSettingsSchema.safeParse(input);
+  return twitchAction("admin", async () => {
+    if (!parsed.success) throw new Error("invalid settings");
+    return updateTwitchSettings(parsed.data);
+  });
+}
+
+export async function disconnectTwitchAction() {
+  return twitchAction("admin", () => disconnectTwitch());
+}
+
+export async function syncTwitchAction() {
+  return twitchAction("staff", () => syncTwitchSchedule());
 }

@@ -401,7 +401,8 @@
           "tooLarge": "Das Bild ist zu groß für Discord.",
           "cantDecrypt": "Der gespeicherte Webhook ist nicht lesbar (Schlüssel geändert). Füge die URL erneut ein.",
           "messageGone": "Die Nachricht wurde in Discord gelöscht.",
-          "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Versuch es gleich noch einmal."
+          "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Versuch es gleich noch einmal.",
+          "devSkipped": "Nicht gesendet: Discord und Twitch werden nur von der Live-Seite aktualisiert (Dev und Live teilen die Datenbank). Zum lokalen Testen SCHEDULE_INTEGRATIONS_IN_DEV=true setzen."
         },
         "weeklyPost": "Jeden Montag um 14:00 eine neue Nachricht",
         "weeklyPostHint": "Postet die Woche als neue Nachricht (Wiener Zeit, innerhalb von 5 Minuten) und pingt die Rolle unten. Änderungen während der Woche bearbeiten diese Nachricht ohne Ping.",
@@ -411,7 +412,57 @@
         "saveRole": "Rolle speichern"
       },
       "showMoreWeeks": "Die nächsten 4 Wochen zeigen",
-      "showThisWeek": "Nur diese Woche zeigen"
+      "showThisWeek": "Nur diese Woche zeigen",
+      "twitch": {
+        "heading": "Twitch-Streamplan",
+        "hint": "Trägt jeden Stream der nächsten 14 Tage in deinen Twitch-Streamplan ein und hält ihn aktuell: Änderungen, Absagen und Löschungen landen auch auf Twitch.",
+        "adminOnly": "Nur Admins können Twitch verbinden oder einstellen. Staff kann synchronisieren.",
+        "notReady": "Twitch-App-Zugangsdaten oder TOKEN_ENCRYPTION_KEY fehlen.",
+        "connectHint": "Melde dich mit dem AboutSelphy-Twitch-Konto an und erlaube „Streamplan verwalten“. Nur dieser Kanal kann verbunden werden.",
+        "connect": "Twitch verbinden",
+        "reconnect": "Neu verbinden",
+        "notConnected": "Twitch ist nicht verbunden.",
+        "connectedAs": "Verbunden als {login}",
+        "segments": "{count, plural, =0 {Noch keine kommenden Streams auf Twitch.} one {# kommender Stream auf Twitch.} other {# kommende Streams auf Twitch.}}",
+        "lastSynced": "Zuletzt synchronisiert {time}",
+        "notSynced": "Noch nicht synchronisiert.",
+        "openSchedule": "Streamplan auf Twitch öffnen",
+        "syncNow": "Jetzt synchronisieren",
+        "synced": "Twitch synchronisiert: {created} hinzugefügt, {updated} geändert, {deleted} entfernt.",
+        "titleLanguage": "Titelsprache auf Twitch",
+        "languages": {
+          "de": "Deutsch",
+          "en": "Englisch"
+        },
+        "enabled": "Mit Twitch synchronisieren",
+        "enabledHint": "Nach jeder Änderung am Streamplan und alle 5 Minuten. Aus: Twitch behält, was dort ist, nichts ändert sich.",
+        "disconnect": "Trennen",
+        "disconnected": "Twitch getrennt.",
+        "confirmDisconnectTitle": "Twitch trennen?",
+        "confirmDisconnect": "Die Streams, die diese Seite in deinen Twitch-Streamplan eingetragen hat, werden entfernt (vergangene bleiben), und die Anmeldung wird widerrufen. Was du selbst auf Twitch eingetragen hast, bleibt unberührt.",
+        "cancel": "Abbrechen",
+        "outcomes": {
+          "connected": "Twitch verbunden. Deine Streams werden in den Twitch-Streamplan eingetragen.",
+          "cancelled": "Das Verbinden wurde auf Twitch abgebrochen.",
+          "invalidState": "Der Verbindungslink ist abgelaufen oder wurde schon benutzt. Versuch es noch einmal.",
+          "missingScope": "Twitch hat keinen Zugriff auf den Streamplan gegeben. Versuch es noch einmal und erlaube ihn.",
+          "noRefreshToken": "Twitch hat keine dauerhafte Anmeldung geliefert. Versuch es noch einmal.",
+          "wrongAccount": "Das ist nicht das AboutSelphy-Twitch-Konto. Melde dich mit dem Konto des Kanals an.",
+          "notConfigured": "Twitch-App-Zugangsdaten oder TOKEN_ENCRYPTION_KEY fehlen.",
+          "forbidden": "Nur Admins können Twitch verbinden.",
+          "failed": "Das Verbinden mit Twitch ist fehlgeschlagen. Versuch es gleich noch einmal."
+        },
+        "errors": {
+          "forbidden": "Nur Admins können das ändern.",
+          "invalidGrant": "Die Twitch-Anmeldung ist abgelaufen oder wurde widerrufen. Verbinde neu.",
+          "rateLimited": "Twitch bremst gerade. Die nächste Synchronisierung versucht es erneut.",
+          "rejected": "Twitch hat einen Stream abgelehnt (z. B. zu lang oder in der Vergangenheit). Die anderen wurden synchronisiert.",
+          "segmentGone": "Ein Stream wurde auf Twitch gelöscht; er wird bei der nächsten Synchronisierung neu eingetragen.",
+          "notConfigured": "Twitch-App-Zugangsdaten fehlen.",
+          "failed": "Die Verbindung zu Twitch ist fehlgeschlagen. Die nächste Synchronisierung versucht es erneut.",
+          "devSkipped": "Nicht gesendet: Discord und Twitch werden nur von der Live-Seite aktualisiert (Dev und Live teilen die Datenbank). Zum lokalen Testen SCHEDULE_INTEGRATIONS_IN_DEV=true setzen."
+        }
+      }
     },
     "inquiries": {
       "intro": "Sponsoring-Anfragen aus dem Mediakit-Formular. Personenbezogene Daten: Erledigte und Spam-Anfragen werden 12 Monate nach der letzten Änderung automatisch gelöscht.",

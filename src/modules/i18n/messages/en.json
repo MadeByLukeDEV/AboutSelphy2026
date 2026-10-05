@@ -401,7 +401,8 @@
           "tooLarge": "The image is too large for Discord.",
           "cantDecrypt": "The stored webhook can't be read (the encryption key changed). Paste the URL again.",
           "messageGone": "The message was deleted in Discord.",
-          "failed": "Talking to Discord failed. Try again in a moment."
+          "failed": "Talking to Discord failed. Try again in a moment.",
+          "devSkipped": "Not sent: Discord and Twitch are only updated by the live site (dev and live share the database). Set SCHEDULE_INTEGRATIONS_IN_DEV=true to test locally."
         },
         "weeklyPost": "New message every Monday at 14:00",
         "weeklyPostHint": "Posts the week as a fresh message (Vienna time, within 5 minutes) and pings the role below. Changes during the week edit that message without pinging.",
@@ -411,7 +412,57 @@
         "saveRole": "Save role"
       },
       "showMoreWeeks": "Show the next 4 weeks",
-      "showThisWeek": "Show this week only"
+      "showThisWeek": "Show this week only",
+      "twitch": {
+        "heading": "Twitch schedule",
+        "hint": "Puts every stream of the next 14 days on your Twitch schedule and keeps it in sync: edits, cancellations and deletions go to Twitch too.",
+        "adminOnly": "Only admins can connect or configure Twitch. Staff can sync.",
+        "notReady": "Twitch app credentials or TOKEN_ENCRYPTION_KEY are missing.",
+        "connectHint": "Log in with the AboutSelphy Twitch account and allow “Manage your stream schedule”. Only that channel can be connected.",
+        "connect": "Connect Twitch",
+        "reconnect": "Connect again",
+        "notConnected": "Twitch isn't connected.",
+        "connectedAs": "Connected as {login}",
+        "segments": "{count, plural, =0 {No upcoming streams on Twitch yet.} one {# upcoming stream on Twitch.} other {# upcoming streams on Twitch.}}",
+        "lastSynced": "Last synced {time}",
+        "notSynced": "Not synced yet.",
+        "openSchedule": "Open the schedule on Twitch",
+        "syncNow": "Sync now",
+        "synced": "Twitch synced: {created} added, {updated} changed, {deleted} removed.",
+        "titleLanguage": "Title language on Twitch",
+        "languages": {
+          "de": "German",
+          "en": "English"
+        },
+        "enabled": "Sync to Twitch",
+        "enabledHint": "After every schedule change and every 5 minutes. Off: Twitch keeps what's there, nothing changes.",
+        "disconnect": "Disconnect",
+        "disconnected": "Twitch disconnected.",
+        "confirmDisconnectTitle": "Disconnect Twitch?",
+        "confirmDisconnect": "The streams this site put on your Twitch schedule are removed (past ones stay), and the login is revoked. Segments you added on Twitch yourself aren't touched.",
+        "cancel": "Cancel",
+        "outcomes": {
+          "connected": "Twitch connected. Your streams are being added to the Twitch schedule.",
+          "cancelled": "Connecting was cancelled on Twitch.",
+          "invalidState": "The connect link expired or was reused. Try again.",
+          "missingScope": "Twitch didn't grant schedule access. Try again and allow it.",
+          "noRefreshToken": "Twitch didn't return a lasting login. Try again.",
+          "wrongAccount": "That's not the AboutSelphy Twitch account. Log in with the channel's own account.",
+          "notConfigured": "Twitch app credentials or TOKEN_ENCRYPTION_KEY are missing.",
+          "forbidden": "Only admins can connect Twitch.",
+          "failed": "Connecting to Twitch failed. Try again in a moment."
+        },
+        "errors": {
+          "forbidden": "Only admins can change this.",
+          "invalidGrant": "The Twitch login expired or was revoked. Connect again.",
+          "rateLimited": "Twitch is rate-limiting. The next sync tries again.",
+          "rejected": "Twitch rejected a stream (e.g. too long or in the past). The others were synced.",
+          "segmentGone": "A stream was deleted on Twitch; it's added again on the next sync.",
+          "notConfigured": "Twitch app credentials are missing.",
+          "failed": "Talking to Twitch failed. The next sync tries again.",
+          "devSkipped": "Not sent: Discord and Twitch are only updated by the live site (dev and live share the database). Set SCHEDULE_INTEGRATIONS_IN_DEV=true to test locally."
+        }
+      }
     },
     "inquiries": {
       "intro": "Sponsor inquiries sent through the media kit form. Personal data: done and spam inquiries are deleted automatically 12 months after their last change.",

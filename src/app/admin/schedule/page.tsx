@@ -6,6 +6,8 @@ import { getScheduleForEdit } from "@/modules/schedule/admin-service";
 import { ScheduleManager } from "@/modules/schedule/components/schedule-manager";
 import { DiscordPanel } from "@/modules/schedule/components/discord-panel";
 import { getDiscordStatus } from "@/modules/schedule/discord/service";
+import { TwitchPanel } from "@/modules/schedule/components/twitch-panel";
+import { getTwitchStatus } from "@/modules/schedule/twitch/service";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Admin.nav");
@@ -14,7 +16,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // Staff (admins and moderators) can edit the schedule; the actions enforce
 // the same rule server-side.
-export default async function AdminSchedulePage() {
+export default async function AdminSchedulePage({ searchParams }: PageProps<"/admin/schedule">) {
+  // ?twitch=<outcome> after the Twitch connect round trip (a short code).
+  const twitchOutcome = (await searchParams).twitch;
   const session = await requireStaffPage("/admin/schedule");
   const t = await getTranslations("Admin");
 
@@ -26,6 +30,11 @@ export default async function AdminSchedulePage() {
       </header>
       <ScheduleManager initial={await getScheduleForEdit((await getLocale()) as Locale)} />
       <DiscordPanel initial={await getDiscordStatus()} isAdmin={isAdmin(session.user.role)} />
+      <TwitchPanel
+        initial={await getTwitchStatus()}
+        isAdmin={isAdmin(session.user.role)}
+        outcome={typeof twitchOutcome === "string" && /^[a-zA-Z]{1,30}$/.test(twitchOutcome) ? twitchOutcome : null}
+      />
     </div>
   );
 }

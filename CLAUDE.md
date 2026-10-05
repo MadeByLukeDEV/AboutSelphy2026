@@ -2446,8 +2446,7 @@ SEO and security are built into every phase, not saved for the end.
       public page in en/de, phone/desktop, dark/light. The admin UI needs a
       staff login, so the user tests it. Review: nothing critical/high; its
       six low findings are fixed.
-  - [ ] Step 2 (built 2026-10-05, merged; **waiting for the user's approval
-        live**): schedule image + one Discord message, edited on changes.
+  - [x] Step 2 (built 2026-10-05, **approved by the user**): schedule image + one Discord message, edited on changes.
     - The user's choice: the webhook is set **in the admin**, not as an env
       secret. `DiscordSchedule` (singleton): the webhook URL encrypted with
       `token-cipher` (purpose `discord-webhook`, `TOKEN_ENCRYPTION_KEY`, no
@@ -2496,9 +2495,51 @@ SEO and security are built into every phase, not saved for the end.
       in the error), the cron step. **Not checked by me**: a real post, the
       user's webhook is needed. Review: nothing significant; its five low
       notes are fixed.
-  - [ ] Step 3 (not before step 2 is approved): push streams to the Twitch
-        schedule API and store the segment ids so they can be updated or
-        cancelled.
+  - [ ] Step 3 (built 2026-10-05, merged; **waiting for the user's approval
+        live**): the schedule on Twitch.
+    - Writing the Twitch schedule needs the **broadcaster's own login**
+      (scope `channel:manage:schedule`); the app token can only read. One
+      "Connect Twitch" in `/admin/schedule`: `GET /api/twitch/connect`
+      (admin, state cookie `tw_oauth` on `/api/twitch`, 10 min, plain link
+      because of the CSP's form-action) -> Twitch -> `GET /api/twitch/callback`
+      (state in constant time, scope check, `validate` user id must equal
+      `TWITCH_BROADCASTER_LOGIN`'s id, else revoked as "wrongAccount").
+      Outcome back as `?twitch=<code>` (whitelisted text). No PKCE: Twitch's
+      code flow for a confidential client uses the secret + state.
+    - **The redirect URLs must be registered in the Twitch developer console
+      for the app of `TWITCH_CLIENT_ID`**: `https://aboutselphy.com/api/twitch/callback`
+      and `http://localhost:3002/api/twitch/callback`.
+    - `TwitchScheduleConnection` (singleton): refresh token encrypted
+      (`token-cipher`, purpose `twitch-schedule-refresh-token`; Twitch may
+      rotate it, the newest is stored), broadcaster id + login, enabled, title
+      language. Revocation always uses the **access** token (Twitch's revoke
+      takes access tokens).
+    - **No recurring segments**: Twitch can only cancel the *next* date of a
+      recurring segment. Every stream of the next 14 days is its own one-off
+      segment; `TwitchScheduleSegment` stores occurrence key -> segment id +
+      a hash of what was sent. `syncTwitchSchedule` creates missing ones,
+      PATCHes changed ones (incl. `is_canceled`), deletes ones whose stream
+      vanished (deleted, moved, paused), forgets past ones, re-creates ones
+      deleted on Twitch by hand. Started streams are left alone; cancelled
+      ones never get created. Duration clamped to 30-1380 min, title 140.
+      A created segment that can't be stored is deleted again; the created id
+      is taken only by matching start time (never guessed).
+    - The sync reads the plan **uncached** (`getUpcomingStreams(..., { fresh:
+      true })`): it writes to an external system and must see the latest
+      edit. It runs via `after()` on schedule edits and in the cron (rolling
+      window). Disconnect removes our future segments and revokes the login.
+    - Checked with a simulated Twitch (fetch intercepted, temporary rows,
+      removed): create, no-op, cancel, move, delete. **Not checked by me**:
+      the real connect + segments (the user's login is needed).
+- **Schedule integrations only run on the live site** (2026-10-05):
+  `scheduleIntegrationsActive()` (`schedule/integrations-guard.ts`) allows
+  Discord/Twitch syncs only when `NEXT_PUBLIC_SITE_URL` is an HTTPS public
+  host, or with `SCHEDULE_INTEGRATIONS_IN_DEV=true`. Dev and production
+  share the DB and therefore the webhook and the Twitch login: a local cron
+  run posted a real Discord message, and a dev server on a Monday would send
+  a second @livestream ping. Not `NODE_ENV`: a local `pnpm build && pnpm
+  start` is "production" too. Never trigger the cron or "Update now"
+  against the shared DB without thinking about this.
 - [ ] Real logo for the icons and share cards: later, the user does this
       when everything else is done.
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
