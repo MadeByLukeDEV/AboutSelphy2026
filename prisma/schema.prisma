@@ -517,3 +517,17 @@ model DiscordScheduleEvent {
 
   @@index([startAt])
 }
+
+// ─── guide ───────────────────────────────────────────────────────────────
+
+/// Which admin tours a staff member has finished or skipped, so each tour
+/// starts by itself only once per account (on every device). userId is the
+/// central auth user id (no foreign key: that table lives in schema auth).
+model GuideTourSeen {
+  id     String   @id @default(cuid())
+  userId String   @db.VarChar(64)
+  tourId String   @db.VarChar(40)
+  seenAt DateTime @default(now())
+
+  @@unique([userId, tourId])
+}
