@@ -2473,12 +2473,21 @@ SEO and security are built into every phase, not saved for the end.
       Public at `GET /api/schedule/image?locale=de|en` (memo per content,
       5 min cache), also the admin preview.
     - Sync (`syncDiscordSchedule`): one at a time (in-process queue, the
-      connect save goes through it too); skips when not connected, paused or
-      unchanged; edits the message, posts a new one if it was deleted. Runs
-      via `after()` after every schedule edit and from the 5-minute cron
-      (which also catches the daily roll-over). "Update now" / "Post as new
-      message" for staff; connect, replace, language, auto-update and
-      disconnect for admins.
+      connect save goes through it too). Runs via `after()` after every
+      schedule edit and from the 5-minute cron (which also catches the daily
+      roll-over). Modes:
+      - `auto` (edits, cron): the Monday post when due, otherwise **only
+        edits** an existing message: skipped when paused, unchanged or when
+        there's no message (`noMessage`). **Automatic syncs never post a new
+        message** (the user's rule, 2026-10-05: an automatic first post went
+        out without the ping). A message deleted in Discord is forgotten,
+        not re-posted.
+      - `edit` ("Update now", language change): edit even if unchanged.
+      - `post` ("Post new message", staff): a fresh message, with a "Ping
+        the role" switch (on by default). A pinged post marks the week's
+        Monday post as done, so it never pings twice.
+      Connecting posts nothing. Staff run "Update now" / "Post new message";
+      connect, replace, language, auto-update and disconnect are admin only.
     - **Weekly post** (2026-10-05, the user's request): every Monday 14:00
       Vienna a **new** message, pinging one role (`pingRoleId`, the user's
       @livestream = 1400559547642282184, entered in admin, digits-only CHECK).
