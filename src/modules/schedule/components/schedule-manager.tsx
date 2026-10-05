@@ -141,7 +141,7 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
             </h2>
             <p className="text-sm text-muted-foreground">{t("upcomingHint")}</p>
           </div>
-          <Button type="button" onClick={() => setDialog({ type: "stream", id: null, values: newStream() })}>
+          <Button type="button" data-tour="add-stream" onClick={() => setDialog({ type: "stream", id: null, values: newStream() })}>
             <Plus aria-hidden />
             {t("addStream")}
           </Button>
@@ -179,7 +179,7 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
                         </div>
                         {stream.note && <p className="text-sm text-muted-foreground">{stream.note}</p>}
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2" data-tour="stream-actions">
                         <Button type="button" variant="outline" size="sm" onClick={() => editUpcoming(stream)}>
                           <Pencil aria-hidden />
                           {t("edit")}

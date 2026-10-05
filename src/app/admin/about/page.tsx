@@ -27,6 +27,7 @@ export default async function AdminAboutPage() {
           <p className="max-w-prose text-muted-foreground">{t("about.intro")}</p>
         </div>
         <a
+          data-tour="view-page"
           href={siteUrl()}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
@@ -36,7 +37,9 @@ export default async function AdminAboutPage() {
       </header>
 
       {isAdmin(session.user.role) ? (
-        <ProfileForm initial={await getProfileForEdit()} />
+        <div data-tour="profile-form">
+          <ProfileForm initial={await getProfileForEdit()} />
+        </div>
       ) : (
         <p className="max-w-prose rounded-xl border bg-background p-4">
           {t("about.adminOnly")}

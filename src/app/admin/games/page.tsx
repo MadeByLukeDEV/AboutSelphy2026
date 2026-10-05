@@ -21,7 +21,9 @@ export default async function AdminGamesPage() {
         <p className="max-w-prose text-muted-foreground">{t("games.intro")}</p>
       </header>
       {isAdmin(session.user.role) ? (
-        <GamesManager initial={await getGamesForEdit()} />
+        <div data-tour="games-manager">
+          <GamesManager initial={await getGamesForEdit()} />
+        </div>
       ) : (
         <p className="max-w-prose rounded-xl border bg-background p-4">{t("games.adminOnly")}</p>
       )}

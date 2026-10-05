@@ -21,7 +21,9 @@ export default async function AdminLegalPage() {
         <p className="max-w-prose text-muted-foreground">{t("legal.intro")}</p>
       </header>
       {isAdmin(session.user.role) ? (
-        <LegalForm initial={await getLegalForEdit()} />
+        <div data-tour="legal-form">
+          <LegalForm initial={await getLegalForEdit()} />
+        </div>
       ) : (
         <p className="max-w-prose rounded-xl border bg-background p-4">{t("legal.adminOnly")}</p>
       )}

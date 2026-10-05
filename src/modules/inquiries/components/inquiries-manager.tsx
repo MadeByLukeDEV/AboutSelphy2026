@@ -57,7 +57,7 @@ export function InquiriesManager({ initial }: { initial: AdminInquiries }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div role="group" aria-label={t("filterLabel")} className="flex flex-wrap gap-2">
+      <div role="group" aria-label={t("filterLabel")} className="flex flex-wrap gap-2" data-tour="inquiry-filter">
         {(["new", "in_progress", "done", "spam", "all"] as const).map((key) => (
           <Button
             key={key}
@@ -80,7 +80,7 @@ export function InquiriesManager({ initial }: { initial: AdminInquiries }) {
       ) : (
         <ul className="flex flex-col gap-4">
           {visible.map((inquiry) => (
-            <li key={inquiry.id} className="flex flex-col gap-3 rounded-xl border bg-background p-4">
+            <li key={inquiry.id} className="flex flex-col gap-3 rounded-xl border bg-background p-4" data-tour="inquiry-item">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-col">
                   <p className="font-semibold">{inquiry.company}</p>
@@ -101,7 +101,7 @@ export function InquiriesManager({ initial }: { initial: AdminInquiries }) {
                   }
                   disabled={pending}
                 >
-                  <SelectTrigger aria-label={t("status")} className="h-8 min-w-36">
+                  <SelectTrigger aria-label={t("status")} className="h-8 min-w-36" data-tour="inquiry-status">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -130,6 +130,7 @@ export function InquiriesManager({ initial }: { initial: AdminInquiries }) {
               </p>
               <div className="flex flex-wrap gap-2">
                 <a
+                  data-tour="inquiry-reply"
                   href={`mailto:${encodeURIComponent(inquiry.email)}?subject=${encodeURIComponent(t("replySubject"))}`}
                   className={buttonVariants({ variant: "outline", size: "sm" })}
                 >
