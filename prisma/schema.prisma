@@ -272,25 +272,31 @@ model ScheduleException {
 /// secret token: stored encrypted (token-cipher, TOKEN_ENCRYPTION_KEY) and
 /// never sent to the browser.
 model DiscordSchedule {
-  id            Int       @id @default(1)
-  webhookUrlEnc String
+  id             Int       @id @default(1)
+  webhookUrlEnc  String
   /// Public parts, for display: the webhook id, name, channel and server.
-  webhookId     String    @db.VarChar(30)
-  webhookName   String    @default("") @db.VarChar(80)
-  channelId     String    @default("") @db.VarChar(30)
-  guildId       String    @default("") @db.VarChar(30)
+  webhookId      String    @db.VarChar(30)
+  webhookName    String    @default("") @db.VarChar(80)
+  channelId      String    @default("") @db.VarChar(30)
+  guildId        String    @default("") @db.VarChar(30)
   /// Language of the message and image: "de" or "en".
-  locale        String    @default("de") @db.VarChar(2)
-  autoUpdate    Boolean   @default(true)
+  locale         String    @default("de") @db.VarChar(2)
+  autoUpdate     Boolean   @default(true)
+  /// A fresh message every Monday 14:00 (Vienna), pinging pingRoleId.
+  weeklyPost     Boolean   @default(false)
+  /// Discord role id to ping in the weekly post (e.g. @livestream).
+  pingRoleId     String?   @db.VarChar(20)
+  /// Monday ("YYYY-MM-DD", Vienna) of the week whose post went out.
+  weeklyPostWeek String?   @db.VarChar(10)
   /// The message we keep editing; null until the first post.
-  messageId     String?   @db.VarChar(30)
+  messageId      String?   @db.VarChar(30)
   /// Hash of what was last posted, so unchanged schedules are not re-sent.
-  contentHash   String?   @db.VarChar(64)
-  lastSyncedAt  DateTime?
+  contentHash    String?   @db.VarChar(64)
+  lastSyncedAt   DateTime?
   /// Last failure as a short code (never Discord text or the URL).
-  lastError     String    @default("") @db.VarChar(40)
-  connectedBy   String    @default("") @db.VarChar(120)
-  updatedAt     DateTime  @updatedAt
+  lastError      String    @default("") @db.VarChar(40)
+  connectedBy    String    @default("") @db.VarChar(120)
+  updatedAt      DateTime  @updatedAt
 }
 
 /// A label for streams, e.g. "Dixper enabled", "Sponsored", "Drops".

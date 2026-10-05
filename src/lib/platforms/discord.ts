@@ -76,14 +76,24 @@ export async function getWebhookInfo(webhookUrl: string): Promise<WebhookInfo> {
 
 export type DiscordEmbed = Record<string, unknown>;
 
-function form(payload: Record<string, unknown>, image: { name: string; data: Uint8Array }) {
+type Payload = {
+  embeds: DiscordEmbed[];
+  /** Plain message text above the embed (e.g. the weekly role ping). */
+  content?: string;
+  /** The only role ids this message may ping; nothing else ever pings. */
+  pingRoleIds?: string[];
+};
+
+function form(payload: Payload, image: { name: string; data: Uint8Array }) {
+  const { pingRoleIds = [], ...rest } = payload;
   const body = new FormData();
   body.set(
     "payload_json",
     JSON.stringify({
-      ...payload,
-      // Never ping anyone (@everyone, roles, users) from schedule text.
-      allowed_mentions: { parse: [] },
+      ...rest,
+      // No @everyone/@here/users/roles from schedule text -- only the role
+      // explicitly listed for this message (the weekly post's @livestream).
+      allowed_mentions: { parse: [], roles: pingRoleIds.filter((id) => /^\d{17,20}$/.test(id)) },
       attachments: [{ id: 0, filename: image.name }],
     }),
   );
@@ -94,7 +104,7 @@ function form(payload: Record<string, unknown>, image: { name: string; data: Uin
 /** Posts a message with one PNG attachment; returns the message id. */
 export async function postWebhookMessage(
   webhookUrl: string,
-  payload: { embeds: DiscordEmbed[] },
+  payload: Payload,
   image: { name: string; data: Uint8Array },
 ): Promise<string> {
   const response = await call(`${webhookUrl}?wait=true`, { method: "POST", body: form(payload, image) });
@@ -110,7 +120,7 @@ export async function postWebhookMessage(
 export async function editWebhookMessage(
   webhookUrl: string,
   messageId: string,
-  payload: { embeds: DiscordEmbed[] },
+  payload: Payload,
   image: { name: string; data: Uint8Array },
 ): Promise<void> {
   if (!/^\d{17,20}$/.test(messageId)) throw new DiscordError("messageGone");

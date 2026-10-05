@@ -14,7 +14,7 @@ import { decryptToken, encryptToken, isTokenCipherConfigured } from "@/lib/secur
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/modules/i18n";
 import { getUpcomingStreams, SCHEDULE_DAYS } from "../service";
-import { addDays, viennaToday, viennaToInstant } from "../time";
+import { addDays, dateKey, isoWeekday, viennaToday, viennaToInstant } from "../time";
 import { renderScheduleImage } from "./image";
 import { buildScheduleEmbed } from "./message";
 
@@ -104,6 +104,10 @@ export type DiscordStatus = {
   guildId: string;
   locale: Locale;
   autoUpdate: boolean;
+  weeklyPost: boolean;
+  pingRoleId: string;
+  /** When the next weekly post goes out (ISO), while it's switched on. */
+  nextWeeklyPost: string | null;
   /** Link to the posted message in Discord, once there is one. */
   messageUrl: string | null;
   lastSyncedAt: string | null;
@@ -120,6 +124,9 @@ export async function getDiscordStatus(): Promise<DiscordStatus> {
     guildId: row?.guildId ?? "",
     locale: (row?.locale === "en" ? "en" : "de") as Locale,
     autoUpdate: row?.autoUpdate ?? true,
+    weeklyPost: row?.weeklyPost ?? false,
+    pingRoleId: row?.pingRoleId ?? "",
+    nextWeeklyPost: row?.weeklyPost ? nextWeeklyPost(row.weeklyPostWeek).toISOString() : null,
     messageUrl:
       row?.messageId && row.guildId && row.channelId
         ? `https://discord.com/channels/${row.guildId}/${row.channelId}/${row.messageId}`
@@ -176,10 +183,33 @@ export async function disconnectDiscord() {
   await prisma.discordSchedule.deleteMany({ where: { id: 1 } });
 }
 
-export async function updateDiscordSettings(settings: { locale: Locale; autoUpdate: boolean }) {
+/** This week's post if it's still to come, else next Monday 14:00. */
+function nextWeeklyPost(postedWeek: string | null) {
+  const week = currentWeek();
+  if (postedWeek !== week.mondayKey && new Date() < week.postAt) return week.postAt;
+  if (postedWeek !== week.mondayKey) return new Date(); // due now (next cron run)
+  return new Date(week.postAt.getTime() + 7 * 24 * 60 * 60_000);
+}
+
+export async function updateDiscordSettings(settings: {
+  locale: Locale;
+  autoUpdate: boolean;
+  weeklyPost: boolean;
+  pingRoleId: string | null;
+}) {
   const row = await find();
   if (!row) throw new DiscordSetupError("notConnected");
-  await prisma.discordSchedule.update({ where: { id: 1 }, data: settings });
+  const week = currentWeek();
+  // Switching the weekly post on after this week's Monday 14:00 must not
+  // post (and ping) right away: mark this week as done, start next Monday.
+  const turningOn = settings.weeklyPost && !row.weeklyPost;
+  await prisma.discordSchedule.update({
+    where: { id: 1 },
+    data: {
+      ...settings,
+      ...(turningOn && new Date() >= week.postAt ? { weeklyPostWeek: week.mondayKey } : {}),
+    },
+  });
   // A language change rewrites the message right away.
   if (settings.locale !== row.locale) return syncDiscordSchedule({ force: true });
   return null;
@@ -192,6 +222,7 @@ export type DiscordSyncResult =
   | "paused"
   | "unchanged"
   | "posted"
+  | "weeklyPosted"
   | "updated"
   | { error: string };
 
@@ -212,10 +243,25 @@ export function syncDiscordSchedule(
   return run;
 }
 
+/** When the weekly post is due: Monday 14:00 Vienna of the current week. */
+const WEEKLY_POST_TIME = "14:00";
+
+/** The current Vienna week: its Monday's key and the weekly post's time. */
+export function currentWeek(now = new Date()) {
+  const today = viennaToday(now);
+  const monday = addDays(today, 1 - isoWeekday(today));
+  return { mondayKey: dateKey(monday), postAt: viennaToInstant(monday, WEEKLY_POST_TIME) };
+}
+
 async function syncNow({ force = false, newMessage = false }): Promise<DiscordSyncResult> {
   const row = await find();
   if (!row) return "notConnected";
-  if (!row.autoUpdate && !force) return "paused";
+  // The weekly post (a fresh message with the role ping) is independent of
+  // auto-update. Missed (server down at 14:00)? It goes out later that week.
+  const week = currentWeek();
+  const weeklyDue = row.weeklyPost && new Date() >= week.postAt && row.weeklyPostWeek !== week.mondayKey;
+  if (!weeklyDue && !row.autoUpdate && !force) return "paused";
+  if (weeklyDue) newMessage = true;
   const locale: Locale = row.locale === "en" ? "en" : "de";
 
   let url: string;
@@ -234,7 +280,7 @@ async function syncNow({ force = false, newMessage = false }): Promise<DiscordSy
     const payload = { embeds: [embed] };
     const file = { name: IMAGE_NAME, data: png };
     let messageId = row.messageId;
-    let outcome: "posted" | "updated" = "updated";
+    let outcome: "posted" | "updated" | "weeklyPosted" = "updated";
     if (messageId && !newMessage) {
       try {
         await editWebhookMessage(url, messageId, payload, file);
@@ -245,12 +291,32 @@ async function syncNow({ force = false, newMessage = false }): Promise<DiscordSy
       }
     }
     if (!messageId || newMessage) {
-      messageId = await postWebhookMessage(url, payload, file);
-      outcome = "posted";
+      // Only the weekly post pings, and only the configured role. Edits and
+      // other new posts never ping (Discord doesn't ping on edits anyway).
+      const role = weeklyDue && row.pingRoleId ? row.pingRoleId : null;
+      const t = await getTranslations({ locale, namespace: "ScheduleDiscord" });
+      messageId = await postWebhookMessage(
+        url,
+        weeklyDue
+          ? {
+              ...payload,
+              content: role ? t("weeklyContentPing", { role: `<@&${role}>` }) : t("weeklyContent"),
+              pingRoleIds: role ? [role] : [],
+            }
+          : payload,
+        file,
+      );
+      outcome = weeklyDue ? "weeklyPosted" : "posted";
     }
     await prisma.discordSchedule.update({
       where: { id: 1 },
-      data: { messageId, contentHash: hash, lastSyncedAt: new Date(), lastError: "" },
+      data: {
+        messageId,
+        contentHash: hash,
+        lastSyncedAt: new Date(),
+        lastError: "",
+        ...(weeklyDue ? { weeklyPostWeek: week.mondayKey } : {}),
+      },
     });
     return outcome;
   } catch (error) {

@@ -172,6 +172,13 @@ const webhookInputSchema = z.object({
 const discordSettingsSchema = z.object({
   locale: z.enum(["de", "en"]),
   autoUpdate: z.boolean(),
+  weeklyPost: z.boolean(),
+  /** A Discord role id (snowflake) or empty for no ping. */
+  pingRoleId: z
+    .string()
+    .trim()
+    .regex(/^(\d{17,20})?$/)
+    .transform((id) => id || null),
 });
 
 async function discordAction(
