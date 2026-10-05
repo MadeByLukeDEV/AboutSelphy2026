@@ -158,16 +158,17 @@ export default async function SchedulePage({
                                 </p>
                               )}
                             </div>
-                            {(running || stream.cancelled || stream.extra) && (
+                            {/* Streams planned on a date are regular streams for
+                                viewers: no "extra" label (the user's call). */}
+                            {(running || stream.cancelled) && (
                               <p
                                 className={cn(
                                   "shrink-0 text-sm font-medium",
                                   running && "text-red-600 dark:text-red-400",
                                   stream.cancelled && "text-destructive",
-                                  stream.extra && !stream.cancelled && "text-brand-text",
                                 )}
                               >
-                                {running ? t("inProgress") : stream.cancelled ? t("cancelled") : t("extra")}
+                                {running ? t("inProgress") : t("cancelled")}
                               </p>
                             )}
                           </div>
