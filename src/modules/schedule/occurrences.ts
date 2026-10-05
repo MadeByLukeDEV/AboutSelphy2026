@@ -1,4 +1,5 @@
 import type { Locale } from "@/modules/i18n";
+import type { CategoryColor } from "./schema";
 import {
   addDays,
   dateKey,
@@ -10,50 +11,59 @@ import {
 // Pure: a plan (weekly slots + exceptions) -> concrete streams. Kept free of
 // I/O so it can be tested directly.
 
+type Stream = {
+  startTime: string;
+  durationMinutes: number;
+  /** A Game's name, else the Twitch category's, else null. */
+  gameName: string | null;
+  gameCoverUrl: string | null;
+  titleEn: string;
+  titleDe: string;
+  categoryIds: string[];
+};
+
 export type Plan = {
-  slots: Array<{
-    id: string;
-    weekday: number;
-    startTime: string;
-    durationMinutes: number;
-    gameName: string | null;
-    gameCoverUrl: string | null;
-    titleEn: string;
-    titleDe: string;
-  }>;
-  exceptions: Array<{
-    id: string;
-    kind: "cancelled" | "extra";
-    dateKey: string;
-    slotId: string | null;
-    startTime: string | null;
-    durationMinutes: number | null;
-    gameName: string | null;
-    gameCoverUrl: string | null;
-    titleEn: string;
-    titleDe: string;
-    noteEn: string;
-    noteDe: string;
-  }>;
+  slots: Array<Stream & { id: string; weekday: number }>;
+  exceptions: Array<
+    Omit<Stream, "startTime" | "durationMinutes"> & {
+      id: string;
+      kind: "cancelled" | "extra";
+      dateKey: string;
+      slotId: string | null;
+      startTime: string | null;
+      durationMinutes: number | null;
+      noteEn: string;
+      noteDe: string;
+      /** extra only: cancelled but still listed, with an optional reason. */
+      cancelled: boolean;
+      cancelReasonEn: string;
+      cancelReasonDe: string;
+    }
+  >;
+  categories: Array<{ id: string; nameEn: string; nameDe: string; color: CategoryColor }>;
 };
 
 export type StreamOccurrence = {
   /** Stable per occurrence: slot id or exception id + date. */
   key: string;
+  /** Where it comes from, so the admin can cancel or edit exactly this one. */
+  source: { kind: "weekly"; slotId: string } | { kind: "once"; exceptionId: string };
   date: LocalDate;
   start: Date;
   end: Date;
   gameName: string | null;
   gameCoverUrl: string | null;
   title: string;
+  categories: Array<{ id: string; name: string; color: CategoryColor }>;
   cancelled: boolean;
   note: string;
+  /** A one-time stream (not from the weekly plan). */
   extra: boolean;
 };
 
 /**
- * Streams from today (Vienna) for `days` days: weekly slots minus
- * cancellations, plus extra streams, sorted by start. Streams that already
+ * Streams from today (Vienna) for `days` days: weekly slots (cancelled ones
+ * marked) plus one-time streams, sorted by start. Streams that already
  * ended are left out; one in progress stays in.
  */
 export function computeOccurrences(
@@ -65,6 +75,11 @@ export function computeOccurrences(
 ): StreamOccurrence[] {
   const de = locale === "de";
   const text = (en: string, deText: string) => (de ? deText || en : en || deText);
+  // Keeps the admin's category order, drops ids that no longer exist.
+  const categories = (ids: string[]) =>
+    plan.categories
+      .filter((c) => ids.includes(c.id))
+      .map((c) => ({ id: c.id, name: text(c.nameEn, c.nameDe), color: c.color }));
 
   const cancelled = new Map(
     plan.exceptions
@@ -82,12 +97,14 @@ export function computeOccurrences(
       const cancellation = cancelled.get(`${slot.id}|${key}`);
       result.push({
         key: `${slot.id}|${key}`,
+        source: { kind: "weekly", slotId: slot.id },
         date,
         start,
         end: new Date(start.getTime() + slot.durationMinutes * 60_000),
         gameName: slot.gameName,
         gameCoverUrl: slot.gameCoverUrl,
         title: text(slot.titleEn, slot.titleDe),
+        categories: categories(slot.categoryIds),
         cancelled: Boolean(cancellation),
         note: cancellation ? text(cancellation.noteEn, cancellation.noteDe) : "",
         extra: false,
@@ -100,14 +117,19 @@ export function computeOccurrences(
       const start = viennaToInstant(date, extra.startTime!);
       result.push({
         key: `${extra.id}|${key}`,
+        source: { kind: "once", exceptionId: extra.id },
         date,
         start,
         end: new Date(start.getTime() + extra.durationMinutes! * 60_000),
         gameName: extra.gameName,
         gameCoverUrl: extra.gameCoverUrl,
         title: text(extra.titleEn, extra.titleDe),
-        cancelled: false,
-        note: text(extra.noteEn, extra.noteDe),
+        categories: categories(extra.categoryIds),
+        cancelled: extra.cancelled,
+        // A cancelled stream shows why (if a reason was given), else its note.
+        note:
+          (extra.cancelled && text(extra.cancelReasonEn, extra.cancelReasonDe)) ||
+          text(extra.noteEn, extra.noteDe),
         extra: true,
       });
     }
@@ -117,4 +139,3 @@ export function computeOccurrences(
     .filter((occurrence) => occurrence.end > now)
     .sort((a, b) => a.start.getTime() - b.start.getTime());
 }
-

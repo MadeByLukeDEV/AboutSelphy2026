@@ -198,19 +198,26 @@ model MediaItem {
 
 /// A stream that repeats every week.
 model ScheduleSlot {
-  id              String   @id @default(cuid())
+  id                 String           @id @default(cuid())
   /// ISO weekday: 1 = Monday ... 7 = Sunday.
-  weekday         Int      @db.SmallInt
+  weekday            Int              @db.SmallInt
   /// "HH:mm", Europe/Vienna.
-  startTime       String   @db.VarChar(5)
-  durationMinutes Int      @db.SmallInt
-  gameId          String?
-  game            Game?    @relation(fields: [gameId], references: [id], onDelete: SetNull)
-  titleEn         String   @default("") @db.VarChar(120)
-  titleDe         String   @default("") @db.VarChar(120)
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  startTime          String           @db.VarChar(5)
+  durationMinutes    Int              @db.SmallInt
+  gameId             String?
+  game               Game?            @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  titleEn            String           @default("") @db.VarChar(120)
+  titleDe            String           @default("") @db.VarChar(120)
+  active             Boolean          @default(true)
+  /// A Twitch category picked by search instead of a Game (never both;
+  /// CHECK in the migration). Lets the schedule use games that aren't in
+  /// the Games section.
+  twitchCategoryId   String?          @db.VarChar(20)
+  twitchCategoryName String?          @db.VarChar(120)
+  twitchBoxArtUrl    String?          @db.VarChar(300)
+  categories         StreamCategory[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   exceptions ScheduleException[]
 
@@ -224,27 +231,63 @@ enum ScheduleExceptionKind {
 
 /// A change to the weekly plan on one date. Moving a stream = cancel + extra.
 model ScheduleException {
-  id              String                @id @default(cuid())
-  kind            ScheduleExceptionKind
+  id                 String                @id @default(cuid())
+  kind               ScheduleExceptionKind
   /// Europe/Vienna calendar date.
-  date            DateTime              @db.Date
+  date               DateTime              @db.Date
   /// cancelled: the slot whose occurrence is cancelled.
-  slotId          String?
-  slot            ScheduleSlot?         @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  slotId             String?
+  slot               ScheduleSlot?         @relation(fields: [slotId], references: [id], onDelete: Cascade)
   /// extra: when, how long, what.
-  startTime       String?               @db.VarChar(5)
-  durationMinutes Int?                  @db.SmallInt
-  gameId          String?
-  game            Game?                 @relation(fields: [gameId], references: [id], onDelete: SetNull)
-  titleEn         String                @default("") @db.VarChar(120)
-  titleDe         String                @default("") @db.VarChar(120)
+  startTime          String?               @db.VarChar(5)
+  durationMinutes    Int?                  @db.SmallInt
+  gameId             String?
+  game               Game?                 @relation(fields: [gameId], references: [id], onDelete: SetNull)
+  titleEn            String                @default("") @db.VarChar(120)
+  titleDe            String                @default("") @db.VarChar(120)
   /// Optional public note, e.g. why a stream is cancelled.
-  noteEn          String                @default("") @db.VarChar(200)
-  noteDe          String                @default("") @db.VarChar(200)
-  createdAt       DateTime              @default(now())
+  noteEn             String                @default("") @db.VarChar(200)
+  noteDe             String                @default("") @db.VarChar(200)
+  /// extra: cancelled but still listed (struck through) instead of deleted.
+  cancelled          Boolean               @default(false)
+  /// extra: why it was cancelled, kept apart from the normal note so a
+  /// restore brings the original note back.
+  cancelReasonEn     String                @default("") @db.VarChar(200)
+  cancelReasonDe     String                @default("") @db.VarChar(200)
+  /// A Twitch category picked by search instead of a Game (never both;
+  /// CHECK in the migration). Lets the schedule use games that aren't in
+  /// the Games section.
+  twitchCategoryId   String?               @db.VarChar(20)
+  twitchCategoryName String?               @db.VarChar(120)
+  twitchBoxArtUrl    String?               @db.VarChar(300)
+  categories         StreamCategory[]
+  createdAt          DateTime              @default(now())
 
   @@unique([slotId, date])
   @@index([date])
+}
+
+/// A label for streams, e.g. "Dixper enabled", "Sponsored", "Drops".
+/// Managed in /admin/schedule.
+model StreamCategory {
+  id         String              @id @default(cuid())
+  nameEn     String              @db.VarChar(40)
+  nameDe     String              @db.VarChar(40)
+  color      StreamCategoryColor @default(green)
+  sortOrder  Int                 @default(0)
+  createdAt  DateTime            @default(now())
+  slots      ScheduleSlot[]
+  exceptions ScheduleException[]
+}
+
+/// Fixed palette (each has light/dark styles with AA contrast).
+enum StreamCategoryColor {
+  green
+  blue
+  violet
+  amber
+  rose
+  slate
 }
 
 // ─── assets ──────────────────────────────────────────────────────────────
@@ -313,22 +356,22 @@ model Package {
 
 /// Singleton (id = 1, CHECK in the migration).
 model LegalSettings {
-  id           Int      @id @default(1)
-  operatorName String   @default("") @db.VarChar(120)
-  street       String   @default("") @db.VarChar(120)
-  postalCode   String   @default("") @db.VarChar(20)
-  city         String   @default("") @db.VarChar(80)
-  country      String   @default("") @db.VarChar(80)
-  email        String   @default("") @db.VarChar(254)
-  phone        String   @default("") @db.VarChar(40)
+  id             Int      @id @default(1)
+  operatorName   String   @default("") @db.VarChar(120)
+  street         String   @default("") @db.VarChar(120)
+  postalCode     String   @default("") @db.VarChar(20)
+  city           String   @default("") @db.VarChar(80)
+  country        String   @default("") @db.VarChar(80)
+  email          String   @default("") @db.VarChar(254)
+  phone          String   @default("") @db.VarChar(40)
   /// Extra Impressum text (Markdown), e.g. the MedienG "Blattlinie".
-  imprintExtraEn String @default("") @db.VarChar(4000)
-  imprintExtraDe String @default("") @db.VarChar(4000)
+  imprintExtraEn String   @default("") @db.VarChar(4000)
+  imprintExtraDe String   @default("") @db.VarChar(4000)
   /// Privacy policy (Markdown, no HTML).
-  privacyEn    String   @default("") @db.VarChar(30000)
-  privacyDe    String   @default("") @db.VarChar(30000)
-  published    Boolean  @default(false)
-  updatedAt    DateTime @updatedAt
+  privacyEn      String   @default("") @db.VarChar(30000)
+  privacyDe      String   @default("") @db.VarChar(30000)
+  published      Boolean  @default(false)
+  updatedAt      DateTime @updatedAt
 }
 
 // ─── inquiries ───────────────────────────────────────────────────────────

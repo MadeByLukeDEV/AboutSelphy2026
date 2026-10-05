@@ -223,3 +223,28 @@ export async function findTwitchGame(name: string): Promise<TwitchGame | null> {
     boxArtUrl: game.box_art_url.replace("{width}", "285").replace("{height}", "380"),
   };
 }
+
+/**
+ * Twitch categories matching a search (Helix search/categories), best
+ * matches first, for picking a schedule game without adding it to the
+ * Games section. Search results carry a fixed 52x72 cover; it's rewritten
+ * to the same 285x380 as findTwitchGame. Only covers on Twitch's own CDN.
+ */
+/** 285x380 box art on Twitch's CDN box-art path, or "" for anything else. */
+function sizedBoxArt(url: string | undefined) {
+  const sized = (url ?? "").replace(/-\d+x\d+(\.\w+)$/, "-285x380$1");
+  return /^https:\/\/static-cdn\.jtvnw\.net\/ttv-boxart\/[A-Za-z0-9_.%-]+$/.test(sized) ? sized : "";
+}
+
+export async function searchTwitchCategories(query: string, limit = 8): Promise<TwitchGame[]> {
+  const body = await helix<{
+    data: Array<{ id: string; name: string; box_art_url: string }>;
+  }>(`search/categories?query=${encodeURIComponent(query)}&first=${limit}`);
+  return body.data
+    .filter((c) => /^\d{1,20}$/.test(c.id) && c.name)
+    .map((c) => ({
+      id: c.id,
+      name: c.name.slice(0, 120),
+      boxArtUrl: sizedBoxArt(c.box_art_url),
+    }));
+}
