@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { RefreshCw, Unplug } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -34,6 +34,9 @@ export function TwitchPanel({
 }) {
   const t = useTranslations("Admin.schedule.twitch");
   const format = useFormatter();
+  // An explicit "now" for relativeTime (next-intl warns without one), ticking
+  // so "Last synced 2 minutes ago" stays current while the page is open.
+  const now = useNow({ updateInterval: 30_000 });
   const [status, setStatus] = useState(initial);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -104,7 +107,7 @@ export function TwitchPanel({
             <p className="text-sm text-muted-foreground">{t("segments", { count: status.segments })}</p>
             <p className="text-sm text-muted-foreground">
               {status.lastSyncedAt
-                ? t("lastSynced", { time: format.relativeTime(new Date(status.lastSyncedAt)) })
+                ? t("lastSynced", { time: format.relativeTime(new Date(status.lastSyncedAt), now) })
                 : t("notSynced")}
             </p>
             {status.lastError && <p className="text-sm font-medium text-destructive">{errorText(status.lastError)}</p>}

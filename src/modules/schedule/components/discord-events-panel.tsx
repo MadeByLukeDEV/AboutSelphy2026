@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useNow, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ExternalLink, RefreshCw, Unplug } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,9 @@ import {
 export function DiscordEventsPanel({ initial, isAdmin }: { initial: DiscordEventsStatus; isAdmin: boolean }) {
   const t = useTranslations("Admin.schedule.discordEvents");
   const format = useFormatter();
+  // An explicit "now" for relativeTime (next-intl warns without one), ticking
+  // so "Last synced 2 minutes ago" stays current while the page is open.
+  const now = useNow({ updateInterval: 30_000 });
   const [status, setStatus] = useState(initial);
   const [token, setToken] = useState("");
   const [guildId, setGuildId] = useState(initial.guildId || initial.suggestedGuildId);
@@ -146,7 +149,7 @@ export function DiscordEventsPanel({ initial, isAdmin }: { initial: DiscordEvent
             </p>
             <p className="text-sm text-muted-foreground">
               {status.lastSyncedAt
-                ? t("lastSynced", { time: format.relativeTime(new Date(status.lastSyncedAt)) })
+                ? t("lastSynced", { time: format.relativeTime(new Date(status.lastSyncedAt), now) })
                 : t("notSynced")}
             </p>
             {status.lastError && <p className="text-sm font-medium text-destructive">{errorText(status.lastError)}</p>}
