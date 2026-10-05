@@ -9,6 +9,7 @@ import { CHANNELS, GameCover, PROFILE_IMAGES } from "@/modules/profile";
 import { getUpcomingStreams, type StreamOccurrence } from "@/modules/schedule";
 import { StreamTime } from "@/modules/schedule/components/stream-time";
 import { WithMentions } from "@/modules/schedule/components/with-mentions";
+import { CategoryChip } from "@/modules/schedule/components/category-chip";
 import { JsonLd, streamEventSchema, PageBreadcrumbs } from "@/modules/seo";
 
 export async function generateMetadata({
@@ -142,6 +143,15 @@ export default async function SchedulePage({
                                 {stream.gameName && stream.title && " – "}
                                 {stream.title ? <WithMentions text={stream.title} /> : !stream.gameName && t("defaultTitle")}
                               </p>
+                              {stream.categories.length > 0 && (
+                                <ul className="flex flex-wrap gap-1.5 pt-0.5" aria-label={t("categoriesLabel")}>
+                                  {stream.categories.map((category) => (
+                                    <li key={category.id}>
+                                      <CategoryChip name={category.name} color={category.color} />
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                               {stream.note && (
                                 <p className="text-sm text-muted-foreground">
                                   <WithMentions text={stream.note} />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { Locale } from "@/modules/i18n";
 import { requireStaffPage } from "@/modules/auth";
 import { getScheduleForEdit } from "@/modules/schedule/admin-service";
 import { ScheduleManager } from "@/modules/schedule/components/schedule-manager";
@@ -21,7 +22,7 @@ export default async function AdminSchedulePage() {
         <h1 className="text-fluid-3xl font-extrabold tracking-tight">{t("nav.schedule")}</h1>
         <p className="max-w-prose text-muted-foreground">{t("schedule.intro")}</p>
       </header>
-      <ScheduleManager initial={await getScheduleForEdit()} />
+      <ScheduleManager initial={await getScheduleForEdit((await getLocale()) as Locale)} />
     </div>
   );
 }

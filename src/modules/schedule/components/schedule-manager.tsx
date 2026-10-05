@@ -1,49 +1,41 @@
 "use client";
 
 import { useState, useTransition, type ReactNode } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFormatter, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { Ban, CalendarPlus, Pencil, Plus, Trash2 } from "lucide-react";
+import { Ban, Pencil, Plus, RotateCcw, Tag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { FormSelect } from "@/components/form/form-select";
-import type { Control, FieldPath, FieldValues } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import type { AdminSchedule } from "../admin-service";
 import {
-  addExtraAction,
-  cancelOccurrenceAction,
-  deleteExceptionAction,
+  cancelStreamAction,
+  deleteCategoryAction,
+  deleteOnceAction,
   deleteSlotAction,
-  saveSlotAction,
+  restoreStreamAction,
+  saveCategoryAction,
+  saveStreamAction,
   type ScheduleResult,
 } from "../actions";
 import {
-  cancellationInputSchema,
-  extraInputSchema,
-  slotInputSchema,
-  type ExtraFormValues,
-  type SlotFormValues,
+  CATEGORY_COLORS,
+  categoryInputSchema,
+  streamInputSchema,
+  type CategoryInput,
+  type StreamFormValues,
 } from "../schema";
+import { CATEGORY_STYLES, CategoryChip } from "./category-chip";
+import { GamePicker } from "./game-picker";
 
 type Slot = AdminSchedule["slots"][number];
-type Games = AdminSchedule["games"];
+type Upcoming = AdminSchedule["upcoming"][number];
+type Category = AdminSchedule["categories"][number];
 
 function endTime(start: string, minutes: number) {
   const [h, m] = start.split(":").map(Number);
@@ -52,64 +44,185 @@ function endTime(start: string, minutes: number) {
   return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-/** ISO weekday (1 = Monday) of a "YYYY-MM-DD" key. */
-function weekdayOf(key: string) {
-  const day = new Date(`${key}T12:00:00Z`).getUTCDay();
-  return day === 0 ? 7 : day;
-}
+type DialogState =
+  | { type: "stream"; id: string | null; values: StreamFormValues }
+  | { type: "cancel"; stream: Upcoming }
+  | { type: "deleteSlot"; slot: Slot }
+  | { type: "deleteOnce"; stream: Upcoming }
+  | { type: "category"; category: Category | null }
+  | { type: "deleteCategory"; category: Category }
+  | null;
 
-// Weekly plan + upcoming changes. State is seeded from the server and
-// replaced by each action's returned schedule.
+// The schedule editor: upcoming streams (cancel/restore/edit per stream),
+// the weekly plan, and stream categories. State is seeded from the server
+// and replaced by each action's returned schedule.
 export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
   const t = useTranslations("Admin.schedule");
   const format = useFormatter();
   const [schedule, setSchedule] = useState(initial);
-  const [dialog, setDialog] = useState<
-    | { type: "slot"; slot: Slot | null }
-    | { type: "cancel" }
-    | { type: "extra" }
-    | { type: "deleteSlot"; slot: Slot }
-    | null
-  >(null);
+  const [dialog, setDialog] = useState<DialogState>(null);
   const [isPending, startTransition] = useTransition();
 
-  function apply(result: ScheduleResult) {
+  function apply(result: ScheduleResult, message = t("saved")) {
     if (result.ok) {
       setSchedule(result.schedule);
-      toast.success(t("saved"));
+      toast.success(message);
       setDialog(null);
-    } else {
-      toast.error(t(`errors.${result.error}`));
+      return true;
     }
+    toast.error(t(`errors.${result.error}`));
+    return false;
   }
-
-  const slotLabel = (slot: Slot) =>
-    [
-      t(`weekdays.${slot.weekday}` as "weekdays.1"),
-      `${slot.startTime}–${endTime(slot.startTime, slot.durationMinutes)}`,
-      slot.gameName ?? t("noGame"),
-    ].join(" ");
-  const dateLabel = (key: string) =>
-    format.dateTime(new Date(`${key}T12:00:00Z`), {
-      timeZone: "UTC",
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
+  const run = (action: () => Promise<ScheduleResult>, message?: string) =>
+    startTransition(async () => {
+      apply(await action(), message);
     });
-  const slotsById = new Map(schedule.slots.map((slot) => [slot.id, slot]));
+
+  const newStream = (): StreamFormValues => ({
+    repeat: "weekly",
+    weekday: 1,
+    active: true,
+    startTime: "19:00",
+    durationMinutes: 240,
+    game: { kind: "none" },
+    titleEn: "",
+    titleDe: "",
+    categoryIds: [],
+  });
+  const editSlot = (slot: Slot) =>
+    setDialog({
+      type: "stream",
+      id: slot.id,
+      values: {
+        repeat: "weekly",
+        weekday: slot.weekday,
+        active: slot.active,
+        startTime: slot.startTime,
+        durationMinutes: slot.durationMinutes,
+        game: slot.game,
+        titleEn: slot.titleEn,
+        titleDe: slot.titleDe,
+        categoryIds: slot.categoryIds,
+      },
+    });
+  const editUpcoming = (stream: Upcoming) => {
+    if (stream.source.kind === "weekly") {
+      const slot = schedule.slots.find((s) => s.id === (stream.source as { slotId: string }).slotId);
+      if (slot) editSlot(slot);
+      return;
+    }
+    const once = schedule.once[stream.source.exceptionId];
+    if (once) setDialog({ type: "stream", id: once.id, values: { repeat: "once", ...once } });
+  };
+
+  const time = (iso: string) =>
+    format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Vienna" });
+  const dayLabel = (key: string) =>
+    format.dateTime(new Date(`${key}T12:00:00Z`), { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
+  const days = groupByDate(schedule.upcoming);
 
   return (
     <div className="flex flex-col gap-12">
-      <section aria-labelledby="weekly-heading" className="flex flex-col gap-4">
+      <section aria-labelledby="upcoming-heading" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 id="upcoming-heading" className="text-lg font-bold">
+              {t("upcomingHeading")}
+            </h2>
+            <p className="text-sm text-muted-foreground">{t("upcomingHint")}</p>
+          </div>
+          <Button type="button" onClick={() => setDialog({ type: "stream", id: null, values: newStream() })}>
+            <Plus aria-hidden />
+            {t("addStream")}
+          </Button>
+        </div>
+        {days.length === 0 ? (
+          <p className="rounded-xl border bg-background p-4">{t("noUpcoming")}</p>
+        ) : (
+          <ol className="flex flex-col gap-5">
+            {days.map(([date, streams]) => (
+              <li key={date} className="flex flex-col gap-2">
+                <h3 className="font-semibold">{dayLabel(date)}</h3>
+                <ul className="divide-y rounded-xl border bg-background">
+                  {streams.map((stream) => (
+                    <li key={stream.key} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                      <div className={cn("flex min-w-0 flex-1 flex-col gap-1", stream.cancelled && "text-muted-foreground")}>
+                        <p className={cn("font-semibold", stream.cancelled && "line-through")}>
+                          <span className="tabular-nums">
+                            {time(stream.start)}–{time(stream.end)}
+                          </span>{" "}
+                          {stream.gameName ?? t("noGame")}
+                          {stream.title && ` – ${stream.title}`}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="rounded-md border px-2 py-0.5 text-xs">
+                            {stream.extra ? t("kindOnce") : t("kindWeekly")}
+                          </span>
+                          {stream.cancelled && (
+                            <span className="rounded-md border border-destructive/40 px-2 py-0.5 text-xs font-semibold text-destructive">
+                              {t("cancelledBadge")}
+                            </span>
+                          )}
+                          {stream.categories.map((c) => (
+                            <CategoryChip key={c.id} name={c.name} color={c.color} />
+                          ))}
+                        </div>
+                        {stream.note && <p className="text-sm text-muted-foreground">{stream.note}</p>}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={() => editUpcoming(stream)}>
+                          <Pencil aria-hidden />
+                          {t("edit")}
+                        </Button>
+                        {stream.cancelled ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isPending}
+                            onClick={() =>
+                              run(
+                                () =>
+                                  restoreStreamAction(
+                                    stream.source.kind === "weekly"
+                                      ? { target: "weekly", slotId: stream.source.slotId, date: stream.date }
+                                      : { target: "once", exceptionId: stream.source.exceptionId },
+                                  ),
+                                t("restored"),
+                              )
+                            }
+                          >
+                            <RotateCcw aria-hidden />
+                            {t("restore")}
+                          </Button>
+                        ) : (
+                          <Button type="button" variant="outline" size="sm" onClick={() => setDialog({ type: "cancel", stream })}>
+                            <Ban aria-hidden />
+                            {t("cancelStream")}
+                          </Button>
+                        )}
+                        {stream.extra && (
+                          <Button type="button" variant="outline" size="sm" onClick={() => setDialog({ type: "deleteOnce", stream })}>
+                            <Trash2 aria-hidden />
+                            {t("delete")}
+                          </Button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
+      <section aria-labelledby="weekly-heading" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
           <h2 id="weekly-heading" className="text-lg font-bold">
             {t("weeklyHeading")}
           </h2>
-          <Button type="button" onClick={() => setDialog({ type: "slot", slot: null })}>
-            <Plus aria-hidden />
-            {t("addSlot")}
-          </Button>
+          <p className="text-sm text-muted-foreground">{t("weeklyHint")}</p>
         </div>
         {schedule.slots.length === 0 ? (
           <p className="rounded-xl border bg-background p-4">{t("noSlots")}</p>
@@ -117,23 +230,26 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
           <ul className="divide-y rounded-xl border bg-background">
             {schedule.slots.map((slot) => (
               <li key={slot.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                <div className={cn("flex min-w-0 flex-1 flex-col", !slot.active && "text-muted-foreground")}>
+                <div className={cn("flex min-w-0 flex-1 flex-col gap-1", !slot.active && "text-muted-foreground")}>
                   <p className="font-semibold">
                     {t(`weekdays.${slot.weekday}` as "weekdays.1")}{" "}
                     <span className="tabular-nums">
                       {slot.startTime}–{endTime(slot.startTime, slot.durationMinutes)}
-                    </span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
+                    </span>{" "}
                     {slot.gameName ?? t("noGame")}
                     {(slot.titleEn || slot.titleDe) && ` – ${slot.titleEn || slot.titleDe}`}
                   </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {!slot.active && <span className="rounded-md border px-2 py-0.5 text-xs">{t("inactive")}</span>}
+                    {schedule.categories
+                      .filter((c) => slot.categoryIds.includes(c.id))
+                      .map((c) => (
+                        <CategoryChip key={c.id} name={c.nameEn} color={c.color} />
+                      ))}
+                  </div>
                 </div>
-                {!slot.active && (
-                  <span className="rounded-md border px-2 py-0.5 text-xs">{t("inactive")}</span>
-                )}
                 <div className="flex gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={() => setDialog({ type: "slot", slot })}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => editSlot(slot)}>
                     <Pencil aria-hidden />
                     {t("edit")}
                   </Button>
@@ -148,109 +264,98 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
         )}
       </section>
 
-      <section aria-labelledby="changes-heading" className="flex flex-col gap-4">
+      <section aria-labelledby="categories-heading" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="changes-heading" className="text-lg font-bold">
-            {t("changesHeading")}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={schedule.slots.length === 0}
-              onClick={() => setDialog({ type: "cancel" })}
-            >
-              <Ban aria-hidden />
-              {t("cancelStream")}
-            </Button>
-            <Button type="button" onClick={() => setDialog({ type: "extra" })}>
-              <CalendarPlus aria-hidden />
-              {t("addExtra")}
-            </Button>
+          <div className="flex flex-col gap-1">
+            <h2 id="categories-heading" className="text-lg font-bold">
+              {t("categoriesHeading")}
+            </h2>
+            <p className="text-sm text-muted-foreground">{t("categoriesHint")}</p>
           </div>
+          <Button type="button" variant="outline" onClick={() => setDialog({ type: "category", category: null })}>
+            <Tag aria-hidden />
+            {t("addCategory")}
+          </Button>
         </div>
-        {schedule.exceptions.length === 0 ? (
-          <p className="rounded-xl border bg-background p-4">{t("noChanges")}</p>
+        {schedule.categories.length === 0 ? (
+          <p className="rounded-xl border bg-background p-4">{t("noCategories")}</p>
         ) : (
           <ul className="divide-y rounded-xl border bg-background">
-            {schedule.exceptions.map((exception) => {
-              const slot = exception.slotId ? slotsById.get(exception.slotId) : undefined;
-              const stream =
-                exception.kind === "cancelled"
-                  ? slot
-                    ? slotLabel(slot)
-                    : ""
-                  : `${exception.startTime}–${endTime(exception.startTime ?? "", exception.durationMinutes ?? 0)} ${exception.gameName ?? t("noGame")}${exception.titleEn || exception.titleDe ? ` – ${exception.titleEn || exception.titleDe}` : ""}`;
-              return (
-                <li key={exception.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <p className="font-semibold">{dateLabel(exception.date)}</p>
-                    <p className={cn("text-sm", exception.kind === "cancelled" ? "text-destructive" : "text-brand-text")}>
-                      {exception.kind === "cancelled"
-                        ? t("cancelledLabel", { stream })
-                        : t("extraLabel", { stream })}
-                    </p>
-                    {(exception.noteEn || exception.noteDe) && (
-                      <p className="text-sm text-muted-foreground">{exception.noteEn || exception.noteDe}</p>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={isPending}
-                    onClick={() =>
-                      startTransition(async () => apply(await deleteExceptionAction(exception.id)))
-                    }
-                  >
+            {schedule.categories.map((category) => (
+              <li key={category.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                  <CategoryChip name={category.nameEn} color={category.color} />
+                  <span className="text-sm text-muted-foreground">{category.nameDe}</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setDialog({ type: "category", category })}>
+                    <Pencil aria-hidden />
+                    {t("edit")}
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setDialog({ type: "deleteCategory", category })}>
                     <Trash2 aria-hidden />
                     {t("delete")}
                   </Button>
-                </li>
-              );
-            })}
+                </div>
+              </li>
+            ))}
           </ul>
         )}
       </section>
 
       <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
-          {dialog?.type === "slot" && (
-            <SlotForm slot={dialog.slot} games={schedule.games} onDone={apply} onCancel={() => setDialog(null)} />
-          )}
-          {dialog?.type === "cancel" && (
-            <CancelForm
+          {dialog?.type === "stream" && (
+            <StreamForm
+              id={dialog.id}
+              initial={dialog.values}
               schedule={schedule}
-              slotLabel={slotLabel}
-              onDone={apply}
+              onDone={(result) => apply(result)}
               onCancel={() => setDialog(null)}
             />
           )}
-          {dialog?.type === "extra" && (
-            <ExtraForm today={schedule.today} games={schedule.games} onDone={apply} onCancel={() => setDialog(null)} />
+          {dialog?.type === "cancel" && (
+            <CancelForm
+              stream={dialog.stream}
+              label={`${dayLabel(dialog.stream.date)}, ${time(dialog.stream.start)} ${dialog.stream.gameName ?? ""}`}
+              onDone={(result) => apply(result, t("cancelledToast"))}
+              onCancel={() => setDialog(null)}
+            />
+          )}
+          {dialog?.type === "category" && (
+            <CategoryForm category={dialog.category} onDone={(result) => apply(result)} onCancel={() => setDialog(null)} />
           )}
           {dialog?.type === "deleteSlot" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{slotLabel(dialog.slot)}</DialogTitle>
-              </DialogHeader>
-              <p>{t("confirmDeleteSlot")}</p>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setDialog(null)}>
-                  {t("cancel")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={isPending}
-                  onClick={() =>
-                    startTransition(async () => apply(await deleteSlotAction(dialog.slot.id)))
-                  }
-                >
-                  {t("delete")}
-                </Button>
-              </DialogFooter>
-            </>
+            <Confirm
+              title={t("confirmDeleteSlotTitle", {
+                day: t(`weekdays.${dialog.slot.weekday}` as "weekdays.1"),
+                time: dialog.slot.startTime,
+              })}
+              text={t("confirmDeleteSlot")}
+              pending={isPending}
+              onConfirm={() => run(() => deleteSlotAction(dialog.slot.id), t("deleted"))}
+              onCancel={() => setDialog(null)}
+            />
+          )}
+          {dialog?.type === "deleteOnce" && dialog.stream.source.kind === "once" && (
+            <Confirm
+              title={`${dayLabel(dialog.stream.date)}, ${time(dialog.stream.start)}`}
+              text={t("confirmDeleteOnce")}
+              pending={isPending}
+              onConfirm={() =>
+                run(() => deleteOnceAction((dialog.stream.source as { exceptionId: string }).exceptionId), t("deleted"))
+              }
+              onCancel={() => setDialog(null)}
+            />
+          )}
+          {dialog?.type === "deleteCategory" && (
+            <Confirm
+              title={t("confirmDeleteCategoryTitle", { name: dialog.category.nameEn })}
+              text={t("confirmDeleteCategory")}
+              pending={isPending}
+              onConfirm={() => run(() => deleteCategoryAction(dialog.category.id), t("deleted"))}
+              onCancel={() => setDialog(null)}
+            />
           )}
         </DialogContent>
       </Dialog>
@@ -258,11 +363,16 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
   );
 }
 
+function groupByDate(streams: Upcoming[]) {
+  const groups = new Map<string, Upcoming[]>();
+  for (const stream of streams) groups.set(stream.date, [...(groups.get(stream.date) ?? []), stream]);
+  return [...groups.entries()];
+}
+
 function useErrorText() {
   const t = useTranslations("Admin.schedule");
   return (code: string | undefined) =>
-    code &&
-    ["required", "tooLong", "invalidTime", "invalidDuration", "invalidDate"].includes(code)
+    code && ["required", "tooLong", "invalidTime", "invalidDuration", "invalidDate"].includes(code)
       ? [{ message: t(`errors.${code}` as "errors.required") }]
       : undefined;
 }
@@ -272,12 +382,14 @@ function FormShell({
   onSubmit,
   onCancel,
   pending,
+  submitLabel,
   children,
 }: {
   title: string;
   onSubmit: () => void;
   onCancel: () => void;
   pending: boolean;
+  submitLabel?: string;
   children: ReactNode;
 }) {
   const t = useTranslations("Admin.schedule");
@@ -299,86 +411,143 @@ function FormShell({
           {t("cancel")}
         </Button>
         <Button type="submit" disabled={pending}>
-          {pending ? t("saving") : t("save")}
+          {pending ? t("saving") : (submitLabel ?? t("save"))}
         </Button>
       </DialogFooter>
     </form>
   );
 }
 
-function GameSelect<T extends FieldValues>({
-  id,
-  games,
-  control,
-  name,
+function Confirm({
+  title,
+  text,
+  pending,
+  onConfirm,
+  onCancel,
 }: {
-  id: string;
-  games: Games;
-  control: Control<T>;
-  name: FieldPath<T>;
+  title: string;
+  text: string;
+  pending: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
 }) {
   const t = useTranslations("Admin.schedule");
   return (
-    <Field>
-      <FieldLabel htmlFor={id}>{t("game")}</FieldLabel>
-      <FormSelect
-        control={control}
-        name={name}
-        id={id}
-        options={[
-          { value: "", label: t("noGame") },
-          ...games.map((game) => ({ value: game.id, label: game.name })),
-        ]}
-      />
-    </Field>
+    <>
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+      </DialogHeader>
+      <p>{text}</p>
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          {t("cancel")}
+        </Button>
+        <Button type="button" variant="destructive" disabled={pending} onClick={onConfirm}>
+          {t("delete")}
+        </Button>
+      </DialogFooter>
+    </>
   );
 }
 
-function SlotForm({
-  slot,
-  games,
+function StreamForm({
+  id,
+  initial,
+  schedule,
   onDone,
   onCancel,
 }: {
-  slot: Slot | null;
-  games: Games;
+  id: string | null;
+  initial: StreamFormValues;
+  schedule: AdminSchedule;
   onDone: (result: ScheduleResult) => void;
   onCancel: () => void;
 }) {
   const t = useTranslations("Admin.schedule");
   const errorText = useErrorText();
   const [pending, startTransition] = useTransition();
-  const form = useForm<SlotFormValues>({
-    resolver: zodResolver(slotInputSchema),
-    defaultValues: slot
-      ? { ...slot, gameId: slot.gameId ?? "" }
-      : { weekday: 1, startTime: "19:00", durationMinutes: 240, gameId: games[0]?.id ?? "", titleEn: "", titleDe: "", active: true },
-  });
-  const { errors } = form.formState;
-  const [start, minutes] = useWatch({ control: form.control, name: ["startTime", "durationMinutes"] });
+  const form = useForm<StreamFormValues>({ resolver: zodResolver(streamInputSchema), defaultValues: initial });
+  const errors = form.formState.errors as Partial<Record<string, { message?: string }>>;
+  const [repeat, start, minutes] = useWatch({ control: form.control, name: ["repeat", "startTime", "durationMinutes"] });
+  const isNew = id === null;
 
   return (
     <FormShell
-      title={slot ? t("dialogSlotEdit") : t("dialogSlotAdd")}
+      title={isNew ? t("dialogStreamAdd") : repeat === "weekly" ? t("dialogWeeklyEdit") : t("dialogOnceEdit")}
       pending={pending}
       onCancel={onCancel}
       onSubmit={form.handleSubmit((values) =>
-        startTransition(async () => onDone(await saveSlotAction(slot?.id ?? null, values))),
+        startTransition(async () => onDone(await saveStreamAction(id, values))),
       )}
     >
+      {isNew && (
+        <Controller
+          control={form.control}
+          name="repeat"
+          render={({ field }) => (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">{t("repeat")}</legend>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {(["weekly", "once"] as const).map((option) => (
+                  <label
+                    key={option}
+                    className={cn(
+                      "flex cursor-pointer flex-col gap-0.5 rounded-lg border p-3 text-sm has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+                      field.value === option && "border-primary bg-primary/5",
+                    )}
+                  >
+                    <span className="flex items-center gap-2 font-semibold">
+                      <input
+                        type="radio"
+                        name="repeat"
+                        value={option}
+                        checked={field.value === option}
+                        onChange={() => {
+                          const base = form.getValues();
+                          form.reset(
+                            option === "weekly"
+                              ? {
+                                  ...base,
+                                  repeat: "weekly",
+                                  weekday: "weekday" in base ? base.weekday : 1,
+                                  active: "active" in base ? base.active : true,
+                                }
+                              : { ...base, repeat: "once", date: schedule.today, noteEn: "", noteDe: "" },
+                          );
+                        }}
+                        className="accent-primary"
+                      />
+                      {t(option === "weekly" ? "repeatWeekly" : "repeatOnce")}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {t(option === "weekly" ? "repeatWeeklyHint" : "repeatOnceHint")}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+        />
+      )}
+
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field>
-          <FieldLabel htmlFor="weekday">{t("weekday")}</FieldLabel>
-          <FormSelect
-            control={form.control}
-            name="weekday"
-            id="weekday"
-            options={[1, 2, 3, 4, 5, 6, 7].map((day) => ({
-              value: String(day),
-              label: t(`weekdays.${day}` as "weekdays.1"),
-            }))}
-          />
-        </Field>
+        {repeat === "weekly" ? (
+          <Field>
+            <FieldLabel htmlFor="weekday">{t("weekday")}</FieldLabel>
+            <FormSelect
+              control={form.control}
+              name="weekday"
+              id="weekday"
+              options={[1, 2, 3, 4, 5, 6, 7].map((day) => ({ value: String(day), label: t(`weekdays.${day}` as "weekdays.1") }))}
+            />
+          </Field>
+        ) : (
+          <Field data-invalid={!!errors.date}>
+            <FieldLabel htmlFor="date">{t("date")}</FieldLabel>
+            <Input id="date" type="date" min={schedule.today} {...form.register("date")} />
+            <FieldError errors={errorText(errors.date?.message)} />
+          </Field>
+        )}
         <Field data-invalid={!!errors.startTime}>
           <FieldLabel htmlFor="startTime">{t("startTime")}</FieldLabel>
           <Input id="startTime" type="time" step={900} {...form.register("startTime")} />
@@ -391,7 +560,24 @@ function SlotForm({
           <FieldError errors={errorText(errors.durationMinutes?.message)} />
         </Field>
       </div>
-      <GameSelect id="gameId" games={games} control={form.control} name="gameId" />
+
+      <Field>
+        <FieldLabel htmlFor="game">{t("game")}</FieldLabel>
+        <Controller
+          control={form.control}
+          name="game"
+          render={({ field }) => (
+            <GamePicker
+              id="game"
+              value={field.value}
+              onChange={field.onChange}
+              games={schedule.games}
+              twitchSearch={schedule.twitchSearch}
+            />
+          )}
+        />
+      </Field>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <Field data-invalid={!!errors.titleEn}>
           <FieldLabel htmlFor="titleEn">{t("titleEn")}</FieldLabel>
@@ -405,148 +591,174 @@ function SlotForm({
         </Field>
       </div>
       <FieldDescription>{t("titleHint")}</FieldDescription>
-      <Field orientation="horizontal">
-        <input id="active" type="checkbox" className="size-4 accent-primary" {...form.register("active")} />
-        <FieldLabel htmlFor="active">{t("active")}</FieldLabel>
-      </Field>
-      <FieldDescription>{t("activeHint")}</FieldDescription>
+
+      <Controller
+        control={form.control}
+        name="categoryIds"
+        render={({ field }) => {
+          const selected = new Set(field.value ?? []);
+          return (
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 text-sm font-medium">{t("categories")}</legend>
+              {schedule.categories.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("noCategoriesYet")}</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {schedule.categories.map((category) => {
+                    const on = selected.has(category.id);
+                    return (
+                      <button
+                        key={category.id}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          field.onChange(on ? [...selected].filter((x) => x !== category.id) : [...selected, category.id])
+                        }
+                        className={cn(
+                          "rounded-md border px-2.5 py-1 text-sm font-semibold transition-opacity focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                          CATEGORY_STYLES[category.color],
+                          !on && "opacity-45 hover:opacity-80",
+                        )}
+                      >
+                        {category.nameEn}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </fieldset>
+          );
+        }}
+      />
+
+      {repeat === "weekly" ? (
+        <>
+          <Field orientation="horizontal">
+            <input id="active" type="checkbox" className="size-4 accent-primary" {...form.register("active")} />
+            <FieldLabel htmlFor="active">{t("active")}</FieldLabel>
+          </Field>
+          <FieldDescription>{t("activeHint")}</FieldDescription>
+        </>
+      ) : (
+        <NoteFields register={form.register as never} errors={errors} />
+      )}
     </FormShell>
   );
 }
 
 function CancelForm({
-  schedule,
-  slotLabel,
+  stream,
+  label,
   onDone,
   onCancel,
 }: {
-  schedule: AdminSchedule;
-  slotLabel: (slot: Slot) => string;
+  stream: Upcoming;
+  label: string;
   onDone: (result: ScheduleResult) => void;
   onCancel: () => void;
 }) {
   const t = useTranslations("Admin.schedule");
-  const errorText = useErrorText();
   const [pending, startTransition] = useTransition();
-  const form = useForm({
-    resolver: zodResolver(cancellationInputSchema),
-    defaultValues: { slotId: "", date: "", noteEn: "", noteDe: "" },
-  });
-  const date = useWatch({ control: form.control, name: "date" });
-  const options = date
-    ? schedule.slots.filter((slot) => slot.active && slot.weekday === weekdayOf(date))
-    : [];
-  const { errors } = form.formState;
+  const form = useForm({ defaultValues: { noteEn: "", noteDe: "" } });
 
   return (
     <FormShell
-      title={t("dialogCancel")}
+      title={t("dialogCancel", { stream: label })}
       pending={pending}
+      submitLabel={t("cancelConfirm")}
       onCancel={onCancel}
-      onSubmit={form.handleSubmit((values) =>
-        startTransition(async () => onDone(await cancelOccurrenceAction(values))),
+      onSubmit={form.handleSubmit((note) =>
+        startTransition(async () =>
+          onDone(
+            await cancelStreamAction(
+              stream.source.kind === "weekly"
+                ? { target: "weekly", slotId: stream.source.slotId, date: stream.date, ...note }
+                : { target: "once", exceptionId: stream.source.exceptionId, ...note },
+            ),
+          ),
+        ),
       )}
     >
-      <Field data-invalid={!!errors.date}>
-        <FieldLabel htmlFor="cancel-date">{t("date")}</FieldLabel>
-        <Input
-          id="cancel-date"
-          type="date"
-          min={schedule.today}
-          {...form.register("date", {
-            onChange: () => form.setValue("slotId", ""),
-          })}
-        />
-        <FieldError errors={errorText(errors.date?.message)} />
-      </Field>
-      <Field data-invalid={!!errors.slotId}>
-        <FieldLabel htmlFor="cancel-slot">{t("slot")}</FieldLabel>
-        <FormSelect
-          control={form.control}
-          name="slotId"
-          id="cancel-slot"
-          disabled={options.length === 0}
-          invalid={!!errors.slotId}
-          placeholder={!date ? t("pickDate") : options.length === 0 ? t("noSlotOnDate") : "–"}
-          options={options.map((slot) => ({ value: slot.id, label: slotLabel(slot) }))}
-        />
-        {errors.slotId && <FieldError>{t("errors.required")}</FieldError>}
-      </Field>
-      <NoteFields register={form.register} errors={errors} />
+      <p className="text-sm text-muted-foreground">{t("cancelExplain")}</p>
+      <NoteFields register={form.register as never} errors={{}} />
     </FormShell>
   );
 }
 
-function ExtraForm({
-  today,
-  games,
+function CategoryForm({
+  category,
   onDone,
   onCancel,
 }: {
-  today: string;
-  games: Games;
+  category: Category | null;
   onDone: (result: ScheduleResult) => void;
   onCancel: () => void;
 }) {
   const t = useTranslations("Admin.schedule");
   const errorText = useErrorText();
   const [pending, startTransition] = useTransition();
-  const form = useForm<ExtraFormValues>({
-    resolver: zodResolver(extraInputSchema),
-    defaultValues: {
-      date: today,
-      startTime: "19:00",
-      durationMinutes: 180,
-      gameId: games[0]?.id ?? "",
-      titleEn: "",
-      titleDe: "",
-      noteEn: "",
-      noteDe: "",
-    },
+  const form = useForm<CategoryInput>({
+    resolver: zodResolver(categoryInputSchema),
+    defaultValues: category ?? { nameEn: "", nameDe: "", color: "green" },
   });
   const { errors } = form.formState;
-  const [start, minutes] = useWatch({ control: form.control, name: ["startTime", "durationMinutes"] });
+  const [nameEn, color] = useWatch({ control: form.control, name: ["nameEn", "color"] });
 
   return (
     <FormShell
-      title={t("dialogExtra")}
+      title={category ? t("dialogCategoryEdit") : t("dialogCategoryAdd")}
       pending={pending}
       onCancel={onCancel}
       onSubmit={form.handleSubmit((values) =>
-        startTransition(async () => onDone(await addExtraAction(values))),
+        startTransition(async () => onDone(await saveCategoryAction(category?.id ?? null, values))),
       )}
     >
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field data-invalid={!!errors.date}>
-          <FieldLabel htmlFor="extra-date">{t("date")}</FieldLabel>
-          <Input id="extra-date" type="date" min={today} {...form.register("date")} />
-          <FieldError errors={errorText(errors.date?.message)} />
-        </Field>
-        <Field data-invalid={!!errors.startTime}>
-          <FieldLabel htmlFor="extra-start">{t("startTime")}</FieldLabel>
-          <Input id="extra-start" type="time" step={900} {...form.register("startTime")} />
-          <FieldError errors={errorText(errors.startTime?.message)} />
-        </Field>
-        <Field data-invalid={!!errors.durationMinutes}>
-          <FieldLabel htmlFor="extra-duration">{t("duration")}</FieldLabel>
-          <Input id="extra-duration" type="number" min={15} max={1440} step={15} {...form.register("durationMinutes")} />
-          <FieldDescription>{t("endsAt", { time: endTime(String(start), Number(minutes)) })}</FieldDescription>
-          <FieldError errors={errorText(errors.durationMinutes?.message)} />
-        </Field>
-      </div>
-      <GameSelect id="extra-game" games={games} control={form.control} name="gameId" />
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor="extra-titleEn">{t("titleEn")}</FieldLabel>
-          <Input id="extra-titleEn" lang="en" {...form.register("titleEn")} />
+        <Field data-invalid={!!errors.nameEn}>
+          <FieldLabel htmlFor="nameEn">{t("categoryNameEn")}</FieldLabel>
+          <Input id="nameEn" lang="en" maxLength={40} {...form.register("nameEn")} />
+          <FieldError errors={errorText(errors.nameEn?.message)} />
         </Field>
-        <Field>
-          <FieldLabel htmlFor="extra-titleDe">{t("titleDe")}</FieldLabel>
-          <Input id="extra-titleDe" lang="de" {...form.register("titleDe")} />
+        <Field data-invalid={!!errors.nameDe}>
+          <FieldLabel htmlFor="nameDe">{t("categoryNameDe")}</FieldLabel>
+          <Input id="nameDe" lang="de" maxLength={40} {...form.register("nameDe")} />
+          <FieldError errors={errorText(errors.nameDe?.message)} />
         </Field>
       </div>
-      <FieldDescription>{t("titleHint")}</FieldDescription>
-      <NoteFields register={form.register} errors={errors} />
+      <Controller
+        control={form.control}
+        name="color"
+        render={({ field }) => (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 text-sm font-medium">{t("categoryColor")}</legend>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORY_COLORS.map((option) => (
+                <label
+                  key={option}
+                  className={cn(
+                    "cursor-pointer rounded-md border px-2.5 py-1 text-sm font-semibold has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+                    CATEGORY_STYLES[option],
+                    field.value !== option && "opacity-45 hover:opacity-80",
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="color"
+                    value={option}
+                    checked={field.value === option}
+                    onChange={() => field.onChange(option)}
+                    className="sr-only"
+                  />
+                  {t(`colors.${option}`)}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+      />
+      <p className="flex items-center gap-2 text-sm text-muted-foreground">
+        {t("categoryPreview")} <CategoryChip name={nameEn || "Dixper"} color={color} />
+      </p>
     </FormShell>
   );
 }
@@ -555,10 +767,9 @@ function NoteFields({
   register,
   errors,
 }: {
-  // Shared by the cancel and extra forms (both have noteEn/noteDe).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register: (name: "noteEn" | "noteDe") => any;
-  errors: { noteEn?: { message?: string }; noteDe?: { message?: string } };
+  // Shared by the cancel and one-time stream forms (both have noteEn/noteDe).
+  register: (name: "noteEn" | "noteDe") => object;
+  errors: Partial<Record<string, { message?: string }>>;
 }) {
   const t = useTranslations("Admin.schedule");
   const errorText = useErrorText();
@@ -567,12 +778,12 @@ function NoteFields({
       <div className="grid gap-4 sm:grid-cols-2">
         <Field data-invalid={!!errors.noteEn}>
           <FieldLabel htmlFor="noteEn">{t("noteEn")}</FieldLabel>
-          <Input id="noteEn" lang="en" {...register("noteEn")} />
+          <Input id="noteEn" lang="en" maxLength={200} {...register("noteEn")} />
           <FieldError errors={errorText(errors.noteEn?.message)} />
         </Field>
         <Field data-invalid={!!errors.noteDe}>
           <FieldLabel htmlFor="noteDe">{t("noteDe")}</FieldLabel>
-          <Input id="noteDe" lang="de" {...register("noteDe")} />
+          <Input id="noteDe" lang="de" maxLength={200} {...register("noteDe")} />
           <FieldError errors={errorText(errors.noteDe?.message)} />
         </Field>
       </div>
