@@ -348,7 +348,61 @@
       "twitchNoResults": "Keine Kategorien gefunden.",
       "twitchPick": "{name} (Twitch)",
       "twitchPickedHint": "Twitch-Kategorie, nicht bei den Spielen.",
-      "twitchClear": "Spiel entfernen"
+      "twitchClear": "Spiel entfernen",
+      "discord": {
+        "heading": "Discord",
+        "hint": "Postet die Woche als Nachricht mit Bild in einen Discord-Kanal und hält diese Nachricht aktuell.",
+        "adminOnly": "Nur Admins können die Discord-Verbindung ändern. Staff kann die Nachricht aktualisieren.",
+        "notReady": "TOKEN_ENCRYPTION_KEY ist nicht gesetzt, daher kann der Webhook nicht sicher gespeichert werden.",
+        "webhookLabel": "Webhook-URL",
+        "webhookHint": "In Discord: Kanaleinstellungen → Integrationen → Webhooks → Neuer Webhook → Webhook-URL kopieren. Sie wird verschlüsselt gespeichert und nie wieder angezeigt.",
+        "language": "Sprache der Nachricht",
+        "languages": {
+          "de": "Deutsch",
+          "en": "Englisch"
+        },
+        "connect": "Verbinden",
+        "connecting": "Prüfe bei Discord…",
+        "connectedTo": "Verbunden: Webhook „{name}“",
+        "channel": "Kanal {id}",
+        "replace": "Webhook ersetzen",
+        "autoUpdate": "Automatisch aktualisieren",
+        "autoUpdateHint": "Nach jeder Änderung am Streamplan und wenn ein Tag vorbei ist (alle 5 Minuten geprüft).",
+        "lastSynced": "Zuletzt aktualisiert {time}",
+        "notPosted": "Noch nicht gepostet.",
+        "openMessage": "Nachricht in Discord öffnen",
+        "updateNow": "Jetzt aktualisieren",
+        "postNew": "Als neue Nachricht posten",
+        "postNewHint": "Postet eine neue Nachricht (z. B. für eine neue Woche); die alte wird nicht mehr aktualisiert.",
+        "disconnect": "Trennen",
+        "confirmDisconnectTitle": "Discord trennen?",
+        "confirmDisconnect": "Die Nachricht bleibt in Discord, wird aber nicht mehr aktualisiert. Um wieder zu posten, füge eine Webhook-URL ein.",
+        "preview": "Vorschau des Bildes",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "results": {
+          "posted": "In Discord gepostet.",
+          "updated": "Discord-Nachricht aktualisiert.",
+          "unchanged": "Schon aktuell.",
+          "paused": "Automatische Aktualisierung ist aus.",
+          "notConnected": "Discord ist nicht verbunden.",
+          "saved": "Einstellungen gespeichert.",
+          "disconnected": "Discord getrennt."
+        },
+        "errors": {
+          "forbidden": "Nur Admins können das ändern.",
+          "invalid": "Einige Felder sind ungültig.",
+          "invalidUrl": "Das ist keine Discord-Webhook-URL.",
+          "invalidWebhook": "Discord kennt diesen Webhook nicht (gelöscht oder zurückgesetzt?). Füge eine neue URL ein.",
+          "notReady": "TOKEN_ENCRYPTION_KEY ist nicht gesetzt.",
+          "notConnected": "Discord ist nicht verbunden.",
+          "rateLimited": "Discord bremst gerade. Versuch es in einer Minute noch einmal.",
+          "tooLarge": "Das Bild ist zu groß für Discord.",
+          "cantDecrypt": "Der gespeicherte Webhook ist nicht lesbar (Schlüssel geändert). Füge die URL erneut ein.",
+          "messageGone": "Die Nachricht wurde in Discord gelöscht.",
+          "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Versuch es gleich noch einmal."
+        }
+      }
     },
     "inquiries": {
       "intro": "Sponsoring-Anfragen aus dem Mediakit-Formular. Personenbezogene Daten: Erledigte und Spam-Anfragen werden 12 Monate nach der letzten Änderung automatisch gelöscht.",
@@ -723,5 +777,14 @@
       "GAME_CONSOLE": "Spielkonsole",
       "UNKNOWN_PLATFORM": "Unbekannt"
     }
+  },
+  "ScheduleDiscord": {
+    "title": "Streamplan: {range}",
+    "heading": "Streamplan · {range}",
+    "empty": "Diese Woche sind keine Streams geplant.",
+    "cancelled": "Abgesagt",
+    "zone": "Alle Zeiten: Wien ({zone})",
+    "summerTime": "MESZ",
+    "winterTime": "MEZ"
   }
 }

@@ -3,7 +3,7 @@
 import { getLocale } from "next-intl/server";
 import { z } from "zod";
 import { errorInfo } from "@/lib/log";
-import { AuthorizationError, requireStaff } from "@/modules/auth";
+import { AuthorizationError, requireAdmin, requireStaff, type StaffSession } from "@/modules/auth";
 import type { Locale } from "@/modules/i18n";
 import {
   cancelStream,
@@ -17,6 +17,17 @@ import {
   searchCategories,
   type AdminSchedule,
 } from "./admin-service";
+import {
+  connectDiscord,
+  disconnectDiscord,
+  DiscordSetupError,
+  getDiscordStatus,
+  syncDiscordSchedule,
+  updateDiscordSettings,
+  type DiscordStatus,
+  type DiscordSyncResult,
+} from "./discord/service";
+import { DiscordError } from "@/lib/platforms/discord";
 import {
   cancelInputSchema,
   categoryInputSchema,
@@ -140,4 +151,74 @@ export async function searchTwitchCategoriesAction(query: unknown): Promise<Cate
     console.error("[schedule] Twitch category search failed", errorInfo(error, { message: true }));
     return { ok: false, error: "failed" };
   }
+}
+
+// ─── Discord ─────────────────────────────────────────────────────────────
+// Connecting, disconnecting and settings are admin-only (the webhook is a
+// credential); updating the message is allowed for all staff.
+
+/**
+ * ok: the change happened (status is fresh). A failed Discord post after a
+ * successful change (e.g. connected, but rate-limited) comes as syncError.
+ */
+export type DiscordActionResult =
+  | { ok: true; status: DiscordStatus; result?: string; syncError?: string }
+  | { ok: false; error: string };
+
+const webhookInputSchema = z.object({
+  url: z.string().trim().min(1).max(300),
+  locale: z.enum(["de", "en"]),
+});
+const discordSettingsSchema = z.object({
+  locale: z.enum(["de", "en"]),
+  autoUpdate: z.boolean(),
+});
+
+async function discordAction(
+  role: "admin" | "staff",
+  run: (session: StaffSession) => Promise<DiscordSyncResult | null | void>,
+): Promise<DiscordActionResult> {
+  let session: StaffSession;
+  try {
+    session = role === "admin" ? await requireAdmin() : await requireStaff();
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { ok: false, error: "forbidden" };
+    throw error;
+  }
+  try {
+    const outcome = await run(session);
+    const status = await getDiscordStatus();
+    if (outcome && typeof outcome === "object") return { ok: true, status, syncError: outcome.error };
+    return { ok: true, status, result: outcome ?? undefined };
+  } catch (error) {
+    if (error instanceof DiscordSetupError) return { ok: false, error: error.code };
+    // Discord itself (rate limit, outage) during connect: its short code.
+    if (error instanceof DiscordError) return { ok: false, error: error.code };
+    console.error("[schedule/discord] action failed", errorInfo(error));
+    return { ok: false, error: "failed" };
+  }
+}
+
+export async function connectDiscordAction(input: unknown) {
+  const parsed = webhookInputSchema.safeParse(input);
+  return discordAction("admin", async (session) => {
+    if (!parsed.success) throw new DiscordSetupError("invalidUrl");
+    return connectDiscord(parsed.data.url, parsed.data.locale, session.user.name ?? "");
+  });
+}
+
+export async function disconnectDiscordAction() {
+  return discordAction("admin", () => disconnectDiscord());
+}
+
+export async function saveDiscordSettingsAction(input: unknown) {
+  const parsed = discordSettingsSchema.safeParse(input);
+  return discordAction("admin", async () => {
+    if (!parsed.success) throw new DiscordSetupError("invalid");
+    return updateDiscordSettings(parsed.data);
+  });
+}
+
+export async function syncDiscordAction(newMessage: unknown) {
+  return discordAction("staff", () => syncDiscordSchedule({ force: true, newMessage: newMessage === true }));
 }

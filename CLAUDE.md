@@ -1203,8 +1203,8 @@ SEO and security are built into every phase, not saved for the end.
 - [ ] Schedule v2 (started 2026-10-05). The user's rule: **three steps, and
       the next one only starts after they approved the previous one live on
       the main site.** Never begin a step early.
-  - [ ] Step 1 (built 2026-10-05, merged; **waiting for the user's approval
-        live**): categories, cancel per stream, Twitch game search, weekly vs
+  - [x] Step 1 (built 2026-10-05, **approved by the user**, plus their fix:
+        streams planned on a date get no "Extra stream" label publicly): categories, cancel per stream, Twitch game search, weekly vs
         once per stream. The user's choices: repeat is chosen **per stream**
         (not a global switch), categories are **editable in admin**.
     - Tables: `StreamCategory` (en/de name, colour from a fixed palette
@@ -2446,9 +2446,45 @@ SEO and security are built into every phase, not saved for the end.
       public page in en/de, phone/desktop, dark/light. The admin UI needs a
       staff login, so the user tests it. Review: nothing critical/high; its
       six low findings are fixed.
-  - [ ] Step 2 (not before step 1 is approved): an image of the schedule,
-        posted as an embedded message to the Discord server and edited
-        (message + image) when the schedule changes.
+  - [ ] Step 2 (built 2026-10-05, merged; **waiting for the user's approval
+        live**): schedule image + one Discord message, edited on changes.
+    - The user's choice: the webhook is set **in the admin**, not as an env
+      secret. `DiscordSchedule` (singleton): the webhook URL encrypted with
+      `token-cipher` (purpose `discord-webhook`, `TOKEN_ENCRYPTION_KEY`, no
+      new env var), the public parts (webhook id/name, channel, guild),
+      language de/en, auto-update, the posted `messageId`, a content hash,
+      last sync and a short last-error code. The URL never goes back to the
+      browser, into logs or into error texts.
+    - `src/lib/platforms/discord.ts`: only `discord(app).com` webhook URLs
+      (canonicalised to `/api/v10`, the id Discord reports must match),
+      10 s timeouts, multipart `payload_json` + `files[0]` with
+      `attachments: [{ id: 0 }]` (an edit replaces the old image),
+      `allowed_mentions: { parse: [] }`. Errors are short codes.
+    - `schedule/discord/message.ts` (pure): day headings (Vienna dates) and
+      lines with Discord timestamps `<t:unix:t>` (each viewer sees their own
+      time), categories, cancelled lines struck through with the reason.
+      Staff text is escaped (markdown, `<` so no `<t:>`/`<@>`/`<#>`,
+      `://` so no auto-links); `@name` stays a Twitch link. Description
+      cut at a line break below 4,000 chars. The hash covers the embed (not
+      its timestamp) plus the covers.
+    - `schedule/discord/image.tsx`: 1200 px wide PNG (next/og), height from
+      the number of streams; Vienna times with the zone (MESZ/CEST) in the
+      header; covers fetched server-side (box-art path or `/api/media`
+      asset only), cropped to PNG; failed cover loads aren't remembered.
+      Public at `GET /api/schedule/image?locale=de|en` (memo per content,
+      5 min cache), also the admin preview.
+    - Sync (`syncDiscordSchedule`): one at a time (in-process queue, the
+      connect save goes through it too); skips when not connected, paused or
+      unchanged; edits the message, posts a new one if it was deleted. Runs
+      via `after()` after every schedule edit and from the 5-minute cron
+      (which also catches the daily roll-over). "Update now" / "Post as new
+      message" for staff; connect, replace, language, auto-update and
+      disconnect for admins.
+    - Checked: images in de/en, the embed text (escaping, mentions, long
+      weeks), URL validation, a fake webhook (404 -> invalidWebhook, no token
+      in the error), the cron step. **Not checked by me**: a real post, the
+      user's webhook is needed. Review: nothing significant; its five low
+      notes are fixed.
   - [ ] Step 3 (not before step 2 is approved): push streams to the Twitch
         schedule API and store the segment ids so they can be updated or
         cancelled.

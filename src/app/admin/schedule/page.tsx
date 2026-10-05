@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Locale } from "@/modules/i18n";
-import { requireStaffPage } from "@/modules/auth";
+import { isAdmin, requireStaffPage } from "@/modules/auth";
 import { getScheduleForEdit } from "@/modules/schedule/admin-service";
 import { ScheduleManager } from "@/modules/schedule/components/schedule-manager";
+import { DiscordPanel } from "@/modules/schedule/components/discord-panel";
+import { getDiscordStatus } from "@/modules/schedule/discord/service";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Admin.nav");
@@ -13,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 // Staff (admins and moderators) can edit the schedule; the actions enforce
 // the same rule server-side.
 export default async function AdminSchedulePage() {
-  await requireStaffPage("/admin/schedule");
+  const session = await requireStaffPage("/admin/schedule");
   const t = await getTranslations("Admin");
 
   return (
@@ -23,6 +25,7 @@ export default async function AdminSchedulePage() {
         <p className="max-w-prose text-muted-foreground">{t("schedule.intro")}</p>
       </header>
       <ScheduleManager initial={await getScheduleForEdit((await getLocale()) as Locale)} />
+      <DiscordPanel initial={await getDiscordStatus()} isAdmin={isAdmin(session.user.role)} />
     </div>
   );
 }

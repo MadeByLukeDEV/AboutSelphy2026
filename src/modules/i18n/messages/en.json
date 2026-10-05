@@ -348,7 +348,61 @@
       "twitchNoResults": "No categories found.",
       "twitchPick": "{name} (Twitch)",
       "twitchPickedHint": "Twitch category, not in the Games section.",
-      "twitchClear": "Remove this game"
+      "twitchClear": "Remove this game",
+      "discord": {
+        "heading": "Discord",
+        "hint": "Posts the week as a message with an image to a Discord channel and keeps that message up to date.",
+        "adminOnly": "Only admins can change the Discord connection. Staff can update the message.",
+        "notReady": "TOKEN_ENCRYPTION_KEY isn't set, so the webhook can't be stored securely.",
+        "webhookLabel": "Webhook URL",
+        "webhookHint": "In Discord: channel settings → Integrations → Webhooks → New Webhook → Copy Webhook URL. It's stored encrypted and never shown again.",
+        "language": "Message language",
+        "languages": {
+          "de": "German",
+          "en": "English"
+        },
+        "connect": "Connect",
+        "connecting": "Checking with Discord…",
+        "connectedTo": "Connected: webhook “{name}”",
+        "channel": "Channel {id}",
+        "replace": "Replace webhook",
+        "autoUpdate": "Update automatically",
+        "autoUpdateHint": "After every schedule change, and when a day is over (checked every 5 minutes).",
+        "lastSynced": "Last updated {time}",
+        "notPosted": "Not posted yet.",
+        "openMessage": "Open message in Discord",
+        "updateNow": "Update now",
+        "postNew": "Post as new message",
+        "postNewHint": "Posts a fresh message (e.g. for a new week); the old one is no longer updated.",
+        "disconnect": "Disconnect",
+        "confirmDisconnectTitle": "Disconnect Discord?",
+        "confirmDisconnect": "The message stays in Discord but won't be updated any more. To post again, paste a webhook URL.",
+        "preview": "Preview of the image",
+        "save": "Save",
+        "cancel": "Cancel",
+        "results": {
+          "posted": "Posted to Discord.",
+          "updated": "Discord message updated.",
+          "unchanged": "Already up to date.",
+          "paused": "Automatic updates are off.",
+          "notConnected": "Discord isn't connected.",
+          "saved": "Settings saved.",
+          "disconnected": "Discord disconnected."
+        },
+        "errors": {
+          "forbidden": "Only admins can change this.",
+          "invalid": "Some fields aren't valid.",
+          "invalidUrl": "That isn't a Discord webhook URL.",
+          "invalidWebhook": "Discord doesn't know this webhook (deleted or reset?). Paste a new URL.",
+          "notReady": "TOKEN_ENCRYPTION_KEY isn't set.",
+          "notConnected": "Discord isn't connected.",
+          "rateLimited": "Discord is rate-limiting. Try again in a minute.",
+          "tooLarge": "The image is too large for Discord.",
+          "cantDecrypt": "The stored webhook can't be read (the encryption key changed). Paste the URL again.",
+          "messageGone": "The message was deleted in Discord.",
+          "failed": "Talking to Discord failed. Try again in a moment."
+        }
+      }
     },
     "inquiries": {
       "intro": "Sponsor inquiries sent through the media kit form. Personal data: done and spam inquiries are deleted automatically 12 months after their last change.",
@@ -723,5 +777,14 @@
       "GAME_CONSOLE": "Game console",
       "UNKNOWN_PLATFORM": "Unknown"
     }
+  },
+  "ScheduleDiscord": {
+    "title": "Stream schedule: {range}",
+    "heading": "Stream schedule · {range}",
+    "empty": "No streams planned this week.",
+    "cancelled": "Cancelled",
+    "zone": "All times: Vienna ({zone})",
+    "summerTime": "CEST",
+    "winterTime": "CET"
   }
 }
