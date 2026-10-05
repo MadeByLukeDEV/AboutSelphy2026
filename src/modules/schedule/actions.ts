@@ -325,7 +325,7 @@ export type DiscordEventsActionResult =
 const botInputSchema = z.object({
   // Never echoed back or logged; the service checks its shape.
   token: z.string().trim().min(1).max(200),
-  guildId: z.string().trim().regex(/^d{17,20}$/),
+  guildId: z.string().trim().regex(/^\d{17,20}$/),
   locale: z.enum(["de", "en"]),
 });
 const eventsSettingsSchema = z.object({ locale: z.enum(["de", "en"]), enabled: z.boolean() });
