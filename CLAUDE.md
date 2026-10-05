@@ -1054,8 +1054,10 @@ SEO and security are built into every phase, not saved for the end.
       SET/GET/INCR/EXPIRE/DEL on it (checked).
     - Legal pages: see "Legal pages" below. The form's privacy note links
       to the policy once it's published.
-- [ ] Legal pages (built 2026-09-29, **not published yet**: the user must
-      enter the operator details and replace the draft's TODO: markers)
+- [ ] Legal pages (built 2026-09-29, **on hold by the user's choice**,
+      2026-10-05: they don't want to publish a private address yet and will
+      take their time. Don't push for it; it needs the operator details and
+      the draft's TODO: markers replaced before it can be published)
   - `modules/legal`, table `LegalSettings` (singleton, CHECK id = 1):
     operator name/street/postal code/city/country/email/phone, optional
     extra Impressum text (Markdown, en/de), privacy policy (Markdown,
@@ -1119,19 +1121,17 @@ SEO and security are built into every phase, not saved for the end.
     share card + PDF rendered once per data change (shared in-flight
     promise, cache headers), rate-limit expiry self-heals, `errorInfo()`
     logging (`src/lib/log.ts`), FormData check on the cover upload.
-    **Open**: (L2) the origin should only accept Cloudflare (firewall
-    allowlist / Authenticated Origin Pulls / Tunnel), otherwise
-    `CF-Connecting-IP` can be spoofed past the rate limit (Turnstile
-    still applies). **Fixed 2026-09-29**: (L4) uploads moved to route
+    (L2) origin restricted to Cloudflare and the manual live checks (Rich
+    Results Test, securityheaders.com, live Lighthouse): **done by the user**
+    (confirmed 2026-10-05). **Fixed 2026-09-29**: (L4) uploads moved to route
     handlers, so Server Actions (the public inquiry form included) are
     back to the 1 MB default; `auth/session.ts` logs only the error's name
     and code (here and in Social; the auth repo's consumer doesn't log).
   - Build gotcha: stopping the dev server mid-write can truncate
     `.next/dev/types`, and `next build` then fails type-checking those
     files. Delete `.next/dev/types` and rebuild.
-- [ ] Phase 8: YouTube Analytics demographics (built 2026-09-29 on
-      `feature_youtube-analytics`; migration applied and connected locally
-      2026-09-29; **waiting on** the Dokploy env vars and a live check)
+- [x] Phase 8: YouTube Analytics demographics (built 2026-09-29, merged;
+      live in production, confirmed by the user 2026-10-05)
   - Decisions (the user's): its **own OAuth client** ("Web application") in
     the auth service's Google Cloud project, **90-day** window, and a
     **"Show in media kit" switch, off by default**.
@@ -1200,4 +1200,19 @@ SEO and security are built into every phase, not saved for the end.
     memo key. Labels and percent text come from `audienceLabeller(locale)` /
     `shareText()` in `stats/demographic-labels.ts`, shared with the page.
     Checked: en and de both render as one page.
+- [ ] Schedule v2 (started 2026-10-05). The user's rule: **three steps, and
+      the next one only starts after they approved the previous one live on
+      the main site.** Never begin a step early.
+  - [ ] Step 1: stream categories (Dixper enabled, Sponsored, Drops, ...), a
+        cancel button per stream (weekly and extra), games from a Twitch
+        category search without adding them to the Games section, and a
+        "weekly" vs "individual" schedule setting instead of always weekly.
+  - [ ] Step 2 (not before step 1 is approved): an image of the schedule,
+        posted as an embedded message to the Discord server and edited
+        (message + image) when the schedule changes.
+  - [ ] Step 3 (not before step 2 is approved): push streams to the Twitch
+        schedule API and store the segment ids so they can be updated or
+        cancelled.
+- [ ] Real logo for the icons and share cards: later, the user does this
+      when everything else is done.
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
