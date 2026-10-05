@@ -9,3 +9,4 @@ export { SCHEDULE_TIME_ZONE } from "./time";
 export { getPublicSchedule, type PublicSchedule } from "./public-feed";
 export { syncDiscordSchedule, getScheduleImage } from "./discord/service";
 export { syncTwitchSchedule } from "./twitch/service";
+export { syncDiscordEvents } from "./discord/events-service";

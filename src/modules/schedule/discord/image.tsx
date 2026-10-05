@@ -15,15 +15,15 @@ import type { StreamOccurrence } from "../occurrences";
 // Satori: flexbox only, every element needs display: flex.
 
 const WIDTH = 1200;
-const INK = "#0a0a0a";
-const CARD = "#151515";
-const LINE = "#262626";
-const MUTED = "#a3a3a3";
-const BRAND = "#00ffa8";
-const RED = "#f87171";
+export const INK = "#0a0a0a";
+export const CARD = "#151515";
+export const LINE = "#262626";
+export const MUTED = "#a3a3a3";
+export const BRAND = "#00ffa8";
+export const RED = "#f87171";
 
 /** Dark-background versions of the category palette (same hues as the site). */
-const CHIP: Record<CategoryColor, { bg: string; fg: string }> = {
+export const CHIP: Record<CategoryColor, { bg: string; fg: string }> = {
   green: { bg: "rgba(16,185,129,0.18)", fg: "#6ee7b7" },
   blue: { bg: "rgba(14,165,233,0.18)", fg: "#7dd3fc" },
   violet: { bg: "rgba(139,92,246,0.2)", fg: "#c4b5fd" },
@@ -47,7 +47,7 @@ export type ImageTexts = {
 const coverCache = new Map<string, Promise<string | null>>();
 
 /** A cover as a small PNG data URL (satori can't load relative URLs or WebP reliably). */
-function coverDataUrl(url: string | null): Promise<string | null> {
+export function coverDataUrl(url: string | null): Promise<string | null> {
   if (!url) return Promise.resolve(null);
   let cached = coverCache.get(url);
   if (!cached) {
@@ -84,7 +84,7 @@ async function loadCover(url: string): Promise<string | null> {
 }
 
 /** One line in the image: shortened with an ellipsis (rows have a fixed height). */
-function clip(text: string, max: number) {
+export function clip(text: string, max: number) {
   return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
 }
 

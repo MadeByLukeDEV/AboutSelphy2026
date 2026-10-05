@@ -35,7 +35,7 @@ function escapeOnly(text: string) {
 }
 
 /** Text with @handles as Twitch links, everything else escaped. */
-function withMentions(text: string) {
+export function withMentions(text: string) {
   // Escape each piece, but normalise whitespace once over the whole text:
   // trimming the pieces ate the spaces around mentions.
   return splitMentions(text)

@@ -9,6 +9,7 @@ import type { CancelInput, CategoryInput, RestoreInput, StreamGame, StreamInput 
 import { buildPlan, SCHEDULE_CACHE_TAG } from "./service";
 import { syncDiscordSchedule } from "./discord/service";
 import { syncTwitchSchedule } from "./twitch/service";
+import { syncDiscordEvents } from "./discord/events-service";
 import {
   addDays,
   dateKey,
@@ -134,6 +135,8 @@ async function changed(locale: Locale) {
   after(() => syncDiscordSchedule().then(() => undefined));
   // Same for the Twitch schedule (skips itself when not connected/paused).
   after(() => syncTwitchSchedule().then(() => undefined));
+  // And the Discord events, one per stream day (same rules).
+  after(() => syncDiscordEvents().then(() => undefined));
   return getScheduleForEdit(locale);
 }
 

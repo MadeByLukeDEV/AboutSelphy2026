@@ -2,7 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "@/lib/env";
 import { runSync } from "@/modules/stats";
 import { purgeOldInquiries } from "@/modules/inquiries";
-import { syncDiscordSchedule, syncTwitchSchedule } from "@/modules/schedule";
+import { syncDiscordEvents, syncDiscordSchedule, syncTwitchSchedule } from "@/modules/schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +51,14 @@ export async function POST(request: Request) {
     typeof twitch === "string"
       ? `twitch schedule: ${twitch}`
       : `twitch schedule: +${twitch.created} ~${twitch.updated} -${twitch.deleted}${twitch.error ? ` (error: ${twitch.error})` : ""}`,
+  );
+  // The Discord events (one per stream day): new days enter the 7-day
+  // window, and anything an edit couldn't send is retried.
+  const events = await syncDiscordEvents().catch(() => ({ created: 0, updated: 0, cancelled: 0, deleted: 0, error: "failed" }));
+  result.steps.push(
+    typeof events === "string"
+      ? `discord events: ${events}`
+      : `discord events: +${events.created} ~${events.updated} x${events.cancelled} -${events.deleted}${events.error ? ` (error: ${events.error})` : ""}`,
   );
   console.log(
     `[cron/stats] ${result.skipped ?? (result.ok ? "ok" : "partial failure")}: ${result.steps.join("; ")}`,
