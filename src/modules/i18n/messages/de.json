@@ -294,7 +294,7 @@
         "unknownStream": "Diesen Stream gibt es nicht mehr."
       },
       "upcomingHeading": "Kommende Streams",
-      "upcomingHint": "Die nächsten vier Wochen, aus dem Wochenplan und einmaligen Streams.",
+      "upcomingHint": "Diese Woche, plus alle einmaligen Streams, die du geplant hast.",
       "addStream": "Stream hinzufügen",
       "noUpcoming": "In den nächsten vier Wochen ist nichts geplant.",
       "kindWeekly": "Wöchentlich",
@@ -387,11 +387,12 @@
           "paused": "Automatische Aktualisierung ist aus.",
           "notConnected": "Discord ist nicht verbunden.",
           "saved": "Einstellungen gespeichert.",
-          "disconnected": "Discord getrennt."
+          "disconnected": "Discord getrennt.",
+          "weeklyPosted": "Wochennachricht gepostet."
         },
         "errors": {
           "forbidden": "Nur Admins können das ändern.",
-          "invalid": "Einige Felder sind ungültig.",
+          "invalid": "Diese Rollen-ID ist ungültig (nur Ziffern).",
           "invalidUrl": "Das ist keine Discord-Webhook-URL.",
           "invalidWebhook": "Discord kennt diesen Webhook nicht (gelöscht oder zurückgesetzt?). Füge eine neue URL ein.",
           "notReady": "TOKEN_ENCRYPTION_KEY ist nicht gesetzt.",
@@ -401,8 +402,16 @@
           "cantDecrypt": "Der gespeicherte Webhook ist nicht lesbar (Schlüssel geändert). Füge die URL erneut ein.",
           "messageGone": "Die Nachricht wurde in Discord gelöscht.",
           "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Versuch es gleich noch einmal."
-        }
-      }
+        },
+        "weeklyPost": "Jeden Montag um 14:00 eine neue Nachricht",
+        "weeklyPostHint": "Postet die Woche als neue Nachricht (Wiener Zeit, innerhalb von 5 Minuten) und pingt die Rolle unten. Änderungen während der Woche bearbeiten diese Nachricht ohne Ping.",
+        "pingRole": "Rolle zum Pingen (ID)",
+        "pingRoleHint": "z. B. @livestream. In Discord: Entwicklermodus einschalten, dann Servereinstellungen → Rollen → Rechtsklick auf die Rolle → Rollen-ID kopieren. Die Rolle muss erwähnbar sein (oder der Webhook Rollen erwähnen dürfen). Leer lassen für keinen Ping.",
+        "nextWeeklyPost": "Nächster Wochenpost: {time}",
+        "saveRole": "Rolle speichern"
+      },
+      "showMoreWeeks": "Die nächsten 4 Wochen zeigen",
+      "showThisWeek": "Nur diese Woche zeigen"
     },
     "inquiries": {
       "intro": "Sponsoring-Anfragen aus dem Mediakit-Formular. Personenbezogene Daten: Erledigte und Spam-Anfragen werden 12 Monate nach der letzten Änderung automatisch gelöscht.",
@@ -785,6 +794,8 @@
     "cancelled": "Abgesagt",
     "zone": "Alle Zeiten: Wien ({zone})",
     "summerTime": "MESZ",
-    "winterTime": "MEZ"
+    "winterTime": "MEZ",
+    "weeklyContent": "Der Streamplan für diese Woche ist da!",
+    "weeklyContentPing": "{role} Der Streamplan für diese Woche ist da!"
   }
 }

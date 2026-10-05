@@ -34,6 +34,22 @@ export function DiscordPanel({ initial, isAdmin }: { initial: DiscordStatus; isA
   // Bumped after every sync so the preview image reloads.
   const [previewVersion, setPreviewVersion] = useState(0);
 
+  const [roleId, setRoleId] = useState(initial.pingRoleId);
+
+  /** Saves one setting; the others are sent as they are now. */
+  const saveSettings = (patch: Partial<Pick<DiscordStatus, "locale" | "autoUpdate" | "weeklyPost" | "pingRoleId">>) =>
+    run(
+      () =>
+        saveDiscordSettingsAction({
+          locale: status.locale,
+          autoUpdate: status.autoUpdate,
+          weeklyPost: status.weeklyPost,
+          pingRoleId: status.pingRoleId,
+          ...patch,
+        }),
+      t("results.saved"),
+    );
+
   const errorText = (code: string) =>
     t.has(`errors.${code}` as "errors.failed") ? t(`errors.${code}` as "errors.failed") : t("errors.failed");
 
@@ -149,27 +165,71 @@ export function DiscordPanel({ initial, isAdmin }: { initial: DiscordStatus; isA
           {isAdmin && (
             <div className="flex flex-col gap-4 border-t pt-4">
               <div className="grid gap-4 sm:grid-cols-2">
-                <LanguageSelect
-                  id="discord-locale"
-                  value={status.locale}
-                  onChange={(next) =>
-                    run(() => saveDiscordSettingsAction({ locale: next, autoUpdate: status.autoUpdate }), t("results.saved"))
-                  }
-                />
+                <LanguageSelect id="discord-locale" value={status.locale} onChange={(locale) => saveSettings({ locale })} />
                 <Field orientation="horizontal" className="items-start">
                   <Switch
                     id="discord-auto"
                     checked={status.autoUpdate}
                     disabled={pending}
-                    onCheckedChange={(autoUpdate) =>
-                      run(() => saveDiscordSettingsAction({ locale: status.locale, autoUpdate }), t("results.saved"))
-                    }
+                    onCheckedChange={(autoUpdate) => saveSettings({ autoUpdate })}
                   />
                   <div className="flex flex-col gap-1">
                     <FieldLabel htmlFor="discord-auto">{t("autoUpdate")}</FieldLabel>
                     <FieldDescription>{t("autoUpdateHint")}</FieldDescription>
                   </div>
                 </Field>
+              </div>
+
+              <div className="flex flex-col gap-3 rounded-lg border p-3">
+                <Field orientation="horizontal" className="items-start">
+                  <Switch
+                    id="discord-weekly"
+                    checked={status.weeklyPost}
+                    disabled={pending}
+                    onCheckedChange={(weeklyPost) => saveSettings({ weeklyPost })}
+                  />
+                  <div className="flex flex-col gap-1">
+                    <FieldLabel htmlFor="discord-weekly">{t("weeklyPost")}</FieldLabel>
+                    <FieldDescription>{t("weeklyPostHint")}</FieldDescription>
+                    {status.nextWeeklyPost && (
+                      <p className="text-sm font-medium">
+                        {t("nextWeeklyPost", {
+                          time: format.dateTime(new Date(status.nextWeeklyPost), {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            timeZone: "Europe/Vienna",
+                          }),
+                        })}
+                      </p>
+                    )}
+                  </div>
+                </Field>
+                <form
+                  className="flex flex-wrap items-end gap-2"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    saveSettings({ pingRoleId: roleId.trim() });
+                  }}
+                >
+                  <Field className="min-w-0 flex-1">
+                    <FieldLabel htmlFor="discord-role">{t("pingRole")}</FieldLabel>
+                    <Input
+                      id="discord-role"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="1400559547642282184"
+                      value={roleId}
+                      onChange={(event) => setRoleId(event.target.value)}
+                    />
+                  </Field>
+                  <Button type="submit" variant="outline" disabled={pending || roleId.trim() === status.pingRoleId}>
+                    {t("saveRole")}
+                  </Button>
+                </form>
+                <FieldDescription>{t("pingRoleHint")}</FieldDescription>
               </div>
               {replacing ? (
                 connectForm

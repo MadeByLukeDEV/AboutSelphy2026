@@ -2480,6 +2480,17 @@ SEO and security are built into every phase, not saved for the end.
       (which also catches the daily roll-over). "Update now" / "Post as new
       message" for staff; connect, replace, language, auto-update and
       disconnect for admins.
+    - **Weekly post** (2026-10-05, the user's request): every Monday 14:00
+      Vienna a **new** message, pinging one role (`pingRoleId`, the user's
+      @livestream = 1400559547642282184, entered in admin, digits-only CHECK).
+      No extra Dokploy job: the 5-minute cron checks `currentWeek()`
+      (Monday key + post time, DST-safe) against `weeklyPostWeek`; a missed
+      Monday is made up later that week; switching it on after Monday 14:00
+      marks the week done (no surprise ping). Independent of auto-update.
+      `allowed_mentions.roles` lists only that role; edits never ping.
+    - Admin "Upcoming streams" shows **this week + all one-time streams** by
+      default (4 weeks of weekly repeats was too crowded, the user's
+      feedback); "Show the next 4 weeks" expands it.
     - Checked: images in de/en, the embed text (escaping, mentions, long
       weeks), URL validation, a fake webhook (404 -> invalidWebhook, no token
       in the error), the cron step. **Not checked by me**: a real post, the

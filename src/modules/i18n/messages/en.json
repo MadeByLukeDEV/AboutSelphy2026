@@ -294,7 +294,7 @@
         "unknownStream": "That stream no longer exists."
       },
       "upcomingHeading": "Upcoming streams",
-      "upcomingHint": "The next four weeks, from the weekly plan and one-time streams.",
+      "upcomingHint": "This week, plus every one-time stream you've planned.",
       "addStream": "Add stream",
       "noUpcoming": "Nothing planned in the next four weeks.",
       "kindWeekly": "Weekly",
@@ -387,11 +387,12 @@
           "paused": "Automatic updates are off.",
           "notConnected": "Discord isn't connected.",
           "saved": "Settings saved.",
-          "disconnected": "Discord disconnected."
+          "disconnected": "Discord disconnected.",
+          "weeklyPosted": "Weekly message posted."
         },
         "errors": {
           "forbidden": "Only admins can change this.",
-          "invalid": "Some fields aren't valid.",
+          "invalid": "That role ID isn't valid (digits only).",
           "invalidUrl": "That isn't a Discord webhook URL.",
           "invalidWebhook": "Discord doesn't know this webhook (deleted or reset?). Paste a new URL.",
           "notReady": "TOKEN_ENCRYPTION_KEY isn't set.",
@@ -401,8 +402,16 @@
           "cantDecrypt": "The stored webhook can't be read (the encryption key changed). Paste the URL again.",
           "messageGone": "The message was deleted in Discord.",
           "failed": "Talking to Discord failed. Try again in a moment."
-        }
-      }
+        },
+        "weeklyPost": "New message every Monday at 14:00",
+        "weeklyPostHint": "Posts the week as a fresh message (Vienna time, within 5 minutes) and pings the role below. Changes during the week edit that message without pinging.",
+        "pingRole": "Role to ping (ID)",
+        "pingRoleHint": "e.g. @livestream. In Discord: turn on Developer Mode, then Server Settings → Roles → right-click the role → Copy Role ID. The role must be mentionable (or the webhook allowed to mention roles). Leave empty for no ping.",
+        "nextWeeklyPost": "Next weekly post: {time}",
+        "saveRole": "Save role"
+      },
+      "showMoreWeeks": "Show the next 4 weeks",
+      "showThisWeek": "Show this week only"
     },
     "inquiries": {
       "intro": "Sponsor inquiries sent through the media kit form. Personal data: done and spam inquiries are deleted automatically 12 months after their last change.",
@@ -785,6 +794,8 @@
     "cancelled": "Cancelled",
     "zone": "All times: Vienna ({zone})",
     "summerTime": "CEST",
-    "winterTime": "CET"
+    "winterTime": "CET",
+    "weeklyContent": "This week's stream schedule is here!",
+    "weeklyContentPing": "{role} This week's stream schedule is here!"
   }
 }

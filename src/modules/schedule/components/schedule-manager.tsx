@@ -62,6 +62,9 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
   const [schedule, setSchedule] = useState(initial);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [isPending, startTransition] = useTransition();
+  // This week by default: weekly streams repeating for 4 weeks crowded the
+  // list (the user's feedback). One-time streams always show.
+  const [showAllWeeks, setShowAllWeeks] = useState(false);
 
   function apply(result: ScheduleResult, message = t("saved")) {
     if (result.ok) {
@@ -119,7 +122,14 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
     format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Vienna" });
   const dayLabel = (key: string) =>
     format.dateTime(new Date(`${key}T12:00:00Z`), { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
-  const days = groupByDate(schedule.upcoming);
+  const weekEnd = new Date(`${schedule.today}T12:00:00Z`);
+  weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
+  const weekEndKey = weekEnd.toISOString().slice(0, 10);
+  const visible = showAllWeeks
+    ? schedule.upcoming
+    : schedule.upcoming.filter((stream) => stream.extra || stream.date < weekEndKey);
+  const hiddenCount = schedule.upcoming.length - visible.length;
+  const days = groupByDate(visible);
 
   return (
     <div className="flex flex-col gap-12">
@@ -214,6 +224,13 @@ export function ScheduleManager({ initial }: { initial: AdminSchedule }) {
               </li>
             ))}
           </ol>
+        )}
+        {(hiddenCount > 0 || showAllWeeks) && (
+          <div>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowAllWeeks((v) => !v)}>
+              {showAllWeeks ? t("showThisWeek") : t("showMoreWeeks")}
+            </Button>
+          </div>
         )}
       </section>
 
