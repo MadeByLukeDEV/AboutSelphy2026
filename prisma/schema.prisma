@@ -477,3 +477,43 @@ model Inquiry {
 
   @@index([status, createdAt])
 }
+
+/// The Discord bot that creates one scheduled event per stream day (a
+/// webhook can't create events). Singleton (CHECK id = 1). The bot token is
+/// encrypted (token-cipher, purpose discord-bot-token) and never leaves the
+/// server.
+model DiscordEventConnection {
+  id           Int       @id @default(1)
+  botTokenEnc  String
+  /// The bot user (checked on connect) and the server it creates events in.
+  botId        String    @db.VarChar(20)
+  botName      String    @default("") @db.VarChar(80)
+  guildId      String    @db.VarChar(20)
+  guildName    String    @default("") @db.VarChar(100)
+  /// Language of the event name, description and cover: "de" or "en".
+  locale       String    @default("de") @db.VarChar(2)
+  enabled      Boolean   @default(true)
+  lastSyncedAt DateTime?
+  /// Last failure as a short code (never Discord text or the token).
+  lastError    String    @default("") @db.VarChar(40)
+  connectedBy  String    @default("") @db.VarChar(120)
+  updatedAt    DateTime  @updatedAt
+}
+
+/// One Discord scheduled event per stream day (Vienna date) of the next 7
+/// days, mirrored by the sync: first stream's start to last stream's end.
+model DiscordScheduleEvent {
+  id          String   @id @default(cuid())
+  /// The Vienna date, "YYYY-MM-DD".
+  dayKey      String   @unique @db.VarChar(10)
+  eventId     String   @db.VarChar(20)
+  /// Hash of what was last sent (name, times, description, cover).
+  contentHash String   @db.VarChar(64)
+  startAt     DateTime
+  /// Cancelled in Discord (every stream of the day cancelled). Discord can't
+  /// undo that: a day that gets a stream again gets a new event.
+  cancelled   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([startAt])
+}
