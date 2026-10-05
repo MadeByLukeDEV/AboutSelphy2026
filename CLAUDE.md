@@ -2591,6 +2591,47 @@ SEO and security are built into every phase, not saved for the end.
     images through a temporary dev route.
   - **Not checked by me**: real Discord calls (needs the user's bot), and
     whether Discord renders `<t:>` timestamps in event descriptions.
+- [ ] **Admin guide** (built 2026-10-05, merged; **waiting for the user's
+      check with a moderator**): tours and a help panel for staff.
+  - The user's choices: a **short tour per page** (welcome tour on the
+    overview, then one per page on its first visit), "seen" stored **per
+    account in the DB**, and a **help button on every page** (side panel).
+  - `modules/guide`: `tours.ts` (client-safe: `TOURS` with a CSS selector
+    per step, `adminOnly` steps/tours, `tourForPath`, `stepsFor`),
+    `guide-content.ts` (help topics per page), `GuideTourSeen` table (userId
+    = central auth user id, unique per tour; migration `guide_tours`),
+    actions take the user id **from the session only** (zod enum for the
+    tour id).
+  - Moderators get the welcome, Schedule, Inquiries and Stats tours (admin
+    steps left out); About, Games, Partners and Legal tours are admin-only
+    (moderators only see a notice there). Admin-only help topics are shown
+    to moderators with an "Admins only" badge.
+  - Tour UI (`tour-overlay.tsx`, no library: the CSP and bundle size): a
+    portal with a click-catcher, the target cut out with a 100vmax
+    box-shadow plus an **outline** ring (a Tailwind `ring` is a box-shadow
+    and gets overridden by the inline one), the card below/above the target
+    or centred, measured every frame (smooth scroll, resizes). Steps whose
+    element is missing or hidden (`findTarget` skips 0-size elements, e.g.
+    the desktop/mobile account blocks) are skipped. Keyboard: Enter/→ next,
+    ← back, Esc skip, Tab trapped; focus goes to "Next" each step and back
+    afterwards. **The card is `opacity-0`, not `invisible`, until measured**:
+    an invisible element can't take focus, and the keys then went to the
+    page (found in the Playwright check).
+  - Anchors: `data-tour="…"` on nav, view-site link, account blocks, help
+    button, add-stream button, stream actions, inquiry filter/item/status/
+    reply, About form/view link, games manager, legal form; other steps use
+    `section[aria-labelledby="…-heading"] > :first-child`. **When a page
+    changes, keep its anchors** (a missing one only skips the step).
+  - Help panel: shadcn `sheet` (added; its `import { cn } from "cn"` was
+    fixed again), topics in `Guide.pages.*`, "Start the tour of this page",
+    "Show all tours again" (deletes the user's rows).
+  - Texts quote the real button labels (checked against the catalogs,
+    German uses "Mediakit"). Update `Guide.*` when a page's UI changes.
+  - Checked: typecheck/lint; Playwright (scratchpad `playwright-core` with
+    the installed Chromium) on a temporary dev page with the overview's
+    anchors, desktop and phone, dark: all steps, keyboard, Escape, help
+    panel, no console errors. **Not checked by me**: the real admin pages
+    (a staff login is needed).
 - **Public schedule JSON** (2026-10-05, for the Twitch panel extension in
   `../extension`): `GET /api/schedule?locale=de|en` (`getPublicSchedule()`,
   `schedule/public-feed.ts`). The same 7 days as the schedule page from the
