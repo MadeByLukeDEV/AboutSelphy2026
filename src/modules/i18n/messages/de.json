@@ -464,6 +464,59 @@
           "failed": "Die Verbindung zu Twitch ist fehlgeschlagen. Die nächste Synchronisierung versucht es erneut.",
           "devSkipped": "Nicht gesendet: Discord und Twitch werden nur von der Live-Seite aktualisiert (Dev und Live teilen die Datenbank). Zum lokalen Testen SCHEDULE_INTEGRATIONS_IN_DEV=true setzen."
         }
+      },
+      "discordEvents": {
+        "heading": "Discord-Events",
+        "hint": "Ein Discord-Event pro Streamtag für die nächsten 7 Tage: beim Twitch-Kanal, vom ersten bis zum letzten Stream, die Streams des Tages in der Beschreibung und ein generiertes Titelbild. Bleibt bei jeder Änderung am Streamplan aktuell; ist jeder Stream eines Tages abgesagt, wird sein Event abgesagt.",
+        "adminOnly": "Nur Admins können den Bot verbinden oder einstellen. Staff kann synchronisieren.",
+        "notReady": "TOKEN_ENCRYPTION_KEY ist nicht gesetzt.",
+        "notConnected": "Noch kein Bot verbunden.",
+        "steps": {
+          "app": "Discord Developer Portal → New Application (z. B. „AboutSelphy Schedule“).",
+          "token": "Bot → Reset Token → kopieren (wird nur einmal angezeigt).",
+          "invite": "OAuth2 → URL Generator: Scope „bot“, Berechtigungen „Create Events“ und „Manage Events“; Link öffnen und den Bot zu deinem Server hinzufügen.",
+          "server": "Server-ID: Discord-Einstellungen → Erweitert → Entwicklermodus an, dann Rechtsklick auf deinen Server → Server-ID kopieren."
+        },
+        "tokenLabel": "Bot-Token",
+        "tokenHint": "Wird verschlüsselt gespeichert und nie wieder angezeigt. Zum Ersetzen einen neuen einfügen.",
+        "serverLabel": "Server-ID",
+        "serverHint": "Vorausgefüllt mit dem Server des Streamplan-Webhooks, falls einer verbunden ist.",
+        "language": "Sprache der Events",
+        "languages": {
+          "de": "Deutsch",
+          "en": "Englisch"
+        },
+        "connect": "Bot verbinden",
+        "connecting": "Wird geprüft…",
+        "invite": "Bot zu deinem Server hinzufügen",
+        "cancel": "Abbrechen",
+        "connectedAs": "{bot} auf {server}",
+        "lastSynced": "Zuletzt synchronisiert {time}",
+        "notSynced": "Noch nicht synchronisiert.",
+        "noEvents": "Keine kommenden Events.",
+        "syncNow": "Jetzt synchronisieren",
+        "synced": "Discord-Events: {created} neu, {updated} geändert, {cancelled} abgesagt, {deleted} entfernt.",
+        "enabled": "Events erstellen und aktualisieren",
+        "enabledHint": "Nach jeder Änderung am Streamplan und alle 5 Minuten. Aus: Die Events in Discord bleiben, wie sie sind.",
+        "replace": "Bot-Token ersetzen",
+        "disconnect": "Trennen",
+        "disconnected": "Bot getrennt.",
+        "confirmDisconnectTitle": "Bot trennen?",
+        "confirmDisconnect": "Kommende Events, die diese Seite erstellt hat, werden in Discord gelöscht (vergangene bleiben), und der Token wird hier entfernt. Der Bot selbst bleibt auf deinem Server, bis du ihn entfernst.",
+        "errors": {
+          "forbidden": "Nur Admins können das ändern.",
+          "invalid": "Prüfe die Server-ID (nur Ziffern).",
+          "invalidToken": "Discord akzeptiert diesen Bot-Token nicht. Kopiere ihn neu (Bot → Reset Token).",
+          "botNotInServer": "Der Bot ist noch nicht auf diesem Server. Füge ihn mit dem Link unten hinzu und verbinde dann erneut.",
+          "missingPermission": "Der Bot braucht „Create Events“ (oder „Manage Events“) auf dem Server. Lade ihn mit dem Link unten neu ein oder gib seiner Rolle diese Berechtigung.",
+          "notReady": "TOKEN_ENCRYPTION_KEY ist nicht gesetzt.",
+          "notConnected": "Kein Bot verbunden.",
+          "cantDecrypt": "Der gespeicherte Token kann nicht gelesen werden (der Schlüssel hat sich geändert). Füge ihn neu ein.",
+          "eventGone": "Ein Event wurde in Discord gelöscht; es wird beim nächsten Sync neu erstellt.",
+          "rateLimited": "Discord bremst gerade. Der nächste Sync versucht es erneut.",
+          "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Der nächste Sync versucht es erneut.",
+          "devSkipped": "Nicht gesendet: Discord und Twitch werden nur von der Live-Seite aktualisiert (Dev und Live teilen sich die Datenbank). Zum lokalen Testen SCHEDULE_INTEGRATIONS_IN_DEV=true setzen."
+        }
       }
     },
     "inquiries": {
@@ -849,6 +902,10 @@
     "summerTime": "MESZ",
     "winterTime": "MEZ",
     "weeklyContent": "Der Streamplan für diese Woche ist da!",
-    "weeklyContentPing": "{role} Der Streamplan für diese Woche ist da!"
+    "weeklyContentPing": "{role} Der Streamplan für diese Woche ist da!",
+    "event": {
+      "name": "Stream – {day}",
+      "more": "+{count} weitere"
+    }
   }
 }

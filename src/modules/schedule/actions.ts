@@ -28,6 +28,17 @@ import {
   type DiscordSyncResult,
 } from "./discord/service";
 import { DiscordError } from "@/lib/platforms/discord";
+import { botInviteUrl, DiscordBotError } from "@/lib/platforms/discord-bot";
+import {
+  connectDiscordEvents,
+  disconnectDiscordEvents,
+  DiscordEventsSetupError,
+  getDiscordEventsStatus,
+  syncDiscordEvents,
+  updateDiscordEventsSettings,
+  type DiscordEventsStatus,
+  type DiscordEventsSyncResult,
+} from "./discord/events-service";
 import {
   disconnectTwitch,
   getTwitchStatus,
@@ -296,4 +307,79 @@ export async function disconnectTwitchAction() {
 
 export async function syncTwitchAction() {
   return twitchAction("staff", () => syncTwitchSchedule());
+}
+
+// ─── Discord events ──────────────────────────────────────────────────────
+// One scheduled event per stream day, created by a bot. Connect, settings
+// and disconnect are admin actions; "Sync now" is for all staff.
+
+export type DiscordEventsActionResult =
+  | {
+      ok: true;
+      status: DiscordEventsStatus;
+      syncError?: string;
+      counts?: { created: number; updated: number; cancelled: number; deleted: number };
+    }
+  | { ok: false; error: string; inviteUrl?: string };
+
+const botInputSchema = z.object({
+  // Never echoed back or logged; the service checks its shape.
+  token: z.string().trim().min(1).max(200),
+  guildId: z.string().trim().regex(/^d{17,20}$/),
+  locale: z.enum(["de", "en"]),
+});
+const eventsSettingsSchema = z.object({ locale: z.enum(["de", "en"]), enabled: z.boolean() });
+
+async function discordEventsAction(
+  role: "admin" | "staff",
+  run: (session: StaffSession) => Promise<DiscordEventsSyncResult | void>,
+): Promise<DiscordEventsActionResult> {
+  let session: StaffSession;
+  try {
+    session = role === "admin" ? await requireAdmin() : await requireStaff();
+  } catch (error) {
+    if (error instanceof AuthorizationError) return { ok: false, error: "forbidden" };
+    throw error;
+  }
+  try {
+    const outcome = await run(session);
+    const status = await getDiscordEventsStatus();
+    if (outcome === "devSkipped") return { ok: true, status, syncError: "devSkipped" };
+    if (outcome && typeof outcome === "object") {
+      const { error, ...counts } = outcome;
+      return { ok: true, status, counts, ...(error ? { syncError: error } : {}) };
+    }
+    return { ok: true, status };
+  } catch (error) {
+    if (error instanceof DiscordEventsSetupError) {
+      return { ok: false, error: error.code, ...(error.botId ? { inviteUrl: botInviteUrl(error.botId) } : {}) };
+    }
+    if (error instanceof DiscordBotError) return { ok: false, error: error.code };
+    console.error("[schedule/discord-events] action failed", errorInfo(error));
+    return { ok: false, error: "failed" };
+  }
+}
+
+export async function connectDiscordEventsAction(input: unknown) {
+  const parsed = botInputSchema.safeParse(input);
+  return discordEventsAction("admin", async (session) => {
+    if (!parsed.success) throw new DiscordEventsSetupError("invalid");
+    return connectDiscordEvents({ ...parsed.data, connectedBy: session.user.name ?? "" });
+  });
+}
+
+export async function saveDiscordEventsSettingsAction(input: unknown) {
+  const parsed = eventsSettingsSchema.safeParse(input);
+  return discordEventsAction("admin", async () => {
+    if (!parsed.success) throw new DiscordEventsSetupError("invalid");
+    return updateDiscordEventsSettings(parsed.data);
+  });
+}
+
+export async function disconnectDiscordEventsAction() {
+  return discordEventsAction("admin", () => disconnectDiscordEvents());
+}
+
+export async function syncDiscordEventsAction() {
+  return discordEventsAction("staff", () => syncDiscordEvents());
 }

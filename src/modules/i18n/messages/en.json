@@ -464,6 +464,59 @@
           "failed": "Talking to Twitch failed. The next sync tries again.",
           "devSkipped": "Not sent: Discord and Twitch are only updated by the live site (dev and live share the database). Set SCHEDULE_INTEGRATIONS_IN_DEV=true to test locally."
         }
+      },
+      "discordEvents": {
+        "heading": "Discord events",
+        "hint": "One Discord event per stream day for the next 7 days: at the Twitch channel, from the first stream to the last, the day's streams in the description and a generated cover. Kept in sync with every schedule change; a day whose streams are all cancelled gets its event cancelled.",
+        "adminOnly": "Only admins can connect or configure the bot. Staff can sync.",
+        "notReady": "TOKEN_ENCRYPTION_KEY isn't set.",
+        "notConnected": "No bot connected yet.",
+        "steps": {
+          "app": "Discord Developer Portal → New Application (e.g. “AboutSelphy Schedule”).",
+          "token": "Bot → Reset Token → copy it (it's shown once).",
+          "invite": "OAuth2 → URL Generator: scope “bot”, permissions “Create Events” and “Manage Events”; open the link and add the bot to your server.",
+          "server": "Server ID: Discord settings → Advanced → Developer Mode on, then right-click your server → Copy Server ID."
+        },
+        "tokenLabel": "Bot token",
+        "tokenHint": "Stored encrypted and never shown again. Paste a new one to replace it.",
+        "serverLabel": "Server ID",
+        "serverHint": "Pre-filled with the server of the schedule webhook, if one is connected.",
+        "language": "Language of the events",
+        "languages": {
+          "de": "German",
+          "en": "English"
+        },
+        "connect": "Connect bot",
+        "connecting": "Checking…",
+        "invite": "Add the bot to your server",
+        "cancel": "Cancel",
+        "connectedAs": "{bot} on {server}",
+        "lastSynced": "Last synced {time}",
+        "notSynced": "Not synced yet.",
+        "noEvents": "No upcoming events.",
+        "syncNow": "Sync now",
+        "synced": "Discord events: {created} added, {updated} changed, {cancelled} cancelled, {deleted} removed.",
+        "enabled": "Create and update events",
+        "enabledHint": "After every schedule change and every 5 minutes. Off: the events in Discord stay as they are.",
+        "replace": "Replace bot token",
+        "disconnect": "Disconnect",
+        "disconnected": "Bot disconnected.",
+        "confirmDisconnectTitle": "Disconnect the bot?",
+        "confirmDisconnect": "Upcoming events this site created are deleted in Discord (past ones stay), and the token is removed here. The bot itself stays on your server until you kick it.",
+        "errors": {
+          "forbidden": "Only admins can change this.",
+          "invalid": "Check the server ID (digits only).",
+          "invalidToken": "Discord doesn't accept this bot token. Copy it again (Bot → Reset Token).",
+          "botNotInServer": "The bot isn't on that server yet. Add it with the link below, then connect again.",
+          "missingPermission": "The bot needs “Create Events” (or “Manage Events”) on the server. Re-invite it with the link below or give its role that permission.",
+          "notReady": "TOKEN_ENCRYPTION_KEY isn't set.",
+          "notConnected": "No bot connected.",
+          "cantDecrypt": "The stored token can't be read (the encryption key changed). Paste it again.",
+          "eventGone": "An event was deleted in Discord; it's created again on the next sync.",
+          "rateLimited": "Discord is rate-limiting. The next sync tries again.",
+          "failed": "Talking to Discord failed. The next sync tries again.",
+          "devSkipped": "Not sent: Discord and Twitch are only updated by the live site (dev and live share the database). Set SCHEDULE_INTEGRATIONS_IN_DEV=true to test locally."
+        }
       }
     },
     "inquiries": {
@@ -849,6 +902,10 @@
     "summerTime": "CEST",
     "winterTime": "CET",
     "weeklyContent": "This week's stream schedule is here!",
-    "weeklyContentPing": "{role} This week's stream schedule is here!"
+    "weeklyContentPing": "{role} This week's stream schedule is here!",
+    "event": {
+      "name": "Stream – {day}",
+      "more": "+{count} more"
+    }
   }
 }

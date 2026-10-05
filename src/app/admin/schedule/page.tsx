@@ -6,6 +6,8 @@ import { getScheduleForEdit } from "@/modules/schedule/admin-service";
 import { ScheduleManager } from "@/modules/schedule/components/schedule-manager";
 import { DiscordPanel } from "@/modules/schedule/components/discord-panel";
 import { getDiscordStatus } from "@/modules/schedule/discord/service";
+import { DiscordEventsPanel } from "@/modules/schedule/components/discord-events-panel";
+import { getDiscordEventsStatus } from "@/modules/schedule/discord/events-service";
 import { TwitchPanel } from "@/modules/schedule/components/twitch-panel";
 import { getTwitchStatus } from "@/modules/schedule/twitch/service";
 
@@ -30,6 +32,7 @@ export default async function AdminSchedulePage({ searchParams }: PageProps<"/ad
       </header>
       <ScheduleManager initial={await getScheduleForEdit((await getLocale()) as Locale)} />
       <DiscordPanel initial={await getDiscordStatus()} isAdmin={isAdmin(session.user.role)} />
+      <DiscordEventsPanel initial={await getDiscordEventsStatus()} isAdmin={isAdmin(session.user.role)} />
       <TwitchPanel
         initial={await getTwitchStatus()}
         isAdmin={isAdmin(session.user.role)}
