@@ -2549,6 +2549,20 @@ SEO and security are built into every phase, not saved for the end.
   a second @livestream ping. Not `NODE_ENV`: a local `pnpm build && pnpm
   start` is "production" too. Never trigger the cron or "Update now"
   against the shared DB without thinking about this.
+- **Public schedule JSON** (2026-10-05, for the Twitch panel extension in
+  `../extension`): `GET /api/schedule?locale=de|en` (`getPublicSchedule()`,
+  `schedule/public-feed.ts`). The same 7 days as the schedule page from the
+  cached plan, with public fields only: `version` (1), `locale`, `timeZone`,
+  `generatedAt`, `url`, `avatarUrl`, and per stream `key` (a hash of the
+  occurrence key, so no DB ids), Vienna `date`, ISO `start`/`end`,
+  `gameName`, `coverUrl`, `title` (may hold @mentions, plain text),
+  `categories` (name + colour), `cancelled`, `note`. No `extra` flag (the
+  page doesn't label one-time streams). Images are absolute URLs through
+  `/_next/image` (`w` 96/128, `q=75`), so the extension only loads from
+  this domain. `Access-Control-Allow-Origin: *` (public, no credentials; the
+  ext-twitch.tv origin differs per extension), `max-age=120`, 503 JSON on
+  failure. **Changing a field breaks the released extension**: add fields
+  freely, but bump `version` for anything else.
 - [ ] Real logo for the icons and share cards: later, the user does this
       when everything else is done.
 - [ ] Phase B (much later, only when the user starts it): viewer dashboard
