@@ -16,6 +16,7 @@ import type { Locale } from "@/modules/i18n";
 import { getUpcomingStreams, SCHEDULE_DAYS } from "../service";
 import { addDays, dateKey, isoWeekday, viennaToday, viennaToInstant } from "../time";
 import { renderScheduleImage } from "./image";
+import { scheduleIntegrationsActive } from "../integrations-guard";
 import { buildScheduleEmbed } from "./message";
 
 // The schedule in Discord: one message (embed + image) that is edited
@@ -219,6 +220,7 @@ export async function updateDiscordSettings(settings: {
 
 export type DiscordSyncResult =
   | "notConnected"
+  | "devSkipped"
   | "paused"
   | "unchanged"
   | "posted"
@@ -254,6 +256,7 @@ export function currentWeek(now = new Date()) {
 }
 
 async function syncNow({ force = false, newMessage = false }): Promise<DiscordSyncResult> {
+  if (!scheduleIntegrationsActive()) return "devSkipped";
   const row = await find();
   if (!row) return "notConnected";
   // The weekly post (a fresh message with the role ping) is independent of

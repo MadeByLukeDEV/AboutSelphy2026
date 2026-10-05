@@ -65,6 +65,16 @@ const schema = z.object({
     .regex(/^[a-f0-9]{32,}$/, "plain lowercase hex, at least 32 chars")
     .optional(),
 
+  // Discord/Twitch schedule syncs run only in production by default: dev
+  // and production share the database (and so the webhook and the Twitch
+  // login), and a dev server would otherwise post, edit and ping too (e.g.
+  // a second weekly @livestream post). "true" allows them in dev, for
+  // testing on purpose.
+  SCHEDULE_INTEGRATIONS_IN_DEV: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+
   // Cloudflare Turnstile for the inquiry form (src/modules/inquiries). The
   // site key is public (rendered into the page by the server); the secret
   // is only used for siteverify. Without them the form refuses submissions.
