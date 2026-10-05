@@ -2549,6 +2549,48 @@ SEO and security are built into every phase, not saved for the end.
   a second @livestream ping. Not `NODE_ENV`: a local `pnpm build && pnpm
   start` is "production" too. Never trigger the cron or "Update now"
   against the shared DB without thinking about this.
+- [ ] **Discord events** (built 2026-10-05, merged; **waiting for the user's
+      live check**): one Discord scheduled event per stream day.
+  - The user's choices: the **bot token is set in the admin** (encrypted,
+    like the webhook), events for the **next 7 days**, a day whose streams
+    are all cancelled gets its event **cancelled** (not deleted).
+  - A webhook can't create events, so this needs a **bot**:
+    `src/lib/platforms/discord-bot.ts` (`Authorization: Bot`, codes only,
+    never the token). Connect checks `/users/@me` (must be a bot), the
+    server, the bot's membership and its permissions (owner, Administrator,
+    Create Events or Manage Events, computed from @everyone + its roles).
+    `botNotInServer`/`missingPermission` come back with an invite link
+    (`botInviteUrl`, scope bot, Create + Manage Events).
+  - Tables: `DiscordEventConnection` (singleton: token encrypted with purpose
+    `discord-bot-token`, bot/server ids and names, language, enabled, last
+    sync/error) and `DiscordScheduleEvent` (one row per Vienna day: event id,
+    content hash, start, cancelled). Migration `discord_events`.
+  - Event (`EXTERNAL`, `GUILD_ONLY`): name "Stream – <weekday, day month>",
+    location `CHANNELS.twitch`, first stream's start to the last stream's
+    end (cancelled streams don't count unless all are), description = the
+    day's streams with `<t:unix:t>` timestamps (escaped like the message,
+    @mentions as Twitch links, cancelled struck through, the schedule page
+    last; cut below 1,000 chars). Cover: `event-image.tsx`, 1200x480
+    (Discord's 2.5:1), up to 3 stream cards + "+N". Discord starts and ends
+    external events by itself.
+  - Sync (`syncDiscordEvents`, own queue): `planEventSync()` in
+    `discord/events.ts` is **pure** (create / update / cancel / reopen /
+    delete / forget) and was checked with made-up streams; the service only
+    executes it. Days that have begun are never touched (Discord can't move
+    an event into the past). Cancelled events can't be reopened in Discord,
+    so a day that gets a stream again gets a fresh event. An event deleted
+    by hand is recreated on the next change. Runs via `after()` on schedule
+    edits and in the cron, guarded by `scheduleIntegrationsActive()`.
+  - Admin "Discord events" panel in `/admin/schedule`: setup steps, token +
+    server id (pre-filled from the webhook's server) + language, links to
+    the upcoming events, "Sync now" (staff), language/enabled/replace/
+    disconnect (admin). Disconnect deletes the events that haven't started.
+  - **Testing gotcha**: a plain tsx script can't load modules that pull in
+    `next/og`, `next/image` (the profile barrel) or next-intl's client entry
+    under `--conditions=react-server`. Keep logic pure and test that; check
+    images through a temporary dev route.
+  - **Not checked by me**: real Discord calls (needs the user's bot), and
+    whether Discord renders `<t:>` timestamps in event descriptions.
 - **Public schedule JSON** (2026-10-05, for the Twitch panel extension in
   `../extension`): `GET /api/schedule?locale=de|en` (`getPublicSchedule()`,
   `schedule/public-feed.ts`). The same 7 days as the schedule page from the
