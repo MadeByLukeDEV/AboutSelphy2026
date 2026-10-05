@@ -13,7 +13,7 @@ export function AdminNav() {
   const t = useTranslations("Admin");
 
   return (
-    <nav aria-label={t("navLabel")}>
+    <nav aria-label={t("navLabel")} data-tour="nav">
       <ul className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
         {ADMIN_SECTIONS.map(({ key, href, icon: Icon, built }) => {
           const active =

@@ -6,7 +6,8 @@ import { ExternalLink } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { ThemeProvider, ThemeToggle } from "@/modules/theme";
-import { requireStaffPage, SignOutButton } from "@/modules/auth";
+import { isAdmin, requireStaffPage, SignOutButton } from "@/modules/auth";
+import { getSeenTours, GuideProvider, HelpButton } from "@/modules/guide";
 import { siteUrl } from "@/lib/env";
 import { clientMessages } from "@/modules/i18n/client-messages";
 import { fontSans } from "../fonts";
@@ -33,6 +34,7 @@ export default async function AdminLayout({
   const locale = await getLocale();
   const t = await getTranslations("Admin");
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const seenTours = await getSeenTours(session.user.id);
 
   return (
     <html
@@ -43,14 +45,16 @@ export default async function AdminLayout({
       <body className="min-h-full bg-muted/40">
         {/* Client components in /admin: nav, forms, sync button, theme. */}
         <NextIntlClientProvider
-          messages={await clientMessages(["Admin", "Inquiry", "ThemeToggle"])}
+          messages={await clientMessages(["Admin", "Guide", "Inquiry", "ThemeToggle"])}
         >
           <ThemeProvider nonce={nonce}>
+            <GuideProvider initialSeen={seenTours} admin={isAdmin(session.user.role)}>
             <div className="flex min-h-dvh flex-col md:flex-row">
               <aside className="flex flex-col gap-4 border-b bg-background px-gutter py-4 md:sticky md:top-0 md:h-dvh md:w-64 md:shrink-0 md:border-r md:border-b-0 md:px-4 md:py-6">
-                <div className="flex items-center justify-between gap-2 md:px-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 md:px-3">
                   <p className="font-bold tracking-tight">{t("brand")}</p>
                   <a
+                    data-tour="view-site"
                     href={siteUrl()}
                     className="inline-flex items-center gap-1 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                   >
@@ -61,8 +65,12 @@ export default async function AdminLayout({
 
                 <AdminNav />
 
+                <div className="md:px-0">
+                  <HelpButton />
+                </div>
+
                 <div className="hidden flex-col gap-3 border-t pt-4 md:mt-auto md:flex">
-                  <div className="px-3">
+                  <div className="px-3" data-tour="account">
                     <p className="truncate text-sm font-semibold">
                       {session.user.name}
                     </p>
@@ -81,7 +89,7 @@ export default async function AdminLayout({
 
               {/* Account controls move below the content on mobile. */}
               <footer className="flex flex-wrap items-center justify-between gap-3 border-t bg-background px-gutter py-4 md:hidden">
-                <p className="text-sm">
+                <p className="text-sm" data-tour="account">
                   <span className="font-semibold">{session.user.name}</span>{" "}
                   <span className="text-muted-foreground">
                     ({t(`roles.${session.user.role}`)})
@@ -94,6 +102,7 @@ export default async function AdminLayout({
               </footer>
             </div>
             <Toaster />
+            </GuideProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

@@ -35,6 +35,7 @@ Modules are added here as they are built.
 | `assets` | `Asset` table; validated, re-encoded image uploads (`storeImage`); served by `/api/media/[id]` | — |
 | `mediakit` | the media kit page: audience sentence, per-platform figures with "as of", demographics (when switched on), growth charts (≥ 7 daily points), current games; owns `Partner` + `Package` (admin editors in `/admin/partners`, public sections, cache tag `mediakit`) | `stats` (read side only), `profile`, `assets` (logos), `auth` (guards) |
 | `inquiries` | `Inquiry` table; public submit action (honeypot, zod, Redis rate limit, Turnstile siteverify); Turnstile widget + form; staff inbox; GDPR purge | `auth` (guards), `i18n` (routing), `lib/redis` |
+| `guide` | admin tours (one short tour per page, started once per staff account; `GuideTourSeen` table) and the help panel ("Guide" button, per-page topics); `TOURS`/`GUIDE_TOPICS` definitions, spotlight overlay | `auth` (guards) |
 | `legal` | `LegalSettings` singleton; Impressum from operator fields, privacy policy as Markdown (sanitizing renderer); publish rules; `/admin/legal` | `auth` (guards), `i18n` |
 | `seo` | public page list for the sitemap, JSON-LD component + schema.org builders (Person, WebSite, ProfilePage) | `i18n` (alternates) |
 | `i18n` | next-intl routing (`/de`, `/en`), request config, locale-aware navigation, hreflang alternates, message catalogs, locale switcher | — |

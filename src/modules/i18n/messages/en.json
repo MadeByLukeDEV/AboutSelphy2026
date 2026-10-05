@@ -388,7 +388,7 @@
           "saved": "Settings saved.",
           "disconnected": "Discord disconnected.",
           "weeklyPosted": "Weekly message posted.",
-          "noMessage": "There's no message to update yet. Use “Post new message”."
+          "noMessage": "There's no message to update yet. Use “Post as new message”."
         },
         "errors": {
           "forbidden": "Only admins can change this.",
@@ -906,6 +906,330 @@
     "event": {
       "name": "Stream – {day}",
       "more": "+{count} more"
+    }
+  },
+  "Guide": {
+    "open": "Guide",
+    "panelLabel": "Guide",
+    "adminsOnly": "Admins only",
+    "startTour": "Start the tour of this page",
+    "resetTours": "Show all tours again",
+    "resetDone": "Done: every page shows its tour again the next time you open it.",
+    "resetFailed": "That didn't work. Try again in a moment.",
+    "nothingToShow": "There's nothing on this page to show yet.",
+    "close": "Close",
+    "stepOf": "Step {step} of {total}",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip tour",
+    "done": "Got it",
+    "tours": {
+      "welcome": {
+        "hello": {
+          "title": "Welcome to the staff area",
+          "body": "This is where the website aboutselphy.com is run: the stream schedule, sponsor inquiries, stats and more. This short tour shows you around. Every page has its own little tour the first time you open it."
+        },
+        "nav": {
+          "title": "All sections",
+          "body": "Everything you can open is listed here. Some pages are for admins only; moderators see a short note there instead."
+        },
+        "sections": {
+          "title": "What each section does",
+          "body": "A one-line summary of every section, so you know where to go."
+        },
+        "viewSite": {
+          "title": "The public website",
+          "body": "Opens aboutselphy.com, so you can check what viewers see after a change."
+        },
+        "account": {
+          "title": "Your account",
+          "body": "You're signed in with Discord. Your role (admin or moderator) decides what you can change. Sign out here when you're done."
+        },
+        "help": {
+          "title": "Help is always here",
+          "body": "The Guide explains the page you're on, step by step. You can also replay this page's tour from there."
+        }
+      },
+      "schedule": {
+        "upcoming": {
+          "title": "Upcoming streams",
+          "body": "This week's streams plus every one-time stream. Times are Vienna time. Viewers on the website see them in their own time zone."
+        },
+        "add": {
+          "title": "Add a stream",
+          "body": "Choose “Every week” for a regular slot or “Only once” for a single date. Pick a game, add a title in German and English, and categories if you like."
+        },
+        "actions": {
+          "title": "Change one stream",
+          "body": "Edit, cancel (with an optional reason) or restore a single date here. Cancelling only affects that one day; the weekly slot stays."
+        },
+        "weekly": {
+          "title": "The weekly plan",
+          "body": "The slots that repeat every week. A change here applies to all future weeks."
+        },
+        "categories": {
+          "title": "Categories",
+          "body": "Coloured labels like “Sponsored” or “Collab” that show next to a stream."
+        },
+        "discord": {
+          "title": "Discord message",
+          "body": "The schedule in Discord. It's edited by itself after every change here. A new message (with the @livestream ping) only goes out every Monday at 14:00 or when someone clicks “Post as new message”."
+        },
+        "discordEvents": {
+          "title": "Discord events",
+          "body": "One Discord event per stream day for the next 7 days, kept up to date by itself."
+        },
+        "twitch": {
+          "title": "Twitch schedule",
+          "body": "Every stream of the next 14 days is also put on the Twitch schedule. Changes and cancellations go there by themselves."
+        }
+      },
+      "inquiries": {
+        "filter": {
+          "title": "Inbox by status",
+          "body": "Sponsor inquiries from the media kit form land here. Start with “New”; the numbers show how many are in each status."
+        },
+        "item": {
+          "title": "One inquiry",
+          "body": "Company, contact, budget, language and the message, exactly as it was sent."
+        },
+        "status": {
+          "title": "Set the status",
+          "body": "Move it along: New → In progress → Done. Use “Spam” for junk."
+        },
+        "reply": {
+          "title": "Reply",
+          "body": "Opens your e-mail program with the address and a subject filled in."
+        },
+        "privacy": {
+          "title": "Personal data",
+          "body": "Inquiries contain names and e-mail addresses. Don't copy them elsewhere. Inquiries marked Done or Spam are deleted automatically after 12 months."
+        }
+      },
+      "stats": {
+        "live": {
+          "title": "Live status",
+          "body": "Whether the stream is live right now, checked every 5 minutes."
+        },
+        "numbers": {
+          "title": "Latest numbers",
+          "body": "Followers, subscribers and views straight from Twitch and YouTube, each with the time it was fetched. The media kit shows the same numbers."
+        },
+        "twitch": {
+          "title": "Twitch, last 30 days",
+          "body": "Average and peak viewers. Twitch doesn't provide these, so the site measures them every 5 minutes while the stream is live."
+        },
+        "youtube": {
+          "title": "Audience (YouTube)",
+          "body": "Age, gender, countries and devices from YouTube Analytics, updated daily."
+        },
+        "runs": {
+          "title": "Sync runs",
+          "body": "Every sync and whether it worked. “Sync now” fetches fresh numbers immediately."
+        },
+        "config": {
+          "title": "Setup checklist",
+          "body": "Which connections are configured on the server. Missing items need a change in the hosting settings."
+        }
+      },
+      "about": {
+        "intro": {
+          "title": "The About text",
+          "body": "Here you edit the name, tagline and About text on the home page, in German and English."
+        },
+        "form": {
+          "title": "Edit and save",
+          "body": "Both languages side by side, with character counters. After saving, the website shows the new text within seconds."
+        },
+        "viewPage": {
+          "title": "Check the result",
+          "body": "Opens the home page to see the text the way viewers do."
+        }
+      },
+      "games": {
+        "intro": {
+          "title": "Games",
+          "body": "The games shown on the home page and the media kit, and offered when you plan a stream."
+        },
+        "list": {
+          "title": "Manage the list",
+          "body": "Add, edit, reorder or delete games, set the category (Main game, Also playing, Coming soon …) and switch “Show on home page” on or off."
+        }
+      },
+      "partners": {
+        "partners": {
+          "title": "Partners",
+          "body": "Brands you work with, shown in the media kit: logo, description, link and referral code. Switch one off to prepare it without showing it."
+        },
+        "packages": {
+          "title": "Packages",
+          "body": "What sponsors can book, with a “from” price or “price on request”."
+        }
+      },
+      "legal": {
+        "intro": {
+          "title": "Imprint and privacy policy",
+          "body": "The legal pages of the website. They stay hidden until they're published."
+        },
+        "form": {
+          "title": "Fill in and publish",
+          "body": "Operator details plus the privacy text in both languages. Publishing is blocked while a field is empty or a text still contains “TODO:”."
+        }
+      }
+    },
+    "pages": {
+      "welcome": {
+        "title": "Overview",
+        "intro": "The staff area of aboutselphy.com: everything behind the public website.",
+        "topics": {
+          "roles": {
+            "title": "Admins and moderators",
+            "body": "Moderators can plan the schedule, answer sponsor inquiries and see the stats. Admins can also edit the About text, games, partners and legal pages, and connect Discord, Twitch and YouTube.\nIf you need something that's admin-only, ask an admin."
+          },
+          "live": {
+            "title": "Changes go live by themselves",
+            "body": "There's no “publish” step: as soon as you save, the website, Discord and Twitch pick up the change (usually within seconds, at most a few minutes)."
+          },
+          "help": {
+            "title": "Tours and this guide",
+            "body": "Every page shows a short tour the first time you open it. Open the Guide on any page for details, or to replay the tour."
+          }
+        }
+      },
+      "schedule": {
+        "title": "Schedule",
+        "intro": "Plan the streams. The website, Discord and Twitch all follow this plan.",
+        "topics": {
+          "add": {
+            "title": "Add a stream",
+            "body": "Click “Add stream”. Choose “Every week” (a regular slot on a weekday) or “Only once” (a single date).\nSet the start time in Vienna time and the length in minutes; the end time is shown. Pick a game from the Games list, or search any Twitch category. Titles are optional, in German and English (one is used for both if the other is empty)."
+          },
+          "cancel": {
+            "title": "Cancel or restore one date",
+            "body": "In “Upcoming streams”, click “Cancel” on a stream and add a reason if you want; it's shown publicly. The stream stays visible, struck through. “Restore” brings it back. One-time streams can also be deleted completely."
+          },
+          "weekly": {
+            "title": "Weekly streams",
+            "body": "Edit a weekly slot to change it for all future weeks. Switch “Active” off to pause it without deleting it. Changing the weekday removes that slot's future cancellations."
+          },
+          "categories": {
+            "title": "Categories",
+            "body": "Labels with a colour (e.g. “Sponsored”, “Collab”). Create them under “Categories”, then tick them when adding or editing a stream."
+          },
+          "mentions": {
+            "title": "Mention people",
+            "body": "Write @name in a title or note (e.g. “with @t00nyFPS”). It becomes a link to that Twitch channel on the website and in Discord."
+          },
+          "discord": {
+            "title": "Discord message",
+            "body": "The schedule message in Discord is edited automatically after every change. Automatic updates never post a new message.\nA new message comes every Monday at 14:00 (with the @livestream ping) or when you click “Post as new message”. Use “Update now” to force an edit."
+          },
+          "discordEvents": {
+            "title": "Discord events",
+            "body": "Every stream day of the next 7 days gets its own Discord event (“Stream – Monday, 6 October”) with the day's streams and a picture. If every stream of a day is cancelled, the event is cancelled too. Days that already started aren't changed any more."
+          },
+          "twitch": {
+            "title": "Twitch schedule",
+            "body": "The next 14 days are mirrored to the Twitch schedule: new streams are added, changes and cancellations are sent, deleted streams are removed."
+          },
+          "connect": {
+            "title": "Connections",
+            "body": "Connecting the Discord webhook, the Discord bot and Twitch, and their settings, is for admins. Everyone on staff can use “Sync now” / “Update now”."
+          }
+        }
+      },
+      "inquiries": {
+        "title": "Inquiries",
+        "intro": "Sponsor and business inquiries sent through the form in the media kit.",
+        "topics": {
+          "statuses": {
+            "title": "Statuses",
+            "body": "New: not looked at yet. In progress: someone is on it. Done: answered or closed. Spam: junk.\nThe buttons at the top filter the list; the numbers show how many are in each status."
+          },
+          "reply": {
+            "title": "Replying",
+            "body": "“Reply by email” opens your e-mail program with the sender's address and a subject. Write from the official AboutSelphy address. Set the status to “In progress” so nobody answers twice."
+          },
+          "privacy": {
+            "title": "Privacy",
+            "body": "Inquiries contain personal data (name, e-mail). Only use it to answer the inquiry and don't copy it elsewhere. Done and Spam inquiries are deleted automatically 12 months after their last change; you can delete spam right away."
+          }
+        }
+      },
+      "stats": {
+        "title": "Stats",
+        "intro": "The numbers behind the media kit, fetched from Twitch and YouTube.",
+        "topics": {
+          "numbers": {
+            "title": "Where the numbers come from",
+            "body": "Followers and subscribers are fetched hourly, the YouTube average views daily. Every number shows when it was fetched. Nothing is entered by hand."
+          },
+          "live": {
+            "title": "Live and viewer numbers",
+            "body": "Every 5 minutes the site checks whether the stream is live and notes the viewer count. Average and peak viewers of the last 30 days are built from these checks."
+          },
+          "sync": {
+            "title": "Sync now",
+            "body": "Fetches everything immediately. The list of runs shows each sync and any error; one failed source doesn't stop the others."
+          },
+          "youtube": {
+            "title": "YouTube audience",
+            "body": "Connecting YouTube Analytics (age, gender, countries, devices) and deciding whether the media kit shows it is for admins."
+          }
+        }
+      },
+      "about": {
+        "title": "About",
+        "intro": "The name, tagline and About text on the home page.",
+        "topics": {
+          "edit": {
+            "title": "Editing",
+            "body": "German and English side by side, with character counters. Save, and the home page shows the new text within seconds. Moderators can't edit this page."
+          }
+        }
+      },
+      "games": {
+        "title": "Games",
+        "intro": "The games on the home page and in the media kit, also offered in the schedule.",
+        "topics": {
+          "edit": {
+            "title": "Add and edit",
+            "body": "Name, category (Main game, Also playing, Sometimes, New, Coming soon, Used to play), a short text in German and English, and up to 6 tags. Use the arrows to change the order."
+          },
+          "home": {
+            "title": "Show on home page",
+            "body": "Switch a game off to hide it from the home page. It stays available for the schedule."
+          },
+          "covers": {
+            "title": "Covers",
+            "body": "The cover comes from Twitch automatically. Upload your own image to replace it (JPEG, PNG, WebP; it's cropped square)."
+          }
+        }
+      },
+      "partners": {
+        "title": "Partners & packages",
+        "intro": "What sponsors see in the media kit.",
+        "topics": {
+          "partners": {
+            "title": "Partners",
+            "body": "Logo, description in both languages, an https link and an optional referral code. Switch “Show in media kit” off to prepare a partner without showing it."
+          },
+          "packages": {
+            "title": "Packages",
+            "body": "Offers with a title, description and a price “from” (in euros) or “price on request”. They link to the inquiry form."
+          }
+        }
+      },
+      "legal": {
+        "title": "Legal",
+        "intro": "Imprint and privacy policy of the website.",
+        "topics": {
+          "status": {
+            "title": "Not published yet",
+            "body": "The pages stay hidden until the operator details are filled in and every “TODO:” in the texts is replaced. Then they can be published here."
+          }
+        }
+      }
     }
   }
 }

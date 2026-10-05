@@ -388,7 +388,7 @@
           "saved": "Einstellungen gespeichert.",
           "disconnected": "Discord getrennt.",
           "weeklyPosted": "Wochennachricht gepostet.",
-          "noMessage": "Es gibt noch keine Nachricht zum Aktualisieren. Nutze „Neue Nachricht posten“."
+          "noMessage": "Es gibt noch keine Nachricht zum Aktualisieren. Nutze „Als neue Nachricht posten“."
         },
         "errors": {
           "forbidden": "Nur Admins können das ändern.",
@@ -906,6 +906,330 @@
     "event": {
       "name": "Stream – {day}",
       "more": "+{count} weitere"
+    }
+  },
+  "Guide": {
+    "open": "Anleitung",
+    "panelLabel": "Anleitung",
+    "adminsOnly": "Nur Admins",
+    "startTour": "Tour dieser Seite starten",
+    "resetTours": "Alle Touren wieder zeigen",
+    "resetDone": "Erledigt: Jede Seite zeigt ihre Tour beim nächsten Öffnen wieder.",
+    "resetFailed": "Das hat nicht geklappt. Versuch es gleich noch einmal.",
+    "nothingToShow": "Auf dieser Seite gibt es noch nichts zu zeigen.",
+    "close": "Schließen",
+    "stepOf": "Schritt {step} von {total}",
+    "next": "Weiter",
+    "back": "Zurück",
+    "skip": "Tour überspringen",
+    "done": "Verstanden",
+    "tours": {
+      "welcome": {
+        "hello": {
+          "title": "Willkommen im Staff-Bereich",
+          "body": "Hier wird die Website aboutselphy.com betreut: Streamplan, Sponsorenanfragen, Statistiken und mehr. Diese kurze Tour zeigt dir alles. Jede Seite hat beim ersten Öffnen ihre eigene kleine Tour."
+        },
+        "nav": {
+          "title": "Alle Bereiche",
+          "body": "Hier ist alles, was du öffnen kannst. Manche Seiten sind nur für Admins; Moderatoren sehen dort einen kurzen Hinweis."
+        },
+        "sections": {
+          "title": "Was jeder Bereich macht",
+          "body": "Eine Zeile pro Bereich, damit du weißt, wohin du musst."
+        },
+        "viewSite": {
+          "title": "Die öffentliche Website",
+          "body": "Öffnet aboutselphy.com, damit du nach einer Änderung siehst, was Zuschauer sehen."
+        },
+        "account": {
+          "title": "Dein Konto",
+          "body": "Du bist mit Discord angemeldet. Deine Rolle (Admin oder Moderator) bestimmt, was du ändern kannst. Hier meldest du dich ab."
+        },
+        "help": {
+          "title": "Hilfe ist immer da",
+          "body": "Die Anleitung erklärt die Seite, auf der du bist, Schritt für Schritt. Dort kannst du auch die Tour der Seite nochmal starten."
+        }
+      },
+      "schedule": {
+        "upcoming": {
+          "title": "Kommende Streams",
+          "body": "Die Streams dieser Woche plus alle einmaligen Streams. Zeiten sind Wiener Zeit. Zuschauer sehen sie auf der Website in ihrer eigenen Zeitzone."
+        },
+        "add": {
+          "title": "Stream hinzufügen",
+          "body": "„Jede Woche“ für einen festen Termin oder „Nur einmal“ für ein Datum. Spiel wählen, Titel auf Deutsch und Englisch eintragen, bei Bedarf Kategorien."
+        },
+        "actions": {
+          "title": "Einen Stream ändern",
+          "body": "Hier einen einzelnen Termin bearbeiten, absagen (mit optionalem Grund) oder wiederherstellen. Eine Absage gilt nur für diesen Tag; der wöchentliche Termin bleibt."
+        },
+        "weekly": {
+          "title": "Der Wochenplan",
+          "body": "Die Termine, die jede Woche wiederkommen. Eine Änderung hier gilt für alle kommenden Wochen."
+        },
+        "categories": {
+          "title": "Kategorien",
+          "body": "Farbige Labels wie „Sponsored“ oder „Collab“, die neben einem Stream stehen."
+        },
+        "discord": {
+          "title": "Discord-Nachricht",
+          "body": "Der Streamplan in Discord. Er wird nach jeder Änderung hier automatisch bearbeitet. Eine neue Nachricht (mit @livestream-Ping) kommt nur jeden Montag um 14:00 oder wenn jemand „Als neue Nachricht posten“ klickt."
+        },
+        "discordEvents": {
+          "title": "Discord-Events",
+          "body": "Ein Discord-Event pro Streamtag für die nächsten 7 Tage, automatisch aktuell gehalten."
+        },
+        "twitch": {
+          "title": "Twitch-Streamplan",
+          "body": "Jeder Stream der nächsten 14 Tage steht auch im Twitch-Streamplan. Änderungen und Absagen gehen automatisch dorthin."
+        }
+      },
+      "inquiries": {
+        "filter": {
+          "title": "Posteingang nach Status",
+          "body": "Sponsorenanfragen aus dem Formular im Mediakit landen hier. Fang mit „Neu“ an; die Zahlen zeigen, wie viele in jedem Status sind."
+        },
+        "item": {
+          "title": "Eine Anfrage",
+          "body": "Firma, Kontakt, Budget, Sprache und die Nachricht, genau so, wie sie gesendet wurde."
+        },
+        "status": {
+          "title": "Status setzen",
+          "body": "Weiterschieben: Neu → In Bearbeitung → Erledigt. „Spam“ für Müll."
+        },
+        "reply": {
+          "title": "Antworten",
+          "body": "Öffnet dein E-Mail-Programm mit Adresse und Betreff."
+        },
+        "privacy": {
+          "title": "Personenbezogene Daten",
+          "body": "Anfragen enthalten Namen und E-Mail-Adressen. Kopiere sie nirgendwohin. Erledigte und Spam-Anfragen werden nach 12 Monaten automatisch gelöscht."
+        }
+      },
+      "stats": {
+        "live": {
+          "title": "Live-Status",
+          "body": "Ob gerade gestreamt wird, alle 5 Minuten geprüft."
+        },
+        "numbers": {
+          "title": "Aktuelle Zahlen",
+          "body": "Follower, Abonnenten und Aufrufe direkt von Twitch und YouTube, jeweils mit dem Zeitpunkt des Abrufs. Das Mediakit zeigt dieselben Zahlen."
+        },
+        "twitch": {
+          "title": "Twitch, letzte 30 Tage",
+          "body": "Durchschnittliche und maximale Zuschauer. Twitch liefert das nicht, deshalb misst die Seite alle 5 Minuten, solange live gestreamt wird."
+        },
+        "youtube": {
+          "title": "Publikum (YouTube)",
+          "body": "Alter, Geschlecht, Länder und Geräte aus YouTube Analytics, täglich aktualisiert."
+        },
+        "runs": {
+          "title": "Sync-Läufe",
+          "body": "Jeder Abgleich und ob er geklappt hat. „Jetzt abgleichen“ holt sofort neue Zahlen."
+        },
+        "config": {
+          "title": "Einrichtung",
+          "body": "Welche Verbindungen auf dem Server eingerichtet sind. Fehlendes muss in den Hosting-Einstellungen ergänzt werden."
+        }
+      },
+      "about": {
+        "intro": {
+          "title": "Der About-Text",
+          "body": "Hier bearbeitest du Name, Tagline und About-Text auf der Startseite, auf Deutsch und Englisch."
+        },
+        "form": {
+          "title": "Bearbeiten und speichern",
+          "body": "Beide Sprachen nebeneinander, mit Zeichenzählern. Nach dem Speichern zeigt die Website den neuen Text innerhalb von Sekunden."
+        },
+        "viewPage": {
+          "title": "Ergebnis ansehen",
+          "body": "Öffnet die Startseite, damit du den Text so siehst wie die Zuschauer."
+        }
+      },
+      "games": {
+        "intro": {
+          "title": "Spiele",
+          "body": "Die Spiele auf der Startseite und im Mediakit, die auch beim Planen eines Streams angeboten werden."
+        },
+        "list": {
+          "title": "Liste verwalten",
+          "body": "Spiele hinzufügen, bearbeiten, sortieren oder löschen, die Kategorie setzen (Hauptspiel, Spiele ich auch, Demnächst …) und „Auf der Startseite zeigen“ an- oder ausschalten."
+        }
+      },
+      "partners": {
+        "partners": {
+          "title": "Partner",
+          "body": "Marken, mit denen du arbeitest, im Mediakit: Logo, Beschreibung, Link und Referral-Code. Ausschalten, um einen Partner vorzubereiten, ohne ihn zu zeigen."
+        },
+        "packages": {
+          "title": "Pakete",
+          "body": "Was Sponsoren buchen können, mit „ab“-Preis oder „Preis auf Anfrage“."
+        }
+      },
+      "legal": {
+        "intro": {
+          "title": "Impressum und Datenschutz",
+          "body": "Die rechtlichen Seiten der Website. Sie bleiben verborgen, bis sie veröffentlicht werden."
+        },
+        "form": {
+          "title": "Ausfüllen und veröffentlichen",
+          "body": "Betreiberdaten und der Datenschutztext in beiden Sprachen. Veröffentlichen geht erst, wenn kein Feld leer ist und kein Text mehr „TODO:“ enthält."
+        }
+      }
+    },
+    "pages": {
+      "welcome": {
+        "title": "Übersicht",
+        "intro": "Der Staff-Bereich von aboutselphy.com: alles hinter der öffentlichen Website.",
+        "topics": {
+          "roles": {
+            "title": "Admins und Moderatoren",
+            "body": "Moderatoren können den Streamplan pflegen, Sponsorenanfragen beantworten und die Statistiken sehen. Admins können außerdem About-Text, Spiele, Partner und Rechtliches bearbeiten und Discord, Twitch und YouTube verbinden.\nWenn du etwas brauchst, das nur Admins dürfen, frag einen Admin."
+          },
+          "live": {
+            "title": "Änderungen gehen von selbst live",
+            "body": "Es gibt keinen „Veröffentlichen“-Schritt: Sobald du speicherst, übernehmen Website, Discord und Twitch die Änderung (meist in Sekunden, höchstens wenige Minuten)."
+          },
+          "help": {
+            "title": "Touren und diese Anleitung",
+            "body": "Jede Seite zeigt beim ersten Öffnen eine kurze Tour. Öffne auf jeder Seite die Anleitung für Details oder um die Tour nochmal zu sehen."
+          }
+        }
+      },
+      "schedule": {
+        "title": "Streamplan",
+        "intro": "Plane die Streams. Website, Discord und Twitch richten sich alle nach diesem Plan.",
+        "topics": {
+          "add": {
+            "title": "Stream hinzufügen",
+            "body": "Klick auf „Stream hinzufügen“. Wähle „Jede Woche“ (fester Wochentag) oder „Nur einmal“ (ein Datum).\nStartzeit in Wiener Zeit und Länge in Minuten eintragen; das Ende wird angezeigt. Spiel aus der Spieleliste wählen oder eine beliebige Twitch-Kategorie suchen. Titel sind optional, auf Deutsch und Englisch (ist einer leer, wird der andere für beide genutzt)."
+          },
+          "cancel": {
+            "title": "Einen Termin absagen oder wiederherstellen",
+            "body": "Unter „Kommende Streams“ bei einem Stream auf „Absagen“ klicken und bei Bedarf einen Grund angeben; er wird öffentlich gezeigt. Der Stream bleibt durchgestrichen sichtbar. „Wiederherstellen“ holt ihn zurück. Einmalige Streams können auch ganz gelöscht werden."
+          },
+          "weekly": {
+            "title": "Wöchentliche Streams",
+            "body": "Einen Wochentermin bearbeiten ändert ihn für alle kommenden Wochen. Schalte „Aktiv“ aus, um ihn zu pausieren, ohne ihn zu löschen. Ein anderer Wochentag entfernt die künftigen Absagen dieses Termins."
+          },
+          "categories": {
+            "title": "Kategorien",
+            "body": "Labels mit Farbe (z. B. „Sponsored“, „Collab“). Unter „Kategorien“ anlegen, dann beim Hinzufügen oder Bearbeiten eines Streams ankreuzen."
+          },
+          "mentions": {
+            "title": "Leute erwähnen",
+            "body": "Schreib @name in einen Titel oder Hinweis (z. B. „mit @t00nyFPS“). Auf der Website und in Discord wird daraus ein Link zu diesem Twitch-Kanal."
+          },
+          "discord": {
+            "title": "Discord-Nachricht",
+            "body": "Die Streamplan-Nachricht in Discord wird nach jeder Änderung automatisch bearbeitet. Automatische Updates posten nie eine neue Nachricht.\nEine neue Nachricht kommt jeden Montag um 14:00 (mit @livestream-Ping) oder wenn du „Als neue Nachricht posten“ klickst. „Jetzt aktualisieren“ erzwingt eine Bearbeitung."
+          },
+          "discordEvents": {
+            "title": "Discord-Events",
+            "body": "Jeder Streamtag der nächsten 7 Tage bekommt ein eigenes Discord-Event („Stream – Montag, 6. Oktober“) mit den Streams des Tages und einem Bild. Ist jeder Stream eines Tages abgesagt, wird auch das Event abgesagt. Tage, die schon begonnen haben, werden nicht mehr geändert."
+          },
+          "twitch": {
+            "title": "Twitch-Streamplan",
+            "body": "Die nächsten 14 Tage werden in den Twitch-Streamplan übernommen: neue Streams kommen dazu, Änderungen und Absagen werden übertragen, gelöschte Streams entfernt."
+          },
+          "connect": {
+            "title": "Verbindungen",
+            "body": "Discord-Webhook, Discord-Bot und Twitch verbinden und einstellen ist Sache der Admins. „Jetzt synchronisieren“ / „Jetzt aktualisieren“ kann das ganze Team nutzen."
+          }
+        }
+      },
+      "inquiries": {
+        "title": "Anfragen",
+        "intro": "Sponsoren- und Geschäftsanfragen aus dem Formular im Mediakit.",
+        "topics": {
+          "statuses": {
+            "title": "Status",
+            "body": "Neu: noch nicht angesehen. In Bearbeitung: jemand kümmert sich. Erledigt: beantwortet oder abgeschlossen. Spam: Müll.\nDie Buttons oben filtern die Liste; die Zahlen zeigen, wie viele in jedem Status sind."
+          },
+          "reply": {
+            "title": "Antworten",
+            "body": "„Per E-Mail antworten“ öffnet dein E-Mail-Programm mit der Adresse und einem Betreff. Schreib von der offiziellen AboutSelphy-Adresse. Setz den Status auf „In Bearbeitung“, damit niemand doppelt antwortet."
+          },
+          "privacy": {
+            "title": "Datenschutz",
+            "body": "Anfragen enthalten personenbezogene Daten (Name, E-Mail). Nutze sie nur zum Beantworten und kopiere sie nirgendwohin. Erledigte und Spam-Anfragen werden 12 Monate nach der letzten Änderung automatisch gelöscht; Spam kannst du sofort löschen."
+          }
+        }
+      },
+      "stats": {
+        "title": "Statistiken",
+        "intro": "Die Zahlen hinter dem Mediakit, abgerufen von Twitch und YouTube.",
+        "topics": {
+          "numbers": {
+            "title": "Woher die Zahlen kommen",
+            "body": "Follower und Abonnenten werden stündlich abgerufen, die durchschnittlichen YouTube-Aufrufe täglich. Jede Zahl zeigt, wann sie abgerufen wurde. Nichts wird von Hand eingetragen."
+          },
+          "live": {
+            "title": "Live- und Zuschauerzahlen",
+            "body": "Alle 5 Minuten prüft die Seite, ob live gestreamt wird, und notiert die Zuschauerzahl. Daraus werden Durchschnitt und Höchstwert der letzten 30 Tage berechnet."
+          },
+          "sync": {
+            "title": "Jetzt abgleichen",
+            "body": "Holt sofort alles neu. Die Liste der Läufe zeigt jeden Abgleich und eventuelle Fehler; fällt eine Quelle aus, laufen die anderen trotzdem."
+          },
+          "youtube": {
+            "title": "YouTube-Publikum",
+            "body": "YouTube Analytics verbinden (Alter, Geschlecht, Länder, Geräte) und entscheiden, ob das Mediakit es zeigt, ist Sache der Admins."
+          }
+        }
+      },
+      "about": {
+        "title": "Über mich",
+        "intro": "Name, Tagline und About-Text auf der Startseite.",
+        "topics": {
+          "edit": {
+            "title": "Bearbeiten",
+            "body": "Deutsch und Englisch nebeneinander, mit Zeichenzählern. Speichern, und die Startseite zeigt den neuen Text innerhalb von Sekunden. Moderatoren können diese Seite nicht bearbeiten."
+          }
+        }
+      },
+      "games": {
+        "title": "Spiele",
+        "intro": "Die Spiele auf der Startseite und im Mediakit, die auch im Streamplan angeboten werden.",
+        "topics": {
+          "edit": {
+            "title": "Hinzufügen und bearbeiten",
+            "body": "Name, Kategorie (Hauptspiel, Spiele ich auch, Ab und zu, Neu, Demnächst, Früher gespielt), ein kurzer Text auf Deutsch und Englisch und bis zu 6 Tags. Mit den Pfeilen änderst du die Reihenfolge."
+          },
+          "home": {
+            "title": "Auf der Startseite zeigen",
+            "body": "Schalte ein Spiel aus, um es auf der Startseite zu verbergen. Für den Streamplan bleibt es verfügbar."
+          },
+          "covers": {
+            "title": "Cover",
+            "body": "Das Cover kommt automatisch von Twitch. Lade ein eigenes Bild hoch, um es zu ersetzen (JPEG, PNG, WebP; es wird quadratisch zugeschnitten)."
+          }
+        }
+      },
+      "partners": {
+        "title": "Partner & Pakete",
+        "intro": "Was Sponsoren im Mediakit sehen.",
+        "topics": {
+          "partners": {
+            "title": "Partner",
+            "body": "Logo, Beschreibung in beiden Sprachen, ein https-Link und optional ein Referral-Code. „Im Mediakit zeigen“ ausschalten, um einen Partner vorzubereiten, ohne ihn zu zeigen."
+          },
+          "packages": {
+            "title": "Pakete",
+            "body": "Angebote mit Titel, Beschreibung und einem „ab“-Preis (in Euro) oder „Preis auf Anfrage“. Sie verlinken auf das Anfrageformular."
+          }
+        }
+      },
+      "legal": {
+        "title": "Rechtliches",
+        "intro": "Impressum und Datenschutzerklärung der Website.",
+        "topics": {
+          "status": {
+            "title": "Noch nicht veröffentlicht",
+            "body": "Die Seiten bleiben verborgen, bis die Betreiberdaten eingetragen und alle „TODO:“ in den Texten ersetzt sind. Dann können sie hier veröffentlicht werden."
+          }
+        }
+      }
     }
   }
 }
