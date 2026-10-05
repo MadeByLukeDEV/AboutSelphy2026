@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "@/lib/env";
 import { runSync } from "@/modules/stats";
 import { purgeOldInquiries } from "@/modules/inquiries";
+import { syncDiscordSchedule } from "@/modules/schedule";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,10 @@ export async function POST(request: Request) {
       return "inquiries: purge failed";
     }),
   );
+  // The Discord schedule message: only sent when the week changed (a day
+  // ended, or an edit whose after() update failed). Never fails the sync.
+  const discord = await syncDiscordSchedule().catch(() => ({ error: "failed" }));
+  result.steps.push(`discord: ${typeof discord === "string" ? discord : `failed (${discord.error})`}`);
   console.log(
     `[cron/stats] ${result.skipped ?? (result.ok ? "ok" : "partial failure")}: ${result.steps.join("; ")}`,
   );

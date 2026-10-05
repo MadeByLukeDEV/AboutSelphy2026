@@ -6,3 +6,4 @@ export {
   type StreamOccurrence,
 } from "./service";
 export { SCHEDULE_TIME_ZONE } from "./time";
+export { syncDiscordSchedule, getScheduleImage } from "./discord/service";

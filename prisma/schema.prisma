@@ -267,6 +267,32 @@ model ScheduleException {
   @@index([date])
 }
 
+/// The Discord channel the schedule is posted to (one webhook, set in
+/// /admin/schedule). Singleton (CHECK id = 1). The webhook URL contains its
+/// secret token: stored encrypted (token-cipher, TOKEN_ENCRYPTION_KEY) and
+/// never sent to the browser.
+model DiscordSchedule {
+  id            Int       @id @default(1)
+  webhookUrlEnc String
+  /// Public parts, for display: the webhook id, name, channel and server.
+  webhookId     String    @db.VarChar(30)
+  webhookName   String    @default("") @db.VarChar(80)
+  channelId     String    @default("") @db.VarChar(30)
+  guildId       String    @default("") @db.VarChar(30)
+  /// Language of the message and image: "de" or "en".
+  locale        String    @default("de") @db.VarChar(2)
+  autoUpdate    Boolean   @default(true)
+  /// The message we keep editing; null until the first post.
+  messageId     String?   @db.VarChar(30)
+  /// Hash of what was last posted, so unchanged schedules are not re-sent.
+  contentHash   String?   @db.VarChar(64)
+  lastSyncedAt  DateTime?
+  /// Last failure as a short code (never Discord text or the URL).
+  lastError     String    @default("") @db.VarChar(40)
+  connectedBy   String    @default("") @db.VarChar(120)
+  updatedAt     DateTime  @updatedAt
+}
+
 /// A label for streams, e.g. "Dixper enabled", "Sponsored", "Drops".
 /// Managed in /admin/schedule.
 model StreamCategory {

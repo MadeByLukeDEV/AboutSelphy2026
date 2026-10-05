@@ -1,11 +1,13 @@
 import "server-only";
 import { revalidateTag } from "next/cache";
+import { after } from "next/server";
 import { isTwitchConfigured, searchTwitchCategories } from "@/lib/platforms/twitch";
 import type { Locale } from "@/modules/i18n";
 import * as repo from "./repository";
 import { computeOccurrences } from "./occurrences";
 import type { CancelInput, CategoryInput, RestoreInput, StreamGame, StreamInput } from "./schema";
 import { buildPlan, SCHEDULE_CACHE_TAG } from "./service";
+import { syncDiscordSchedule } from "./discord/service";
 import {
   addDays,
   dateKey,
@@ -125,6 +127,10 @@ export class ScheduleRuleError extends Error {
 
 async function changed(locale: Locale) {
   revalidateTag(SCHEDULE_CACHE_TAG, { expire: 0 });
+  // Update the Discord message after the response is sent: an edit in the
+  // admin never waits for Discord. Skips itself when not connected, paused
+  // or unchanged; the cron retries anything that fails here.
+  after(() => syncDiscordSchedule().then(() => undefined));
   return getScheduleForEdit(locale);
 }
 
