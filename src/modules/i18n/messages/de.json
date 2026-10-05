@@ -367,13 +367,12 @@
         "channel": "Kanal {id}",
         "replace": "Webhook ersetzen",
         "autoUpdate": "Automatisch aktualisieren",
-        "autoUpdateHint": "Nach jeder Änderung am Streamplan und wenn ein Tag vorbei ist (alle 5 Minuten geprüft).",
+        "autoUpdateHint": "Bearbeitet die gepostete Nachricht nach jeder Änderung am Streamplan und wenn ein Tag vorbei ist (alle 5 Minuten geprüft). Postet nie selbst eine neue Nachricht.",
         "lastSynced": "Zuletzt aktualisiert {time}",
-        "notPosted": "Noch nicht gepostet.",
         "openMessage": "Nachricht in Discord öffnen",
         "updateNow": "Jetzt aktualisieren",
         "postNew": "Als neue Nachricht posten",
-        "postNewHint": "Postet eine neue Nachricht (z. B. für eine neue Woche); die alte wird nicht mehr aktualisiert.",
+        "postNewHint": "Postet eine neue Nachricht (die alte wird nicht mehr aktualisiert). Automatische Updates posten nie von selbst.",
         "disconnect": "Trennen",
         "confirmDisconnectTitle": "Discord trennen?",
         "confirmDisconnect": "Die Nachricht bleibt in Discord, wird aber nicht mehr aktualisiert. Um wieder zu posten, füge eine Webhook-URL ein.",
@@ -388,7 +387,8 @@
           "notConnected": "Discord ist nicht verbunden.",
           "saved": "Einstellungen gespeichert.",
           "disconnected": "Discord getrennt.",
-          "weeklyPosted": "Wochennachricht gepostet."
+          "weeklyPosted": "Wochennachricht gepostet.",
+          "noMessage": "Es gibt noch keine Nachricht zum Aktualisieren. Nutze „Neue Nachricht posten“."
         },
         "errors": {
           "forbidden": "Nur Admins können das ändern.",
@@ -400,7 +400,7 @@
           "rateLimited": "Discord bremst gerade. Versuch es in einer Minute noch einmal.",
           "tooLarge": "Das Bild ist zu groß für Discord.",
           "cantDecrypt": "Der gespeicherte Webhook ist nicht lesbar (Schlüssel geändert). Füge die URL erneut ein.",
-          "messageGone": "Die Nachricht wurde in Discord gelöscht.",
+          "messageGone": "Die Nachricht wurde in Discord gelöscht. Poste eine neue.",
           "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Versuch es gleich noch einmal.",
           "devSkipped": "Nicht gesendet: Discord und Twitch werden nur von der Live-Seite aktualisiert (Dev und Live teilen die Datenbank). Zum lokalen Testen SCHEDULE_INTEGRATIONS_IN_DEV=true setzen."
         },
@@ -409,7 +409,9 @@
         "pingRole": "Rolle zum Pingen (ID)",
         "pingRoleHint": "z. B. @livestream. In Discord: Entwicklermodus einschalten, dann Servereinstellungen → Rollen → Rechtsklick auf die Rolle → Rollen-ID kopieren. Die Rolle muss erwähnbar sein (oder der Webhook Rollen erwähnen dürfen). Leer lassen für keinen Ping.",
         "nextWeeklyPost": "Nächster Wochenpost: {time}",
-        "saveRole": "Rolle speichern"
+        "saveRole": "Rolle speichern",
+        "noMessage": "Noch keine Nachricht im Kanal. Automatische Updates bearbeiten nur eine bestehende Nachricht: poste jetzt eine oder warte auf den Montagspost.",
+        "pingOnPost": "Rolle mit diesem Post pingen"
       },
       "showMoreWeeks": "Die nächsten 4 Wochen zeigen",
       "showThisWeek": "Nur diese Woche zeigen",

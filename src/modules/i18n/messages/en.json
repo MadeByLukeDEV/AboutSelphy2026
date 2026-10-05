@@ -367,13 +367,12 @@
         "channel": "Channel {id}",
         "replace": "Replace webhook",
         "autoUpdate": "Update automatically",
-        "autoUpdateHint": "After every schedule change, and when a day is over (checked every 5 minutes).",
+        "autoUpdateHint": "Edits the posted message after every schedule change and when a day is over (checked every 5 minutes). Never posts a new message by itself.",
         "lastSynced": "Last updated {time}",
-        "notPosted": "Not posted yet.",
         "openMessage": "Open message in Discord",
         "updateNow": "Update now",
         "postNew": "Post as new message",
-        "postNewHint": "Posts a fresh message (e.g. for a new week); the old one is no longer updated.",
+        "postNewHint": "Posts a fresh message (the old one is no longer updated). Automatic updates never post on their own.",
         "disconnect": "Disconnect",
         "confirmDisconnectTitle": "Disconnect Discord?",
         "confirmDisconnect": "The message stays in Discord but won't be updated any more. To post again, paste a webhook URL.",
@@ -388,7 +387,8 @@
           "notConnected": "Discord isn't connected.",
           "saved": "Settings saved.",
           "disconnected": "Discord disconnected.",
-          "weeklyPosted": "Weekly message posted."
+          "weeklyPosted": "Weekly message posted.",
+          "noMessage": "There's no message to update yet. Use “Post new message”."
         },
         "errors": {
           "forbidden": "Only admins can change this.",
@@ -400,7 +400,7 @@
           "rateLimited": "Discord is rate-limiting. Try again in a minute.",
           "tooLarge": "The image is too large for Discord.",
           "cantDecrypt": "The stored webhook can't be read (the encryption key changed). Paste the URL again.",
-          "messageGone": "The message was deleted in Discord.",
+          "messageGone": "The message was deleted in Discord. Post a new one.",
           "failed": "Talking to Discord failed. Try again in a moment.",
           "devSkipped": "Not sent: Discord and Twitch are only updated by the live site (dev and live share the database). Set SCHEDULE_INTEGRATIONS_IN_DEV=true to test locally."
         },
@@ -409,7 +409,9 @@
         "pingRole": "Role to ping (ID)",
         "pingRoleHint": "e.g. @livestream. In Discord: turn on Developer Mode, then Server Settings → Roles → right-click the role → Copy Role ID. The role must be mentionable (or the webhook allowed to mention roles). Leave empty for no ping.",
         "nextWeeklyPost": "Next weekly post: {time}",
-        "saveRole": "Save role"
+        "saveRole": "Save role",
+        "noMessage": "No message in the channel yet. Automatic updates only edit an existing message: post one now, or wait for the Monday post.",
+        "pingOnPost": "Ping the role with this post"
       },
       "showMoreWeeks": "Show the next 4 weeks",
       "showThisWeek": "Show this week only",

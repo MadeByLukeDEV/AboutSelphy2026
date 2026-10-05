@@ -35,6 +35,8 @@ export function DiscordPanel({ initial, isAdmin }: { initial: DiscordStatus; isA
   const [previewVersion, setPreviewVersion] = useState(0);
 
   const [roleId, setRoleId] = useState(initial.pingRoleId);
+  // Manual posts announce the week by default; off for a quiet correction.
+  const [pingOnPost, setPingOnPost] = useState(true);
 
   /** Saves one setting; the others are sent as they are now. */
   const saveSettings = (patch: Partial<Pick<DiscordStatus, "locale" | "autoUpdate" | "weeklyPost" | "pingRoleId">>) =>
@@ -131,12 +133,20 @@ export function DiscordPanel({ initial, isAdmin }: { initial: DiscordStatus; isA
           <div className="flex flex-col gap-1">
             <p className="font-semibold">{t("connectedTo", { name: status.webhookName || "Webhook" })}</p>
             {status.channelId && <p className="text-sm text-muted-foreground">{t("channel", { id: status.channelId })}</p>}
-            <p className="text-sm text-muted-foreground">
-              {status.lastSyncedAt
-                ? t("lastSynced", { time: format.relativeTime(new Date(status.lastSyncedAt)) })
-                : t("notPosted")}
-            </p>
-            {status.lastError && <p className="text-sm font-medium text-destructive">{errorText(status.lastError)}</p>}
+            {status.messageUrl ? (
+              status.lastSyncedAt && (
+                <p className="text-sm text-muted-foreground">
+                  {t("lastSynced", { time: format.relativeTime(new Date(status.lastSyncedAt)) })}
+                </p>
+              )
+            ) : (
+              // Automatic updates only edit: without a message they wait for
+              // "Post new message" or the Monday post.
+              <p className="text-sm font-medium">{t("noMessage")}</p>
+            )}
+            {status.lastError && status.lastError !== "messageGone" && (
+              <p className="text-sm font-medium text-destructive">{errorText(status.lastError)}</p>
+            )}
             {status.messageUrl && (
               <a
                 href={status.messageUrl}
@@ -150,17 +160,35 @@ export function DiscordPanel({ initial, isAdmin }: { initial: DiscordStatus; isA
             )}
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" disabled={pending} onClick={() => run(() => syncDiscordAction(false))}>
-              <RefreshCw aria-hidden />
-              {t("updateNow")}
-            </Button>
-            <Button type="button" variant="outline" disabled={pending} onClick={() => run(() => syncDiscordAction(true))}>
-              <Send aria-hidden />
-              {t("postNew")}
-            </Button>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant={status.messageUrl ? "default" : "outline"}
+                disabled={pending || !status.messageUrl}
+                onClick={() => run(() => syncDiscordAction({ mode: "edit" }))}
+              >
+                <RefreshCw aria-hidden />
+                {t("updateNow")}
+              </Button>
+              <Button
+                type="button"
+                variant={status.messageUrl ? "outline" : "default"}
+                disabled={pending}
+                onClick={() => run(() => syncDiscordAction({ mode: "post", ping: pingOnPost && !!status.pingRoleId }))}
+              >
+                <Send aria-hidden />
+                {t("postNew")}
+              </Button>
+            </div>
+            {status.pingRoleId && (
+              <label className="flex w-fit cursor-pointer items-center gap-2 text-sm">
+                <Switch checked={pingOnPost} onCheckedChange={setPingOnPost} />
+                {t("pingOnPost")}
+              </label>
+            )}
+            <p className="text-xs text-muted-foreground">{t("postNewHint")}</p>
           </div>
-          <p className="-mt-3 text-xs text-muted-foreground">{t("postNewHint")}</p>
 
           {isAdmin && (
             <div className="flex flex-col gap-4 border-t pt-4">
