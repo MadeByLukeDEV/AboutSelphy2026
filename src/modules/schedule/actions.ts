@@ -235,8 +235,15 @@ export async function saveDiscordSettingsAction(input: unknown) {
   });
 }
 
-export async function syncDiscordAction(newMessage: unknown) {
-  return discordAction("staff", () => syncDiscordSchedule({ force: true, newMessage: newMessage === true }));
+/** "Update now" (edit only) or "Post new message" (optionally pinging). */
+export async function syncDiscordAction(input: unknown) {
+  const parsed = z
+    .union([z.object({ mode: z.literal("edit") }), z.object({ mode: z.literal("post"), ping: z.boolean() })])
+    .safeParse(input);
+  return discordAction("staff", async () => {
+    if (!parsed.success) throw new DiscordSetupError("invalid");
+    return syncDiscordSchedule(parsed.data);
+  });
 }
 
 // ─── Twitch schedule ─────────────────────────────────────────────────────

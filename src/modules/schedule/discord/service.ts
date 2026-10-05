@@ -176,7 +176,9 @@ export async function connectDiscord(url: string, locale: Locale, connectedBy: s
   );
   queue = save.catch(() => undefined);
   await save;
-  return syncDiscordSchedule({ force: true });
+  // No post on connect (the user's rule): the first message comes from
+  // "Post new message" or the Monday post.
+  return "noMessage" as const;
 }
 
 export async function disconnectDiscord() {
@@ -212,7 +214,7 @@ export async function updateDiscordSettings(settings: {
     },
   });
   // A language change rewrites the message right away.
-  if (settings.locale !== row.locale) return syncDiscordSchedule({ force: true });
+  if (settings.locale !== row.locale) return syncDiscordSchedule({ mode: "edit" });
   return null;
 }
 
@@ -223,23 +225,25 @@ export type DiscordSyncResult =
   | "devSkipped"
   | "paused"
   | "unchanged"
+  | "noMessage"
   | "posted"
   | "weeklyPosted"
   | "updated"
   | { error: string };
 
-// One sync at a time (cron + an edit's after() could otherwise both post a
-// first message). Single container, so an in-process queue is enough.
+/**
+ * auto: after edits and from the cron -- the Monday post when due, otherwise
+ *       only *edits* an existing message (never posts one: the user's rule).
+ * edit: "Update now" / a language change -- edit even if unchanged.
+ * post: "Post new message" -- a fresh message, pinging the role if asked.
+ */
+export type DiscordSyncMode = { mode: "auto" } | { mode: "edit" } | { mode: "post"; ping: boolean };
+
+// One sync at a time (cron + an edit's after() could otherwise both act on
+// the message). Single container, so an in-process queue is enough.
 let queue: Promise<unknown> = Promise.resolve();
 
-/**
- * Brings the Discord message up to date. Skips when nothing changed (unless
- * forced) or when auto-update is off (unless forced). newMessage posts a
- * fresh message instead of editing the old one.
- */
-export function syncDiscordSchedule(
-  options: { force?: boolean; newMessage?: boolean } = {},
-): Promise<DiscordSyncResult> {
+export function syncDiscordSchedule(options: DiscordSyncMode = { mode: "auto" }): Promise<DiscordSyncResult> {
   const run = queue.then(() => syncNow(options));
   queue = run.catch(() => undefined);
   return run;
@@ -255,16 +259,27 @@ export function currentWeek(now = new Date()) {
   return { mondayKey: dateKey(monday), postAt: viennaToInstant(monday, WEEKLY_POST_TIME) };
 }
 
-async function syncNow({ force = false, newMessage = false }): Promise<DiscordSyncResult> {
+async function syncNow(options: DiscordSyncMode): Promise<DiscordSyncResult> {
   if (!scheduleIntegrationsActive()) return "devSkipped";
   const row = await find();
   if (!row) return "notConnected";
+
   // The weekly post (a fresh message with the role ping) is independent of
   // auto-update. Missed (server down at 14:00)? It goes out later that week.
   const week = currentWeek();
-  const weeklyDue = row.weeklyPost && new Date() >= week.postAt && row.weeklyPostWeek !== week.mondayKey;
-  if (!weeklyDue && !row.autoUpdate && !force) return "paused";
-  if (weeklyDue) newMessage = true;
+  const weeklyDue =
+    options.mode === "auto" &&
+    row.weeklyPost &&
+    new Date() >= week.postAt &&
+    row.weeklyPostWeek !== week.mondayKey;
+  const posting = weeklyDue || options.mode === "post";
+  const ping = weeklyDue || (options.mode === "post" && options.ping);
+
+  if (!posting) {
+    if (options.mode === "auto" && !row.autoUpdate) return "paused";
+    // Automatic syncs and "Update now" only edit: no message, nothing to do.
+    if (!row.messageId) return "noMessage";
+  }
   const locale: Locale = row.locale === "en" ? "en" : "de";
 
   let url: string;
@@ -278,39 +293,43 @@ async function syncNow({ force = false, newMessage = false }): Promise<DiscordSy
 
   try {
     const { png, hash, embed } = await getScheduleImage(locale);
-    if (!force && !newMessage && row.messageId && row.contentHash === hash) return "unchanged";
+    if (options.mode === "auto" && !posting && row.contentHash === hash) return "unchanged";
 
     const payload = { embeds: [embed] };
     const file = { name: IMAGE_NAME, data: png };
-    let messageId = row.messageId;
-    let outcome: "posted" | "updated" | "weeklyPosted" = "updated";
-    if (messageId && !newMessage) {
+
+    if (!posting) {
       try {
-        await editWebhookMessage(url, messageId, payload, file);
+        await editWebhookMessage(url, row.messageId!, payload, file);
       } catch (error) {
-        // Deleted in Discord: post a new one instead.
+        // Deleted in Discord: forget it. No automatic new post -- the next
+        // one comes from "Post new message" or the Monday post.
         if (!(error instanceof DiscordError && error.code === "messageGone")) throw error;
-        messageId = null;
+        await prisma.discordSchedule.update({
+          where: { id: 1 },
+          data: { messageId: null, contentHash: null, lastError: "messageGone" },
+        });
+        return "noMessage";
       }
+      await prisma.discordSchedule.update({
+        where: { id: 1 },
+        data: { contentHash: hash, lastSyncedAt: new Date(), lastError: "" },
+      });
+      return "updated";
     }
-    if (!messageId || newMessage) {
-      // Only the weekly post pings, and only the configured role. Edits and
-      // other new posts never ping (Discord doesn't ping on edits anyway).
-      const role = weeklyDue && row.pingRoleId ? row.pingRoleId : null;
-      const t = await getTranslations({ locale, namespace: "ScheduleDiscord" });
-      messageId = await postWebhookMessage(
-        url,
-        weeklyDue
-          ? {
-              ...payload,
-              content: role ? t("weeklyContentPing", { role: `<@&${role}>` }) : t("weeklyContent"),
-              pingRoleIds: role ? [role] : [],
-            }
-          : payload,
-        file,
-      );
-      outcome = weeklyDue ? "weeklyPosted" : "posted";
-    }
+
+    // A new message. Only the configured role is ever pinged, and only here.
+    const role = ping && row.pingRoleId ? row.pingRoleId : null;
+    const t = await getTranslations({ locale, namespace: "ScheduleDiscord" });
+    const messageId = await postWebhookMessage(
+      url,
+      {
+        ...payload,
+        content: role ? t("weeklyContentPing", { role: `<@&${role}>` }) : t("weeklyContent"),
+        pingRoleIds: role ? [role] : [],
+      },
+      file,
+    );
     await prisma.discordSchedule.update({
       where: { id: 1 },
       data: {
@@ -318,10 +337,12 @@ async function syncNow({ force = false, newMessage = false }): Promise<DiscordSy
         contentHash: hash,
         lastSyncedAt: new Date(),
         lastError: "",
-        ...(weeklyDue ? { weeklyPostWeek: week.mondayKey } : {}),
+        // A pinged manual post counts as this week's post (weeks start on
+        // Monday), so Monday 14:00 doesn't ping a second time.
+        ...(ping ? { weeklyPostWeek: week.mondayKey } : {}),
       },
     });
-    return outcome;
+    return weeklyDue ? "weeklyPosted" : "posted";
   } catch (error) {
     // 401/404 on the webhook itself: it was deleted or its token reset.
     const code =
