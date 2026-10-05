@@ -17,6 +17,8 @@ type Stream = {
   /** A Game's name, else the Twitch category's, else null. */
   gameName: string | null;
   gameCoverUrl: string | null;
+  /** For the Twitch schedule: the Game's Twitch id or the searched category. */
+  twitchCategoryId: string | null;
   titleEn: string;
   titleDe: string;
   categoryIds: string[];
@@ -53,6 +55,7 @@ export type StreamOccurrence = {
   end: Date;
   gameName: string | null;
   gameCoverUrl: string | null;
+  twitchCategoryId: string | null;
   title: string;
   categories: Array<{ id: string; name: string; color: CategoryColor }>;
   cancelled: boolean;
@@ -103,6 +106,7 @@ export function computeOccurrences(
         end: new Date(start.getTime() + slot.durationMinutes * 60_000),
         gameName: slot.gameName,
         gameCoverUrl: slot.gameCoverUrl,
+        twitchCategoryId: slot.twitchCategoryId,
         title: text(slot.titleEn, slot.titleDe),
         categories: categories(slot.categoryIds),
         cancelled: Boolean(cancellation),
@@ -123,6 +127,7 @@ export function computeOccurrences(
         end: new Date(start.getTime() + extra.durationMinutes! * 60_000),
         gameName: extra.gameName,
         gameCoverUrl: extra.gameCoverUrl,
+        twitchCategoryId: extra.twitchCategoryId,
         title: text(extra.titleEn, extra.titleDe),
         categories: categories(extra.categoryIds),
         cancelled: extra.cancelled,

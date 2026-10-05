@@ -21,9 +21,14 @@ function gameOf(row: StreamRow | ExceptionRow) {
     return {
       gameName: row.game.name,
       gameCoverUrl: row.game.customCoverId ? assetUrl(row.game.customCoverId) : row.game.boxArtUrl,
+      twitchCategoryId: row.game.twitchGameId,
     };
   }
-  return { gameName: row.twitchCategoryName, gameCoverUrl: row.twitchBoxArtUrl };
+  return {
+    gameName: row.twitchCategoryName,
+    gameCoverUrl: row.twitchBoxArtUrl,
+    twitchCategoryId: row.twitchCategoryId,
+  };
 }
 
 /** DB rows -> the JSON-safe plan computeOccurrences works on. */
@@ -70,16 +75,18 @@ export function buildPlan(
 // Raw plan data, cached (JSON-safe). Occurrences are computed per request
 // from it, because "upcoming" depends on the current time. Edits clear the
 // tag; the fallback expiry covers other processes (see CLAUDE.md).
+async function readPlan(fromKey: string, toKey: string): Promise<Plan> {
+  const [slots, exceptions, categories] = await Promise.all([
+    repo.findSlots(),
+    repo.findExceptionsBetween(toDbDate(parseDateKey(fromKey)), toDbDate(parseDateKey(toKey))),
+    repo.findCategories(),
+  ]);
+  return buildPlan(slots, exceptions, categories);
+}
+
 const loadPlan = unstable_cache(
-  async (fromKey: string, toKey: string): Promise<Plan> => {
-    const [slots, exceptions, categories] = await Promise.all([
-      repo.findSlots(),
-      repo.findExceptionsBetween(toDbDate(parseDateKey(fromKey)), toDbDate(parseDateKey(toKey))),
-      repo.findCategories(),
-    ]);
-    return buildPlan(slots, exceptions, categories);
-  },
-  ["schedule-plan-v2"],
+  readPlan,
+  ["schedule-plan-v3"],
   { tags: [SCHEDULE_CACHE_TAG], revalidate: 600 },
 );
 
@@ -92,10 +99,20 @@ export type { StreamOccurrence } from "./occurrences";
  */
 export async function getUpcomingStreams(
   locale: Locale,
-  { days = SCHEDULE_DAYS, now = new Date() }: { days?: number; now?: Date } = {},
+  {
+    days = SCHEDULE_DAYS,
+    now = new Date(),
+    fresh = false,
+  }: {
+    days?: number;
+    now?: Date;
+    /** Read the DB directly (syncs to Twitch/Discord), not the page cache. */
+    fresh?: boolean;
+  } = {},
 ): Promise<StreamOccurrence[]> {
   const today = viennaToday(now);
-  const plan = await loadPlan(dateKey(today), dateKey(addDays(today, days - 1)));
+  const range = [dateKey(today), dateKey(addDays(today, days - 1))] as const;
+  const plan = fresh ? await readPlan(...range) : await loadPlan(...range);
   return computeOccurrences(plan, locale, today, days, now);
 }
 

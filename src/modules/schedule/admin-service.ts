@@ -8,6 +8,7 @@ import { computeOccurrences } from "./occurrences";
 import type { CancelInput, CategoryInput, RestoreInput, StreamGame, StreamInput } from "./schema";
 import { buildPlan, SCHEDULE_CACHE_TAG } from "./service";
 import { syncDiscordSchedule } from "./discord/service";
+import { syncTwitchSchedule } from "./twitch/service";
 import {
   addDays,
   dateKey,
@@ -131,6 +132,8 @@ async function changed(locale: Locale) {
   // admin never waits for Discord. Skips itself when not connected, paused
   // or unchanged; the cron retries anything that fails here.
   after(() => syncDiscordSchedule().then(() => undefined));
+  // Same for the Twitch schedule (skips itself when not connected/paused).
+  after(() => syncTwitchSchedule().then(() => undefined));
   return getScheduleForEdit(locale);
 }
 

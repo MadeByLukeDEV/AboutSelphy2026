@@ -7,3 +7,4 @@ export {
 } from "./service";
 export { SCHEDULE_TIME_ZONE } from "./time";
 export { syncDiscordSchedule, getScheduleImage } from "./discord/service";
+export { syncTwitchSchedule } from "./twitch/service";

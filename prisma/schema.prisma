@@ -299,6 +299,41 @@ model DiscordSchedule {
   updatedAt      DateTime  @updatedAt
 }
 
+/// The broadcaster login that lets the site write the Twitch schedule
+/// (scope channel:manage:schedule). Singleton (CHECK id = 1). The refresh
+/// token is encrypted (token-cipher) and never leaves the server.
+model TwitchScheduleConnection {
+  id              Int       @id @default(1)
+  refreshTokenEnc String
+  /// Verified on connect: must be the channel in TWITCH_BROADCASTER_LOGIN.
+  broadcasterId   String    @db.VarChar(20)
+  login           String    @db.VarChar(25)
+  enabled         Boolean   @default(true)
+  /// Language of the segment titles on Twitch: "de" or "en".
+  titleLocale     String    @default("de") @db.VarChar(2)
+  lastSyncedAt    DateTime?
+  /// Last failure as a short code (never Twitch text or tokens).
+  lastError       String    @default("") @db.VarChar(40)
+  connectedBy     String    @default("") @db.VarChar(120)
+  updatedAt       DateTime  @updatedAt
+}
+
+/// One stream of the next 14 days as a Twitch schedule segment. Twitch can
+/// only cancel the *next* date of a recurring segment, so every occurrence
+/// is its own one-off segment, mirrored on a rolling window by the sync.
+model TwitchScheduleSegment {
+  id            String   @id @default(cuid())
+  /// StreamOccurrence.key: slot or one-time stream id + date.
+  occurrenceKey String   @unique @db.VarChar(80)
+  segmentId     String   @db.VarChar(200)
+  /// Hash of what was last sent (start, length, category, title, cancelled).
+  contentHash   String   @db.VarChar(64)
+  startAt       DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([startAt])
+}
+
 /// A label for streams, e.g. "Dixper enabled", "Sponsored", "Drops".
 /// Managed in /admin/schedule.
 model StreamCategory {

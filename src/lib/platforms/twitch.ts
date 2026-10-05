@@ -62,7 +62,8 @@ async function helix<T>(path: string, retried = false): Promise<T> {
   return (await res.json()) as T;
 }
 
-async function broadcasterId(): Promise<string> {
+/** The numeric id of TWITCH_BROADCASTER_LOGIN (cached). */
+export async function broadcasterId(): Promise<string> {
   if (globalThis._twitchBroadcasterId) return globalThis._twitchBroadcasterId;
   const login = env().TWITCH_BROADCASTER_LOGIN;
   const body = await helix<{ data: Array<{ id: string }> }>(
