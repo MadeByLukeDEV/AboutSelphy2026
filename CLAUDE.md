@@ -2496,6 +2496,18 @@ SEO and security are built into every phase, not saved for the end.
       Monday is made up later that week; switching it on after Monday 14:00
       marks the week done (no surprise ping). Independent of auto-update.
       `allowed_mentions.roles` lists only that role; edits never ping.
+    - **The message shows a calendar week, not a rolling window**
+      (2026-10-11, the user's report: "Stream schedule: October 11 – 17" on
+      the message posted for Oct 5 – 11; the title moved a day every night).
+      `DiscordSchedule.messageWeek` (Monday key, migration
+      `discord_message_week`, backfilled from `weeklyPostWeek`) is the week
+      a message shows; edits always render that Monday–Sunday week,
+      **including streams that are already over**; a new post (Monday 14:00
+      or manual) takes the current week. `weekContent(locale, mondayKey)`
+      gets the week via `getUpcomingStreams(..., { now: Monday 00:00 })`.
+      `getScheduleImage()` defaults to the current week (public route,
+      admin preview). The public page, the Discord events and the Twitch
+      schedule stay rolling (from today).
     - Admin "Upcoming streams" shows **this week + all one-time streams** by
       default (4 weeks of weekly repeats was too crowded, the user's
       feedback); "Show the next 4 weeks" expands it.
