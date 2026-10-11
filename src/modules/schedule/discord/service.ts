@@ -14,7 +14,7 @@ import { decryptToken, encryptToken, isTokenCipherConfigured } from "@/lib/secur
 import { prisma } from "@/lib/prisma";
 import type { Locale } from "@/modules/i18n";
 import { getUpcomingStreams, SCHEDULE_DAYS } from "../service";
-import { addDays, dateKey, isoWeekday, viennaToday, viennaToInstant } from "../time";
+import { addDays, dateKey, isoWeekday, parseDateKey, viennaToday, viennaToInstant } from "../time";
 import { renderScheduleImage } from "./image";
 import { scheduleIntegrationsActive } from "../integrations-guard";
 import { buildScheduleEmbed } from "./message";
@@ -29,16 +29,22 @@ const IMAGE_NAME = "schedule.png";
 
 // ─── content ─────────────────────────────────────────────────────────────
 
-async function weekContent(locale: Locale) {
+/**
+ * One calendar week, Monday to Sunday (Vienna), including streams that are
+ * already over: the message is "this week's schedule", not a rolling
+ * window (the user's call, 2026-10-11: the title moved a day every night).
+ */
+async function weekContent(locale: Locale, mondayKey: string) {
+  const monday = parseDateKey(mondayKey);
   const [t, format, streams] = await Promise.all([
     getTranslations({ locale, namespace: "ScheduleDiscord" }),
     getFormatter({ locale }),
-    getUpcomingStreams(locale, { days: SCHEDULE_DAYS }),
+    // "now" = the week's start, so nothing of this week is left out.
+    getUpcomingStreams(locale, { days: SCHEDULE_DAYS, now: viennaToInstant(monday, "00:00") }),
   ]);
-  const today = viennaToday();
   const range = format.dateTimeRange(
-    viennaToInstant(today, "12:00"),
-    viennaToInstant(addDays(today, SCHEDULE_DAYS - 1), "12:00"),
+    viennaToInstant(monday, "12:00"),
+    viennaToInstant(addDays(monday, SCHEDULE_DAYS - 1), "12:00"),
     { day: "numeric", month: "long" },
   );
   const dayLabel = (start: Date) => format.dateTime(start, { weekday: "long", day: "numeric", month: "long" });
@@ -79,9 +85,12 @@ async function weekContent(locale: Locale) {
 // admin preview and the sync (in-flight renders are shared too).
 const imageMemo = new Map<string, Promise<Uint8Array>>();
 
-/** The current week as a PNG (memoized until the week changes). */
-export async function getScheduleImage(locale: Locale) {
-  const content = await weekContent(locale);
+/**
+ * A week as a PNG (memoized until it changes). Default: the current week
+ * (public route, admin preview); the sync passes the message's own week.
+ */
+export async function getScheduleImage(locale: Locale, mondayKey = currentWeek().mondayKey) {
+  const content = await weekContent(locale, mondayKey);
   let png = imageMemo.get(content.hash);
   if (!png) {
     if (imageMemo.size > 6) imageMemo.clear();
@@ -165,6 +174,7 @@ export async function connectDiscord(url: string, locale: Locale, connectedBy: s
     locale,
     // A new webhook (maybe another channel): start a fresh message.
     messageId: null,
+    messageWeek: null,
     contentHash: null,
     lastError: "",
     connectedBy: connectedBy.slice(0, 120),
@@ -292,7 +302,10 @@ async function syncNow(options: DiscordSyncMode): Promise<DiscordSyncResult> {
   }
 
   try {
-    const { png, hash, embed } = await getScheduleImage(locale);
+    // A new post shows the current week; an edit stays on the week its
+    // message was posted for (older rows without one: the current week).
+    const messageWeek = posting ? week.mondayKey : (row.messageWeek ?? week.mondayKey);
+    const { png, hash, embed } = await getScheduleImage(locale, messageWeek);
     if (options.mode === "auto" && !posting && row.contentHash === hash) return "unchanged";
 
     const payload = { embeds: [embed] };
@@ -307,7 +320,7 @@ async function syncNow(options: DiscordSyncMode): Promise<DiscordSyncResult> {
         if (!(error instanceof DiscordError && error.code === "messageGone")) throw error;
         await prisma.discordSchedule.update({
           where: { id: 1 },
-          data: { messageId: null, contentHash: null, lastError: "messageGone" },
+          data: { messageId: null, messageWeek: null, contentHash: null, lastError: "messageGone" },
         });
         return "noMessage";
       }
@@ -334,6 +347,7 @@ async function syncNow(options: DiscordSyncMode): Promise<DiscordSyncResult> {
       where: { id: 1 },
       data: {
         messageId,
+        messageWeek,
         contentHash: hash,
         lastSyncedAt: new Date(),
         lastError: "",
