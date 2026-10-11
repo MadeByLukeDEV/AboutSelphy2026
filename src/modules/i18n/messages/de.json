@@ -517,7 +517,8 @@
           "failed": "Die Verbindung zu Discord ist fehlgeschlagen. Der nächste Sync versucht es erneut.",
           "devSkipped": "Nicht gesendet: Discord und Twitch werden nur von der Live-Seite aktualisiert (Dev und Live teilen sich die Datenbank). Zum lokalen Testen SCHEDULE_INTEGRATIONS_IN_DEV=true setzen."
         }
-      }
+      },
+      "pickDate": "Datum wählen"
     },
     "inquiries": {
       "intro": "Sponsoring-Anfragen aus dem Mediakit-Formular. Personenbezogene Daten: Erledigte und Spam-Anfragen werden 12 Monate nach der letzten Änderung automatisch gelöscht.",

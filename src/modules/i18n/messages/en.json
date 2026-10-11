@@ -517,7 +517,8 @@
           "failed": "Talking to Discord failed. The next sync tries again.",
           "devSkipped": "Not sent: Discord and Twitch are only updated by the live site (dev and live share the database). Set SCHEDULE_INTEGRATIONS_IN_DEV=true to test locally."
         }
-      }
+      },
+      "pickDate": "Pick a date"
     },
     "inquiries": {
       "intro": "Sponsor inquiries sent through the media kit form. Personal data: done and spam inquiries are deleted automatically 12 months after their last change.",

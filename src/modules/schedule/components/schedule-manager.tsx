@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { FormDatePicker } from "@/components/form/form-date-picker";
 import { FormSelect } from "@/components/form/form-select";
 import { cn } from "@/lib/utils";
 import type { AdminSchedule } from "../admin-service";
@@ -561,7 +562,14 @@ function StreamForm({
         ) : (
           <Field data-invalid={!!errors.date}>
             <FieldLabel htmlFor="date">{t("date")}</FieldLabel>
-            <Input id="date" type="date" min={schedule.today} {...form.register("date")} />
+            <FormDatePicker
+              control={form.control}
+              name="date"
+              id="date"
+              min={schedule.today}
+              placeholder={t("pickDate")}
+              invalid={!!errors.date}
+            />
             <FieldError errors={errorText(errors.date?.message)} />
           </Field>
         )}
