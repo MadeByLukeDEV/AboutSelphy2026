@@ -290,6 +290,9 @@ model DiscordSchedule {
   weeklyPostWeek String?   @db.VarChar(10)
   /// The message we keep editing; null until the first post.
   messageId      String?   @db.VarChar(30)
+  /// Monday ("YYYY-MM-DD", Vienna) of the week that message shows: edits
+  /// stay on that Monday-Sunday week, the next week gets a new message.
+  messageWeek    String?   @db.VarChar(10)
   /// Hash of what was last posted, so unchanged schedules are not re-sent.
   contentHash    String?   @db.VarChar(64)
   lastSyncedAt   DateTime?
